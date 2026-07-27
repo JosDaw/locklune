@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { Backdrop } from '@/components/backdrop';
-import { PhoneMockup } from '@/components/phone';
 import { MoonMark } from '@/components/logo';
+import { PhoneMockup } from '@/components/phone';
+import { comparison, security, site } from '@/lib/site';
 import {
   CalendarDays as CalendarIcon,
   Check as CheckIcon,
@@ -16,7 +16,7 @@ import {
   WifiOff as WifiOffIcon,
   X as XIcon,
 } from 'lucide-react';
-import { comparison, security, site } from '@/lib/site';
+import Link from 'next/link';
 
 const securityIcons = [ShieldIcon, LockIcon, WifiOffIcon, ServerIcon, EyeOffIcon, TrashIcon];
 
@@ -29,14 +29,14 @@ export default function Home() {
         <div className="mx-auto grid max-w-container items-center gap-16 px-6 pb-10 pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:pt-28">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-fg-soft">
-              <MoonMark className="h-4 w-4" /> Local-first · encrypted · no tracking
+              <MoonMark className="h-4 w-4" /> Device-only · encrypted · no tracking
             </span>
             <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] tracking-tight text-fg sm:text-5xl lg:text-6xl">
               <span className="text-gradient-moon">{site.tagline}</span>
             </h1>
             <div className="mt-6 max-w-md space-y-1.5 text-lg leading-relaxed text-fg-soft">
               <p>Your cycle data never leaves your device.</p>
-              <p className="text-fg-muted">Protected with your PIN. No cloud. No account. No tracking.</p>
+              <p className="text-fg-muted">Protected with your PIN. No cloud. No account. No digital record.</p>
             </div>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -78,7 +78,7 @@ export default function Home() {
           <FeatureCard
             icon={<CloudOffIcon className="h-6 w-6" />}
             title="No cloud. No account. No data collection."
-            body="There is no sign-up and no server. Nothing to breach, nothing to sell, nothing to leak."
+            body="There is no sign-up and no server. Nothing to breach, nothing to sell, nothing to share."
           />
         </div>
       </Section>
@@ -86,7 +86,7 @@ export default function Home() {
       {/* ---------- Beautiful tracking ---------- */}
       <Section id="tracking" eyebrow="Beautiful tracking" title="Calm, minimal, and quietly powerful">
         <p className="-mt-6 mb-10 max-w-xl text-fg-soft">
-          A timeline, an elegant calendar, mood tracking and adaptive predictions, all in a peaceful dark
+          A timeline, an elegant calendar, mood tracking, and adaptive predictions, all in a peaceful dark
           interface designed to disappear into the background. Whether you are tracking your cycle,
           trying to conceive, on contraception, or pregnant, Locklune adapts to you.
         </p>
