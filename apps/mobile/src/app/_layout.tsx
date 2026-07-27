@@ -6,6 +6,8 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GluestackUIProvider } from '../components/gs/gluestack-ui-provider';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import { ToastProvider } from '../components/ui/Toast';
 import { colors } from '../theme/colors';
 import { useAuthStore } from '../stores/authStore';
 import { useDataStore } from '../stores/dataStore';
@@ -68,18 +70,22 @@ export default function RootLayout() {
       <GluestackUIProvider mode="dark">
         <SafeAreaProvider>
           <StatusBar style="light" />
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              contentStyle: { backgroundColor: colors.ink },
-              animation: 'fade',
-            }}
-          >
-            <Stack.Screen
-              name="log"
-              options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-            />
-          </Stack>
+          <ToastProvider>
+            <ErrorBoundary>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.ink },
+                  animation: 'fade',
+                }}
+              >
+                <Stack.Screen
+                  name="log"
+                  options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+                />
+              </Stack>
+            </ErrorBoundary>
+          </ToastProvider>
         </SafeAreaProvider>
       </GluestackUIProvider>
     </GestureHandlerRootView>

@@ -71,7 +71,12 @@ export default function Calendar() {
         ovulation.add(u.ovulationDay);
       }
     }
-    return { periodSet: period, predictedSet: predicted, fertileSet: fertile, ovulationSet: ovulation };
+    return {
+      periodSet: period,
+      predictedSet: predicted,
+      fertileSet: fertile,
+      ovulationSet: ovulation,
+    };
   }, [cycles, prediction, today]);
 
   const weeks: (EpochDay | null)[][] = [];
@@ -84,11 +89,17 @@ export default function Calendar() {
   return (
     <Screen>
       <View className="flex-row items-center justify-between pt-2">
-        <Pressable onPress={() => shiftMonth(-1)} className="h-10 w-10 items-center justify-center rounded-full active:bg-surfaceMuted">
+        <Pressable
+          onPress={() => shiftMonth(-1)}
+          className="h-10 w-10 items-center justify-center rounded-full active:bg-surfaceMuted"
+        >
           <Ionicons name="chevron-back" size={22} color={colors.text} />
         </Pressable>
         <Txt variant="title">{monthLabel}</Txt>
-        <Pressable onPress={() => shiftMonth(1)} className="h-10 w-10 items-center justify-center rounded-full active:bg-surfaceMuted">
+        <Pressable
+          onPress={() => shiftMonth(1)}
+          className="h-10 w-10 items-center justify-center rounded-full active:bg-surfaceMuted"
+        >
           <Ionicons name="chevron-forward" size={22} color={colors.text} />
         </Pressable>
       </View>
@@ -115,8 +126,7 @@ export default function Calendar() {
                 isOvulation={day !== null && ovulationSet.has(day)}
                 hasLog={day !== null && loggedDays.has(day)}
                 onPress={() =>
-                  day !== null &&
-                  router.push({ pathname: '/log', params: { day: String(day) } })
+                  day !== null && router.push({ pathname: '/log', params: { day: String(day) } })
                 }
               />
             ))}
@@ -125,7 +135,9 @@ export default function Calendar() {
       </Card>
 
       <Card>
-        <Txt variant="label" className="mb-3">Legend</Txt>
+        <Txt variant="label" className="mb-3">
+          Legend
+        </Txt>
         <View className="gap-2">
           <LegendRow className="bg-period" label="Period (logged)" />
           <LegendRow className="border border-period" label="Predicted period" />
@@ -169,11 +181,34 @@ function DayCell({
       : isFertile
         ? 'bg-fertile/30'
         : '';
-  const ring = isPredicted && !isPeriod ? 'border border-period' : isToday ? 'border border-primary-soft' : '';
+  const ring =
+    isPredicted && !isPeriod ? 'border border-period' : isToday ? 'border border-primary-soft' : '';
   const textClass = isPeriod || isOvulation ? 'text-ink' : 'text-text';
 
+  const states = [
+    isToday && 'today',
+    isPeriod && 'period',
+    !isPeriod && isPredicted && 'predicted period',
+    isOvulation ? 'estimated ovulation' : isFertile && 'fertile window',
+    hasLog && 'has a log',
+  ].filter(Boolean);
+  const label = [
+    fromEpochDay(day).toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    }),
+    ...states,
+  ].join(', ');
+
   return (
-    <Pressable onPress={onPress} className="flex-1 p-1" style={{ aspectRatio: 1 }}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      className="flex-1 p-1"
+      style={{ aspectRatio: 1 }}
+    >
       <View className={`flex-1 items-center justify-center rounded-xl ${bg} ${ring}`}>
         <Txt className={textClass}>{fromEpochDay(day).getDate()}</Txt>
         {hasLog && <View className="mt-0.5 h-1 w-1 rounded-full bg-primary-soft" />}

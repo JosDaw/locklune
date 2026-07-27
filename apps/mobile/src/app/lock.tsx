@@ -4,6 +4,8 @@ import { BRAND } from '@locklune/core';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
+import * as haptics from '../lib/haptics';
+import * as toast from '../lib/toast';
 import { useAuthStore } from '../stores/authStore';
 import { currentLockSeconds } from '../lib/vault';
 
@@ -32,18 +34,28 @@ export default function Lock() {
     if (remaining > 0 || busy) return;
     setBusy(true);
     setError(null);
-    const ok = await unlockPin(pin);
+    let ok = false;
+    try {
+      ok = await unlockPin(pin);
+    } catch {
+      setBusy(false);
+      toast.error('Something went wrong unlocking. Please try again.');
+      return;
+    }
     setBusy(false);
-    if (!ok) {
-      const s = useAuthStore.getState();
-      if (s.lockedForSeconds > 0) {
-        setRemaining(s.lockedForSeconds);
-        setError('Too many attempts. Please wait before trying again.');
-      } else {
-        setError(
-          `Incorrect PIN. ${s.attemptsRemaining} attempt${s.attemptsRemaining === 1 ? '' : 's'} left before all data is erased.`,
-        );
-      }
+    if (ok) {
+      haptics.success();
+      return;
+    }
+    haptics.error();
+    const s = useAuthStore.getState();
+    if (s.lockedForSeconds > 0) {
+      setRemaining(s.lockedForSeconds);
+      setError('Too many attempts. Please wait before trying again.');
+    } else {
+      setError(
+        `Incorrect PIN. ${s.attemptsRemaining} attempt${s.attemptsRemaining === 1 ? '' : 's'} left before all data is erased.`,
+      );
     }
   };
 

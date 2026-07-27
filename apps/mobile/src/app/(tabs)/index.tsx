@@ -7,6 +7,7 @@ import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
 import { confidenceLabel, formatDay, formatRange, relativeDays } from '../../lib/format';
+import * as haptics from '../../lib/haptics';
 import { colors } from '../../theme/colors';
 import { useDataStore } from '../../stores/dataStore';
 
@@ -18,6 +19,9 @@ export default function Today() {
   const settings = useDataStore((s) => s.settings);
   const startPeriod = useDataStore((s) => s.startPeriod);
   const setCurrentPeriodEnd = useDataStore((s) => s.setCurrentPeriodEnd);
+
+  const onStart = () => void (async () => (await startPeriod(today)) && haptics.success())();
+  const onEnd = () => void (async () => (await setCurrentPeriodEnd(today)) && haptics.success())();
 
   const last = cycles[cycles.length - 1];
   const onPeriod = last !== undefined && last.endDay === null && today >= last.startDay;
@@ -32,7 +36,9 @@ export default function Today() {
   return (
     <Screen>
       <View className="gap-1 pt-2">
-        <Txt variant="label">{formatDay(today, { weekday: 'long', month: 'long', day: 'numeric' })}</Txt>
+        <Txt variant="label">
+          {formatDay(today, { weekday: 'long', month: 'long', day: 'numeric' })}
+        </Txt>
         <Txt variant="display">{BRAND.name}</Txt>
       </View>
 
@@ -40,7 +46,9 @@ export default function Today() {
         <Card>
           {preg ? (
             <View className="gap-2">
-              <Txt variant="label" className="text-primary-soft">Pregnancy</Txt>
+              <Txt variant="label" className="text-primary-soft">
+                Pregnancy
+              </Txt>
               <Txt variant="heading">
                 Week {preg.week}
                 {preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
@@ -52,7 +60,8 @@ export default function Today() {
                   : `${-preg.daysRemaining} days over`}
               </Txt>
               <Txt variant="faint">
-                Estimated due {formatDay(preg.dueDay, { weekday: 'short', month: 'long', day: 'numeric' })}
+                Estimated due{' '}
+                {formatDay(preg.dueDay, { weekday: 'short', month: 'long', day: 'numeric' })}
               </Txt>
             </View>
           ) : (
@@ -70,23 +79,24 @@ export default function Today() {
           <Card>
             {onPeriod ? (
               <View className="gap-3">
-                <Txt variant="label" className="text-period">On your period</Txt>
+                <Txt variant="label" className="text-period">
+                  On your period
+                </Txt>
                 <Txt variant="heading">Day {today - last!.startDay + 1}</Txt>
                 <Txt variant="muted">Started {formatDay(last!.startDay)}</Txt>
-                <Button
-                  title="End period today"
-                  variant="secondary"
-                  onPress={() => void setCurrentPeriodEnd(today)}
-                />
+                <Button title="End period today" variant="secondary" onPress={onEnd} />
               </View>
             ) : next ? (
               <View className="gap-2">
-                <Txt variant="label">{settings.cycleMode === 'contraception' ? 'Next expected bleed' : 'Next period'}</Txt>
+                <Txt variant="label">
+                  {settings.cycleMode === 'contraception' ? 'Next expected bleed' : 'Next period'}
+                </Txt>
                 <Txt variant="heading">{relativeDays(next.periodStart)}</Txt>
                 <Txt variant="muted">
-                  {formatDay(next.periodStart)} · window {formatRange(next.periodStartRange.start, next.periodStartRange.end)}
+                  {formatDay(next.periodStart)} · window{' '}
+                  {formatRange(next.periodStartRange.start, next.periodStartRange.end)}
                 </Txt>
-                <Button title="Log period started today" className="mt-2" onPress={() => void startPeriod(today)} />
+                <Button title="Log period started today" className="mt-2" onPress={onStart} />
               </View>
             ) : (
               <View className="gap-3">
@@ -97,7 +107,7 @@ export default function Today() {
                 <Txt variant="muted">
                   Log the first day of your period and {BRAND.name} will start learning your cycle.
                 </Txt>
-                <Button title="Log period started today" onPress={() => void startPeriod(today)} />
+                <Button title="Log period started today" onPress={onStart} />
               </View>
             )}
           </Card>
@@ -105,11 +115,15 @@ export default function Today() {
           {/* Fertile window emphasis when trying to conceive */}
           {next && fertility && settings.cycleMode === 'trying' && (
             <Card className="border-fertile/40">
-              <Txt variant="label" className="text-fertile">Fertile window</Txt>
+              <Txt variant="label" className="text-fertile">
+                Fertile window
+              </Txt>
               <Txt variant="heading" className="mt-1">
                 {formatRange(next.fertileWindow.start, next.fertileWindow.end)}
               </Txt>
-              <Txt variant="muted" className="mt-0.5">Estimated ovulation {formatDay(next.ovulationDay)}</Txt>
+              <Txt variant="muted" className="mt-0.5">
+                Estimated ovulation {formatDay(next.ovulationDay)}
+              </Txt>
             </Card>
           )}
 
@@ -123,7 +137,10 @@ export default function Today() {
                 </View>
                 {fertility && settings.cycleMode !== 'trying' && (
                   <>
-                    <Row label="Fertile window" value={formatRange(next.fertileWindow.start, next.fertileWindow.end)} />
+                    <Row
+                      label="Fertile window"
+                      value={formatRange(next.fertileWindow.start, next.fertileWindow.end)}
+                    />
                     <Row label="Estimated ovulation" value={formatDay(next.ovulationDay)} />
                   </>
                 )}
@@ -132,7 +149,9 @@ export default function Today() {
                   value={`${Math.round(prediction.averageCycleLength)} days${prediction.usingDefaults ? ' (default)' : ''}`}
                 />
                 {!fertility && (
-                  <Txt variant="faint">Fertility estimates are hidden on hormonal contraception.</Txt>
+                  <Txt variant="faint">
+                    Fertility estimates are hidden on hormonal contraception.
+                  </Txt>
                 )}
               </View>
             </Card>

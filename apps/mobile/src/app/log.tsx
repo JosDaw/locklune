@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Flow, Mood, todayEpochDay, type EpochDay } from '@locklune/core';
+import { cycleForDay, Flow, Mood, todayEpochDay, type EpochDay } from '@locklune/core';
 import { Textarea, TextareaInput } from '../components/gs/textarea';
 import { Button } from '../components/ui/Button';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
 import { formatDay } from '../lib/format';
+import * as haptics from '../lib/haptics';
 import { colors } from '../theme/colors';
 import { useDataStore } from '../stores/dataStore';
 
@@ -27,17 +28,31 @@ const MOOD_OPTIONS: { icon: keyof typeof MaterialCommunityIcons.glyphMap; value:
 ];
 
 const SYMPTOMS = [
-  'cramps', 'headache', 'bloating', 'fatigue', 'tender breasts',
-  'acne', 'nausea', 'back pain', 'cravings', 'insomnia', 'mood swings',
+  'cramps',
+  'headache',
+  'bloating',
+  'fatigue',
+  'tender breasts',
+  'acne',
+  'nausea',
+  'back pain',
+  'cravings',
+  'insomnia',
+  'mood swings',
 ];
 
 export default function LogModal() {
   const router = useRouter();
   const params = useLocalSearchParams<{ day?: string }>();
-  const day: EpochDay = params.day ? Number(params.day) : todayEpochDay();
+  const today = todayEpochDay();
+  const day: EpochDay = params.day ? Number(params.day) : today;
 
   const getDayLog = useDataStore((s) => s.getDayLog);
   const logDay = useDataStore((s) => s.logDay);
+  const cycles = useDataStore((s) => s.cycles);
+  const startPeriod = useDataStore((s) => s.startPeriod);
+  const endCycle = useDataStore((s) => s.endCycle);
+  const deleteCycle = useDataStore((s) => s.deleteCycle);
 
   const [flow, setFlow] = useState<Flow | null>(null);
   const [mood, setMood] = useState<Mood | null>(null);
@@ -65,18 +80,95 @@ export default function LogModal() {
   const toggleSymptom = (s: string) =>
     setSymptoms((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
 
+  // Where this day sits relative to recorded cycles, so we can offer the right action.
+  const status = cycleForDay(cycles, day, today);
+  const c = status.cycle;
+  const isOngoing = c != null && c.endDay === null;
+  const isEndDay = c != null && c.endDay === day;
+  const canSetEnd =
+    c != null && day >= c.startDay && day !== c.endDay && (c.endDay === null || day <= c.endDay);
+
+  const markStart = async () => {
+    if (await startPeriod(day)) haptics.success();
+  };
+
+  const setEnd = async () => {
+    if (c && (await endCycle(c.id, day))) haptics.success();
+  };
+
+  const clearEnd = async () => {
+    if (c && (await endCycle(c.id, null))) haptics.success();
+  };
+
+  const removeStart = () => {
+    if (!c) return;
+    haptics.warn();
+    Alert.alert(
+      'Remove period start?',
+      'This deletes this period from your history. Symptom logs for these days are kept.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => void (async () => (await deleteCycle(c.id)) && haptics.success())(),
+        },
+      ],
+    );
+  };
+
   const save = async () => {
-    await logDay({ day, flow, mood, symptoms, note: note.trim() || null });
-    router.back();
+    if (await logDay({ day, flow, mood, symptoms, note: note.trim() || null })) {
+      haptics.success();
+      router.back();
+    }
   };
 
   return (
     <Screen>
       <View className="flex-row items-center justify-between pt-2">
-        <Txt variant="title">{formatDay(day, { weekday: 'long', month: 'long', day: 'numeric' })}</Txt>
-        <Pressable onPress={() => router.back()} className="h-9 w-9 items-center justify-center rounded-full bg-surfaceMuted">
+        <Txt variant="title">
+          {formatDay(day, { weekday: 'long', month: 'long', day: 'numeric' })}
+        </Txt>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+          className="h-9 w-9 items-center justify-center rounded-full bg-surfaceMuted"
+        >
           <Ionicons name="close" size={20} color={colors.text} />
         </Pressable>
+      </View>
+
+      <View className="gap-3">
+        <Txt variant="label">Period</Txt>
+        {day > today ? (
+          <Txt variant="faint">You can mark a period once the day has arrived.</Txt>
+        ) : !status.isBleedDay ? (
+          <Button
+            title="Mark period started this day"
+            variant="secondary"
+            onPress={() => void markStart()}
+          />
+        ) : (
+          <View className="gap-2">
+            <View className="rounded-2xl border border-period/40 bg-surface p-3">
+              <Txt variant="body">{status.isStart ? 'Period started this day' : 'Period day'}</Txt>
+              {!status.isStart && c && <Txt variant="faint">Started {formatDay(c.startDay)}</Txt>}
+              {isEndDay && <Txt variant="faint">Marked as the last day</Txt>}
+              {isOngoing && !status.isStart && <Txt variant="faint">Period ongoing</Txt>}
+            </View>
+            {canSetEnd && (
+              <Button title="Mark as my last day" variant="ghost" onPress={() => void setEnd()} />
+            )}
+            {isEndDay && (
+              <Button title="Clear end date" variant="ghost" onPress={() => void clearEnd()} />
+            )}
+            {status.isStart && (
+              <Button title="Remove period start" variant="danger" onPress={removeStart} />
+            )}
+          </View>
+        )}
       </View>
 
       <View className="gap-3">
@@ -117,7 +209,12 @@ export default function LogModal() {
         <Txt variant="label">Symptoms</Txt>
         <View className="flex-row flex-wrap gap-2">
           {SYMPTOMS.map((s) => (
-            <Chip key={s} label={s} active={symptoms.includes(s)} onPress={() => toggleSymptom(s)} />
+            <Chip
+              key={s}
+              label={s}
+              active={symptoms.includes(s)}
+              onPress={() => toggleSymptom(s)}
+            />
           ))}
         </View>
       </View>

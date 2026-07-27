@@ -18,6 +18,7 @@ import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
 import { colors } from '../../theme/colors';
 import { formatDay } from '../../lib/format';
+import * as haptics from '../../lib/haptics';
 import { KOFI_URL, MAKER_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
@@ -71,6 +72,7 @@ export default function Settings() {
   };
 
   const confirmWipe = () => {
+    haptics.warn();
     Alert.alert(
       'Erase everything?',
       'This permanently deletes your PIN and all cycle data on this device. It cannot be undone.',
@@ -85,11 +87,15 @@ export default function Settings() {
 
   return (
     <Screen>
-      <Txt variant="display" className="pt-2">Settings</Txt>
+      <Txt variant="display" className="pt-2">
+        Settings
+      </Txt>
 
       {/* Cycle mode */}
       <Card>
-        <Txt variant="label" className="mb-3">I am currently</Txt>
+        <Txt variant="label" className="mb-3">
+          I am currently
+        </Txt>
         <View>
           {CYCLE_MODES.map((m) => (
             <ModeRow
@@ -133,20 +139,34 @@ export default function Settings() {
                 </Txt>
               )}
             </View>
-            <Stepper value={pregWeeks} min={0} max={42} onChange={(w) => void updateSettings({ pregnancyDueDay: dueDayFromWeeksAlong(w, today) })} />
+            <Stepper
+              value={pregWeeks}
+              min={0}
+              max={42}
+              onChange={(w) =>
+                void updateSettings({ pregnancyDueDay: dueDayFromWeeksAlong(w, today) })
+              }
+            />
           </View>
         )}
       </Card>
 
       {/* Security */}
       <Card>
-        <Txt variant="label" className="mb-3">Security</Txt>
-        <Pressable onPress={() => router.push('/change-pin')} className="flex-row items-center justify-between py-3">
+        <Txt variant="label" className="mb-3">
+          Security
+        </Txt>
+        <Pressable
+          onPress={() => router.push('/change-pin')}
+          className="flex-row items-center justify-between py-3"
+        >
           <Txt variant="body">Change PIN</Txt>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </Pressable>
 
-        <Txt variant="faint" className="mb-2 mt-2">Auto-lock after inactivity</Txt>
+        <Txt variant="faint" className="mb-2 mt-2">
+          Auto-lock after inactivity
+        </Txt>
         <Segmented
           options={AUTO_LOCK_OPTIONS}
           value={settings.autoLockMinutes}
@@ -156,7 +176,9 @@ export default function Settings() {
 
       {/* Cycle */}
       <Card>
-        <Txt variant="label" className="mb-3">Cycle</Txt>
+        <Txt variant="label" className="mb-3">
+          Cycle
+        </Txt>
         <View className="flex-row items-center justify-between">
           <View className="flex-1 pr-4">
             <Txt variant="body">Luteal phase length</Txt>
@@ -173,7 +195,9 @@ export default function Settings() {
 
       {/* Reminders */}
       <Card>
-        <Txt variant="label" className="mb-3">Reminders</Txt>
+        <Txt variant="label" className="mb-3">
+          Reminders
+        </Txt>
         <SwitchRow
           label="Period reminder"
           hint="A local notification 2 days before"
@@ -184,7 +208,9 @@ export default function Settings() {
 
       {/* About */}
       <Card>
-        <Txt variant="label" className="mb-3">About</Txt>
+        <Txt variant="label" className="mb-3">
+          About
+        </Txt>
         <RNText className="text-base leading-5 text-text-muted">
           Locklune is made by one person,{' '}
           <RNText className="font-medium text-primary-soft" onPress={() => openLink(MAKER_URL)}>
@@ -205,7 +231,9 @@ export default function Settings() {
 
       {/* Danger zone */}
       <Card className="border-danger/40">
-        <Txt variant="label" className="mb-3 text-danger">Danger zone</Txt>
+        <Txt variant="label" className="mb-3 text-danger">
+          Danger zone
+        </Txt>
         <View className="gap-3">
           <Button title="Lock now" variant="secondary" onPress={() => void lock()} />
           <Button title="Erase all data" variant="danger" onPress={confirmWipe} />
@@ -213,7 +241,9 @@ export default function Settings() {
       </Card>
 
       <View className="items-center gap-1 pb-4">
-        <Txt variant="faint">{BRAND.name} v{Constants.expoConfig?.version ?? '0.1.0'}</Txt>
+        <Txt variant="faint">
+          {BRAND.name} v{Constants.expoConfig?.version ?? '0.1.0'}
+        </Txt>
         <Txt variant="faint" className="text-center">
           100% on-device · encrypted · no accounts, no tracking, no network
         </Txt>
@@ -269,6 +299,9 @@ function Segmented({
           <Pressable
             key={o.value}
             onPress={() => onChange(o.value)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={o.label}
             className={`flex-1 items-center rounded-xl py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
           >
             <Txt className={active ? 'text-ink' : 'text-text-muted'}>{o.label}</Txt>
@@ -291,7 +324,14 @@ function ModeRow({
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} className="flex-row items-center gap-3 py-2.5">
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: active }}
+      accessibilityLabel={label}
+      accessibilityHint={hint}
+      className="flex-row items-center gap-3 py-2.5"
+    >
       <View
         className={`h-5 w-5 items-center justify-center rounded-full border ${active ? 'border-primary bg-primary' : 'border-border'}`}
       >
@@ -309,6 +349,9 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
   return (
     <Pressable
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
       className={`rounded-full px-3.5 py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
     >
       <Txt className={active ? 'text-ink' : 'text-text-muted'}>{label}</Txt>
@@ -334,7 +377,9 @@ function AboutRow({
       className={`flex-row items-center gap-3 py-3 ${last ? '' : 'border-b border-border'}`}
     >
       <Ionicons name={icon} size={18} color={colors.primarySoft} />
-      <Txt variant="body" className="flex-1">{label}</Txt>
+      <Txt variant="body" className="flex-1">
+        {label}
+      </Txt>
       <Ionicons name="open-outline" size={16} color={colors.textMuted} />
     </Pressable>
   );
@@ -355,13 +400,19 @@ function Stepper({
     <View className="flex-row items-center gap-3">
       <Pressable
         onPress={() => onChange(Math.max(min, value - 1))}
+        accessibilityRole="button"
+        accessibilityLabel="Decrease"
         className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
       >
         <Ionicons name="remove" size={20} color={colors.text} />
       </Pressable>
-      <Txt variant="title" className="w-6 text-center">{value}</Txt>
+      <Txt variant="title" className="w-6 text-center">
+        {value}
+      </Txt>
       <Pressable
         onPress={() => onChange(Math.min(max, value + 1))}
+        accessibilityRole="button"
+        accessibilityLabel="Increase"
         className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
       >
         <Ionicons name="add" size={20} color={colors.text} />

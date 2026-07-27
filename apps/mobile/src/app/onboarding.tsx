@@ -7,6 +7,7 @@ import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
 import { colors } from '../theme/colors';
+import * as haptics from '../lib/haptics';
 import { useAuthStore } from '../stores/authStore';
 
 const PIN_LENGTH = 6;
@@ -30,6 +31,7 @@ export default function Onboarding() {
       return;
     }
     if (pin !== firstPin) {
+      haptics.error();
       setError('Those PINs didn’t match. Let’s try again.');
       setFirstPin('');
       setPhase('create');
@@ -38,7 +40,9 @@ export default function Onboarding() {
     setBusy(true);
     try {
       await createPin(pin);
+      haptics.success();
     } catch {
+      haptics.error();
       setError('Something went wrong creating your PIN. Please try again.');
       setFirstPin('');
       setPhase('create');
@@ -51,7 +55,9 @@ export default function Onboarding() {
       <Screen scroll={false} contentClassName="justify-between">
         <View className="items-center gap-2 pt-6">
           <Txt variant="display">{BRAND.name}</Txt>
-          <Txt variant="muted" className="text-center">Before you begin</Txt>
+          <Txt variant="muted" className="text-center">
+            Before you begin
+          </Txt>
         </View>
 
         <View className="gap-5">
@@ -104,11 +110,7 @@ export default function Onboarding() {
       </View>
 
       <View className="gap-3">
-        {error ? (
-          <Txt className="text-center text-danger">{error}</Txt>
-        ) : (
-          <View className="h-5" />
-        )}
+        {error ? <Txt className="text-center text-danger">{error}</Txt> : <View className="h-5" />}
         <PinPad length={PIN_LENGTH} disabled={busy} onComplete={handleComplete} />
       </View>
 

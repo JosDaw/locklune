@@ -10,6 +10,7 @@ import {
 } from '@locklune/core';
 import * as db from '../lib/db';
 import { syncReminders } from '../lib/notifications';
+import * as toast from '../lib/toast';
 
 interface DataState {
   loaded: boolean;
@@ -20,74 +21,103 @@ interface DataState {
   load: () => Promise<void>;
   reset: () => void;
 
-  startPeriod: (day: EpochDay) => Promise<void>;
-  setCurrentPeriodEnd: (day: EpochDay) => Promise<void>;
-  deleteCycle: (id: number) => Promise<void>;
+  /** Mutations resolve to `true` on success; on failure they toast and resolve `false`. */
+  startPeriod: (day: EpochDay) => Promise<boolean>;
+  setCurrentPeriodEnd: (day: EpochDay) => Promise<boolean>;
+  endCycle: (id: number, day: EpochDay | null) => Promise<boolean>;
+  deleteCycle: (id: number) => Promise<boolean>;
 
-  logDay: (log: DayLog) => Promise<void>;
+  logDay: (log: DayLog) => Promise<boolean>;
   getDayLog: (day: EpochDay) => Promise<DayLog | null>;
   getDayLogsInRange: (from: EpochDay, to: EpochDay) => Promise<DayLog[]>;
 
-  updateSettings: (patch: Partial<Settings>) => Promise<void>;
+  updateSettings: (patch: Partial<Settings>) => Promise<boolean>;
 }
 
 const emptyPrediction = predict([]);
 
-export const useDataStore = create<DataState>((set, get) => ({
-  loaded: false,
-  cycles: [],
-  settings: { ...DEFAULT_SETTINGS },
-  prediction: emptyPrediction,
-
-  load: async () => {
-    const [cycles, settings] = await Promise.all([db.getCycles(), db.getSettings()]);
-    const prediction = predict(cycles, settings);
-    set({ cycles, settings, prediction, loaded: true });
-    void syncReminders(prediction, settings.reminderDaysBefore).catch(() => undefined);
-  },
-
-  reset: () =>
-    set({
-      loaded: false,
-      cycles: [],
-      settings: { ...DEFAULT_SETTINGS },
-      prediction: emptyPrediction,
-    }),
-
-  startPeriod: async (day) => {
-    await db.addCycle(day);
+export const useDataStore = create<DataState>((set, get) => {
+  /** Reload cycles from the DB and recompute prediction + reminders. */
+  async function refreshCycles(): Promise<void> {
     const cycles = await db.getCycles();
     const prediction = predict(cycles, get().settings);
     set({ cycles, prediction });
     void syncReminders(prediction, get().settings.reminderDaysBefore).catch(() => undefined);
-  },
+  }
 
-  setCurrentPeriodEnd: async (day) => {
-    const cycles = get().cycles;
-    const last = cycles[cycles.length - 1];
-    if (!last) return;
-    await db.setCycleEnd(last.id, day);
-    const next = await db.getCycles();
-    set({ cycles: next, prediction: predict(next, get().settings) });
-  },
+  /** Run a DB mutation, surfacing a toast (and resolving `false`) on failure. */
+  async function mutate(action: () => Promise<void>, failMessage: string): Promise<boolean> {
+    try {
+      await action();
+      return true;
+    } catch {
+      toast.error(failMessage);
+      return false;
+    }
+  }
 
-  deleteCycle: async (id) => {
-    await db.deleteCycle(id);
-    const cycles = await db.getCycles();
-    set({ cycles, prediction: predict(cycles, get().settings) });
-  },
+  return {
+    loaded: false,
+    cycles: [],
+    settings: { ...DEFAULT_SETTINGS },
+    prediction: emptyPrediction,
 
-  logDay: async (log) => {
-    await db.upsertDayLog(log);
-  },
-  getDayLog: (day) => db.getDayLog(day),
-  getDayLogsInRange: (from, to) => db.getDayLogsInRange(from, to),
+    load: async () => {
+      try {
+        const [cycles, settings] = await Promise.all([db.getCycles(), db.getSettings()]);
+        const prediction = predict(cycles, settings);
+        set({ cycles, settings, prediction, loaded: true });
+        void syncReminders(prediction, settings.reminderDaysBefore).catch(() => undefined);
+      } catch {
+        toast.error('Could not load your data.');
+      }
+    },
 
-  updateSettings: async (patch) => {
-    const next: Settings = { ...get().settings, ...patch };
-    await db.saveSettings(next);
-    const prediction = predict(get().cycles, next);
-    set({ settings: next, prediction });
-    void syncReminders(prediction, next.reminderDaysBefore).catch(() => undefined);
-  },
-}));
+    reset: () =>
+      set({
+        loaded: false,
+        cycles: [],
+        settings: { ...DEFAULT_SETTINGS },
+        prediction: emptyPrediction,
+      }),
+
+    startPeriod: (day) =>
+      mutate(async () => {
+        await db.addCycle(day);
+        await refreshCycles();
+      }, 'Could not save the period.'),
+
+    setCurrentPeriodEnd: (day) =>
+      mutate(async () => {
+        const last = get().cycles[get().cycles.length - 1];
+        if (!last) return;
+        await db.setCycleEnd(last.id, day);
+        await refreshCycles();
+      }, 'Could not update the period.'),
+
+    endCycle: (id, day) =>
+      mutate(async () => {
+        await db.setCycleEnd(id, day);
+        await refreshCycles();
+      }, 'Could not update the end date.'),
+
+    deleteCycle: (id) =>
+      mutate(async () => {
+        await db.deleteCycle(id);
+        await refreshCycles();
+      }, 'Could not remove the period.'),
+
+    logDay: (log) => mutate(() => db.upsertDayLog(log), 'Could not save your log.'),
+    getDayLog: (day) => db.getDayLog(day),
+    getDayLogsInRange: (from, to) => db.getDayLogsInRange(from, to),
+
+    updateSettings: (patch) =>
+      mutate(async () => {
+        const next: Settings = { ...get().settings, ...patch };
+        await db.saveSettings(next);
+        const prediction = predict(get().cycles, next);
+        set({ settings: next, prediction });
+        void syncReminders(prediction, next.reminderDaysBefore).catch(() => undefined);
+      }, 'Could not save your settings.'),
+  };
+});
