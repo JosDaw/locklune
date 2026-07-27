@@ -11,7 +11,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.locklune",
-      "icon": "./assets/expo.icon",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -19,10 +18,8 @@
     "android": {
       "package": "app.locklune",
       "adaptiveIcon": {
-        "backgroundColor": "#12101B",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#040E25",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
       "predictiveBackGestureEnabled": false,
       "allowBackup": false
@@ -36,9 +33,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#12101B",
+          "backgroundColor": "#040E25",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 200
         }
       ],
       ["expo-sqlite", { "useSQLCipher": true }],
