@@ -81,6 +81,30 @@ describe('predict', () => {
     expect(p.upcoming[0]!.ovulationDay).toBe(140 - 12);
   });
 
+  it('anchors the next period to a confirmed ovulation in the current cycle', () => {
+    const p = predict(
+      [{ id: 1, startDay: 1000, endDay: 1004 }],
+      {},
+      { confirmedOvulations: [1015] },
+    );
+    // No ovulation→next-start pairs yet, so the luteal phase falls back to 14.
+    expect(p.upcoming[0]!.ovulationDay).toBe(1015);
+    expect(p.upcoming[0]!.periodStart).toBe(1015 + 14);
+    expect(p.upcoming[0]!.fertileWindow).toEqual({ start: 1015 - 5, end: 1015 + 1 });
+  });
+
+  it('learns the luteal phase from a past confirmed ovulation', () => {
+    const cycles: Cycle[] = [
+      { id: 1, startDay: 0, endDay: 4 },
+      { id: 2, startDay: 30, endDay: 34 },
+    ];
+    // Ovulation at 18 with the next period at 30 → luteal 12; it is not in the
+    // current cycle, so it refines the luteal length rather than the anchor.
+    const p = predict(cycles, {}, { confirmedOvulations: [18] });
+    expect(p.upcoming[0]!.periodStart).toBe(60);
+    expect(p.upcoming[0]!.ovulationDay).toBe(60 - 12);
+  });
+
   it('defaults to tracking mode with fertility applicable', () => {
     const p = predict(cyclesFromLengths(0, [28, 28, 28]));
     expect(p.mode).toBe('tracking');

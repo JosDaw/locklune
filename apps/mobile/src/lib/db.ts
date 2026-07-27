@@ -66,13 +66,20 @@ async function migrate(database: SQLite.SQLiteDatabase): Promise<void> {
       flow INTEGER,
       mood INTEGER,
       symptoms TEXT,
-      note TEXT
+      note TEXT,
+      ovulation INTEGER
     );
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
   `);
+  // Add columns introduced after a table's first version (no-op if present).
+  try {
+    await database.execAsync('ALTER TABLE day_logs ADD COLUMN ovulation INTEGER');
+  } catch {
+    // column already exists
+  }
 }
 
 // --- Cycles -----------------------------------------------------------------
@@ -119,6 +126,7 @@ interface DayLogRow {
   mood: number | null;
   symptoms: string | null;
   note: string | null;
+  ovulation: number | null;
 }
 
 function rowToDayLog(r: DayLogRow): DayLog {
@@ -128,16 +136,23 @@ function rowToDayLog(r: DayLogRow): DayLog {
     mood: (r.mood as Mood | null) ?? null,
     symptoms: r.symptoms ? (JSON.parse(r.symptoms) as string[]) : [],
     note: r.note,
+    ovulation: r.ovulation === 1,
   };
 }
 
 function isEmptyLog(log: DayLog): boolean {
-  return log.flow === null && log.mood === null && log.symptoms.length === 0 && !log.note;
+  return (
+    log.flow === null &&
+    log.mood === null &&
+    log.symptoms.length === 0 &&
+    !log.note &&
+    !log.ovulation
+  );
 }
 
 export async function getDayLog(day: EpochDay): Promise<DayLog | null> {
   const row = await requireDb().getFirstAsync<DayLogRow>(
-    'SELECT day, flow, mood, symptoms, note FROM day_logs WHERE day = ?',
+    'SELECT day, flow, mood, symptoms, note, ovulation FROM day_logs WHERE day = ?',
     day,
   );
   return row ? rowToDayLog(row) : null;
@@ -145,11 +160,19 @@ export async function getDayLog(day: EpochDay): Promise<DayLog | null> {
 
 export async function getDayLogsInRange(from: EpochDay, to: EpochDay): Promise<DayLog[]> {
   const rows = await requireDb().getAllAsync<DayLogRow>(
-    'SELECT day, flow, mood, symptoms, note FROM day_logs WHERE day BETWEEN ? AND ? ORDER BY day',
+    'SELECT day, flow, mood, symptoms, note, ovulation FROM day_logs WHERE day BETWEEN ? AND ? ORDER BY day',
     from,
     to,
   );
   return rows.map(rowToDayLog);
+}
+
+/** Days on which the user confirmed ovulation (used to sharpen predictions). */
+export async function getConfirmedOvulations(): Promise<EpochDay[]> {
+  const rows = await requireDb().getAllAsync<{ day: number }>(
+    'SELECT day FROM day_logs WHERE ovulation = 1 ORDER BY day',
+  );
+  return rows.map((r) => r.day);
 }
 
 /** Insert/update a day-log; if the log is empty, the row is removed (stays sparse). */
@@ -159,15 +182,16 @@ export async function upsertDayLog(log: DayLog): Promise<void> {
     return;
   }
   await requireDb().runAsync(
-    `INSERT INTO day_logs (day, flow, mood, symptoms, note)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO day_logs (day, flow, mood, symptoms, note, ovulation)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(day) DO UPDATE SET flow = excluded.flow, mood = excluded.mood,
-       symptoms = excluded.symptoms, note = excluded.note`,
+       symptoms = excluded.symptoms, note = excluded.note, ovulation = excluded.ovulation`,
     log.day,
     log.flow,
     log.mood,
     log.symptoms.length > 0 ? JSON.stringify(log.symptoms) : null,
     log.note,
+    log.ovulation ? 1 : 0,
   );
 }
 

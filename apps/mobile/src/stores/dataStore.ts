@@ -15,6 +15,8 @@ import * as toast from '../lib/toast';
 interface DataState {
   loaded: boolean;
   cycles: Cycle[];
+  /** Days the user has confirmed ovulation (feeds the prediction). */
+  ovulationDays: EpochDay[];
   settings: Settings;
   prediction: Prediction;
 
@@ -37,11 +39,14 @@ interface DataState {
 const emptyPrediction = predict([]);
 
 export const useDataStore = create<DataState>((set, get) => {
-  /** Reload cycles from the DB and recompute prediction + reminders. */
-  async function refreshCycles(): Promise<void> {
-    const cycles = await db.getCycles();
-    const prediction = predict(cycles, get().settings);
-    set({ cycles, prediction });
+  /** Reload cycles + confirmed ovulations and recompute prediction + reminders. */
+  async function refreshAll(): Promise<void> {
+    const [cycles, ovulationDays] = await Promise.all([
+      db.getCycles(),
+      db.getConfirmedOvulations(),
+    ]);
+    const prediction = predict(cycles, get().settings, { confirmedOvulations: ovulationDays });
+    set({ cycles, ovulationDays, prediction });
     void syncReminders(prediction, get().settings.reminderDaysBefore).catch(() => undefined);
   }
 
@@ -59,14 +64,19 @@ export const useDataStore = create<DataState>((set, get) => {
   return {
     loaded: false,
     cycles: [],
+    ovulationDays: [],
     settings: { ...DEFAULT_SETTINGS },
     prediction: emptyPrediction,
 
     load: async () => {
       try {
-        const [cycles, settings] = await Promise.all([db.getCycles(), db.getSettings()]);
-        const prediction = predict(cycles, settings);
-        set({ cycles, settings, prediction, loaded: true });
+        const [cycles, settings, ovulationDays] = await Promise.all([
+          db.getCycles(),
+          db.getSettings(),
+          db.getConfirmedOvulations(),
+        ]);
+        const prediction = predict(cycles, settings, { confirmedOvulations: ovulationDays });
+        set({ cycles, settings, ovulationDays, prediction, loaded: true });
         void syncReminders(prediction, settings.reminderDaysBefore).catch(() => undefined);
       } catch {
         toast.error('Could not load your data.');
@@ -77,6 +87,7 @@ export const useDataStore = create<DataState>((set, get) => {
       set({
         loaded: false,
         cycles: [],
+        ovulationDays: [],
         settings: { ...DEFAULT_SETTINGS },
         prediction: emptyPrediction,
       }),
@@ -93,7 +104,7 @@ export const useDataStore = create<DataState>((set, get) => {
         } else {
           await db.addCycle(day);
         }
-        await refreshCycles();
+        await refreshAll();
       }, 'Could not save the period.'),
 
     setCurrentPeriodEnd: (day) =>
@@ -101,22 +112,27 @@ export const useDataStore = create<DataState>((set, get) => {
         const last = get().cycles[get().cycles.length - 1];
         if (!last) return;
         await db.setCycleEnd(last.id, day);
-        await refreshCycles();
+        await refreshAll();
       }, 'Could not update the period.'),
 
     endCycle: (id, day) =>
       mutate(async () => {
         await db.setCycleEnd(id, day);
-        await refreshCycles();
+        await refreshAll();
       }, 'Could not update the end date.'),
 
     deleteCycle: (id) =>
       mutate(async () => {
         await db.deleteCycle(id);
-        await refreshCycles();
+        await refreshAll();
       }, 'Could not remove the period.'),
 
-    logDay: (log) => mutate(() => db.upsertDayLog(log), 'Could not save your log.'),
+    logDay: (log) =>
+      mutate(async () => {
+        await db.upsertDayLog(log);
+        // A log can add/remove a confirmed ovulation, which changes the prediction.
+        await refreshAll();
+      }, 'Could not save your log.'),
     getDayLog: (day) => db.getDayLog(day),
     getDayLogsInRange: (from, to) => db.getDayLogsInRange(from, to),
 
@@ -124,7 +140,9 @@ export const useDataStore = create<DataState>((set, get) => {
       mutate(async () => {
         const next: Settings = { ...get().settings, ...patch };
         await db.saveSettings(next);
-        const prediction = predict(get().cycles, next);
+        const prediction = predict(get().cycles, next, {
+          confirmedOvulations: get().ovulationDays,
+        });
         set({ settings: next, prediction });
         void syncReminders(prediction, next.reminderDaysBefore).catch(() => undefined);
       }, 'Could not save your settings.'),

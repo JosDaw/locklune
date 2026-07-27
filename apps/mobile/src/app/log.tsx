@@ -3,6 +3,7 @@ import { Alert, Pressable, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { cycleForDay, Flow, Mood, todayEpochDay, type EpochDay } from '@locklune/core';
+import { Switch } from '../components/gs/switch';
 import { Textarea, TextareaInput } from '../components/gs/textarea';
 import { Button } from '../components/ui/Button';
 import { Screen } from '../components/ui/Screen';
@@ -58,6 +59,7 @@ export default function LogModal() {
   const [mood, setMood] = useState<Mood | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [note, setNote] = useState('');
+  const [ovulation, setOvulation] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -69,6 +71,7 @@ export default function LogModal() {
         setMood(log.mood);
         setSymptoms(log.symptoms);
         setNote(log.note ?? '');
+        setOvulation(log.ovulation);
       }
       setLoaded(true);
     });
@@ -118,7 +121,7 @@ export default function LogModal() {
   };
 
   const save = async () => {
-    if (await logDay({ day, flow, mood, symptoms, note: note.trim() || null })) {
+    if (await logDay({ day, flow, mood, symptoms, note: note.trim() || null, ovulation })) {
       haptics.success();
       router.back();
     }
@@ -217,6 +220,21 @@ export default function LogModal() {
             />
           ))}
         </View>
+      </View>
+
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1 pr-4">
+          <Txt variant="label">Ovulation</Txt>
+          <Txt variant="faint" className="mt-1">
+            Confirmed today, e.g. a positive test. Improves your predictions.
+          </Txt>
+        </View>
+        <Switch
+          value={ovulation}
+          onValueChange={setOvulation}
+          trackColor={{ false: colors.surfaceMuted, true: colors.primary }}
+          thumbColor={colors.moon}
+        />
       </View>
 
       <View className="gap-3">

@@ -95,6 +95,29 @@ function periodLength(cycles: Cycle[], fallback: number): number {
 }
 
 /**
+ * Learn the luteal-phase length from confirmed ovulations that are each followed
+ * by a period start (luteal = nextStart − ovulation), falling back to the
+ * configured length when there is no such data. Only physiologically plausible
+ * gaps (7–20 days) are counted.
+ */
+function empiricalLutealPhase(
+  sortedCycles: Cycle[],
+  sortedOvulations: number[],
+  fallback: number,
+): number {
+  const starts = sortedCycles.map((c) => c.startDay);
+  const lengths: number[] = [];
+  for (const o of sortedOvulations) {
+    const nextStart = starts.find((s) => s > o);
+    if (nextStart === undefined) continue;
+    const len = nextStart - o;
+    if (len >= 7 && len <= 20) lengths.push(len);
+  }
+  if (lengths.length === 0) return fallback;
+  return Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length);
+}
+
+/**
  * Predict the user's upcoming cycles from their history.
  *
  * @param cycles   All recorded cycles (any order).
@@ -104,7 +127,7 @@ function periodLength(cycles: Cycle[], fallback: number): number {
 export function predict(
   cycles: Cycle[],
   settings: Partial<Settings> = {},
-  options: { count?: number } = {},
+  options: { count?: number; confirmedOvulations?: EpochDay[] } = {},
 ): Prediction {
   const cfg: Settings = { ...DEFAULT_SETTINGS, ...settings };
   const count = Math.max(1, options.count ?? 3);
@@ -134,17 +157,32 @@ export function predict(
     mode !== 'pregnant' &&
     !(mode === 'contraception' && isHormonalContraception(cfg.contraceptionMethod));
 
+  // Confirmed ovulations refine the luteal phase and can anchor the next period.
+  const ovulations = [...(options.confirmedOvulations ?? [])].sort((a, b) => a - b);
+  const lutealPhase = empiricalLutealPhase(sorted, ovulations, cfg.lutealPhaseDays);
+
   const upcoming: CyclePrediction[] = [];
   const anchor = sorted.length > 0 ? sorted[sorted.length - 1]!.startDay : null;
   // No period projections while pregnant.
   if (anchor !== null && mode !== 'pregnant') {
     const cycleLen = Math.round(averageCycleLength);
     const periodLen = Math.max(1, Math.round(averagePeriodLength));
+    // A confirmed ovulation in the current cycle (on/after the last period start)
+    // anchors the very next period at ovulation + luteal phase.
+    const currentOvulation = ovulations.filter((o) => o >= anchor).slice(-1)[0];
+    let prevStart = anchor;
     for (let k = 1; k <= count; k++) {
-      const periodStart: EpochDay = anchor + cycleLen * k;
+      let periodStart: EpochDay;
+      let ovulationDay: EpochDay;
+      if (k === 1 && currentOvulation !== undefined) {
+        ovulationDay = currentOvulation;
+        periodStart = currentOvulation + lutealPhase;
+      } else {
+        periodStart = prevStart + cycleLen;
+        ovulationDay = addDays(periodStart, -lutealPhase);
+      }
       // Uncertainty grows with the square root of cycles projected ahead.
       const spread = Math.max(1, Math.round(variability * Math.sqrt(k)));
-      const ovulationDay = addDays(periodStart, -cfg.lutealPhaseDays);
       upcoming.push({
         periodStart,
         periodEnd: periodStart + periodLen - 1,
@@ -155,6 +193,7 @@ export function predict(
           end: addDays(ovulationDay, FERTILE_AFTER_OVULATION),
         },
       });
+      prevStart = periodStart;
     }
   }
 

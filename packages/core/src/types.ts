@@ -49,6 +49,12 @@ export interface DayLog {
   /** Free-form symptom tags, e.g. ['cramps', 'headache']. */
   symptoms: string[];
   note: string | null;
+  /**
+   * User-confirmed ovulation on this day (e.g. a positive ovulation test or BBT
+   * shift). Confirmed ovulations refine the luteal-phase estimate and anchor the
+   * next-period prediction. See {@link ./prediction.ts}.
+   */
+  ovulation: boolean;
 }
 
 /** How the app interprets cycles for the user's current life stage. */
