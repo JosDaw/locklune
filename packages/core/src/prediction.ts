@@ -1,8 +1,10 @@
 import { addDays } from './dates.js';
 import {
   DEFAULT_SETTINGS,
+  isHormonalContraception,
   type Confidence,
   type Cycle,
+  type CycleMode,
   type CyclePrediction,
   type EpochDay,
   type Prediction,
@@ -125,9 +127,17 @@ export function predict(
   const cyclesAnalyzed = recent.length;
   const confidence = classifyConfidence(cyclesAnalyzed, variability);
 
+  const mode: CycleMode = cfg.cycleMode;
+  // Fertility estimates are meaningless while pregnant or on ovulation-suppressing
+  // (hormonal) contraception.
+  const fertilityApplicable =
+    mode !== 'pregnant' &&
+    !(mode === 'contraception' && isHormonalContraception(cfg.contraceptionMethod));
+
   const upcoming: CyclePrediction[] = [];
   const anchor = sorted.length > 0 ? sorted[sorted.length - 1]!.startDay : null;
-  if (anchor !== null) {
+  // No period projections while pregnant.
+  if (anchor !== null && mode !== 'pregnant') {
     const cycleLen = Math.round(averageCycleLength);
     const periodLen = Math.max(1, Math.round(averagePeriodLength));
     for (let k = 1; k <= count; k++) {
@@ -156,5 +166,7 @@ export function predict(
     cyclesAnalyzed,
     usingDefaults,
     upcoming,
+    mode,
+    fertilityApplicable,
   };
 }

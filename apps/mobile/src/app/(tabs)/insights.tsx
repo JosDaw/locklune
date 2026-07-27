@@ -3,12 +3,19 @@ import { View } from 'react-native';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
+import { pregnancyProgress, todayEpochDay } from '@locklune/core';
 import { confidenceLabel, formatDay, relativeDays } from '../../lib/format';
 import { useDataStore } from '../../stores/dataStore';
 
 export default function Insights() {
   const cycles = useDataStore((s) => s.cycles);
   const prediction = useDataStore((s) => s.prediction);
+  const settings = useDataStore((s) => s.settings);
+  const today = todayEpochDay();
+  const preg =
+    settings.cycleMode === 'pregnant' && settings.pregnancyDueDay != null
+      ? pregnancyProgress(settings.pregnancyDueDay, today)
+      : null;
 
   const lengths = useMemo(() => {
     const out: number[] = [];
@@ -55,24 +62,51 @@ export default function Insights() {
         )}
       </Card>
 
-      <Card>
-        <Txt variant="title" className="mb-4">Upcoming periods</Txt>
-        {prediction.upcoming.length === 0 ? (
-          <Txt variant="muted">Log your first period to see predictions.</Txt>
-        ) : (
-          <View className="gap-3">
-            {prediction.upcoming.map((u, i) => (
-              <View key={i} className="flex-row items-center justify-between">
-                <Txt variant="body">{formatDay(u.periodStart, { month: 'long', day: 'numeric' })}</Txt>
-                <Txt variant="muted">{relativeDays(u.periodStart)}</Txt>
-              </View>
-            ))}
-          </View>
-        )}
-      </Card>
+      {settings.cycleMode === 'pregnant' ? (
+        <Card>
+          <Txt variant="title" className="mb-4">Pregnancy</Txt>
+          {preg ? (
+            <View className="gap-2">
+              <Txt variant="heading">
+                Week {preg.week}
+                {preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
+              </Txt>
+              <Txt variant="muted">
+                Trimester {preg.trimester} ·{' '}
+                {preg.daysRemaining >= 0
+                  ? `${preg.daysRemaining} days to go`
+                  : `${-preg.daysRemaining} days over`}
+              </Txt>
+              <Txt variant="faint">
+                Estimated due {formatDay(preg.dueDay, { month: 'long', day: 'numeric' })}
+              </Txt>
+            </View>
+          ) : (
+            <Txt variant="muted">Set how many weeks along you are in Settings.</Txt>
+          )}
+        </Card>
+      ) : (
+        <Card>
+          <Txt variant="title" className="mb-4">
+            {settings.cycleMode === 'contraception' ? 'Upcoming bleeds' : 'Upcoming periods'}
+          </Txt>
+          {prediction.upcoming.length === 0 ? (
+            <Txt variant="muted">Log your first period to see predictions.</Txt>
+          ) : (
+            <View className="gap-3">
+              {prediction.upcoming.map((u, i) => (
+                <View key={i} className="flex-row items-center justify-between">
+                  <Txt variant="body">{formatDay(u.periodStart, { month: 'long', day: 'numeric' })}</Txt>
+                  <Txt variant="muted">{relativeDays(u.periodStart)}</Txt>
+                </View>
+              ))}
+            </View>
+          )}
+        </Card>
+      )}
 
       <Txt variant="faint" className="text-center">
-        Estimates adapt as you log more cycles. For awareness only — not medical advice.
+        For organisation only. Locklune is not medical or health advice.
       </Txt>
     </Screen>
   );

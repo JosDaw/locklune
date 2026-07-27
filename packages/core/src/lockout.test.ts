@@ -1,30 +1,39 @@
 import { describe, expect, it } from 'vitest';
-import { FREE_ATTEMPTS, lockSecondsForAttempts, remainingLockSeconds } from './lockout.js';
+import {
+  attemptsRemaining,
+  lockSecondsForAttempts,
+  MAX_PIN_ATTEMPTS,
+  remainingLockSeconds,
+  shouldWipe,
+} from './lockout.js';
 
 describe('lockout policy', () => {
-  it('allows the free attempts without any lock', () => {
-    for (let i = 0; i <= FREE_ATTEMPTS; i++) {
-      expect(lockSecondsForAttempts(i)).toBe(0);
-    }
+  it('counts down remaining attempts before erase', () => {
+    expect(attemptsRemaining(0)).toBe(MAX_PIN_ATTEMPTS);
+    expect(attemptsRemaining(4)).toBe(1);
+    expect(attemptsRemaining(5)).toBe(0);
+    expect(attemptsRemaining(6)).toBe(0);
   });
 
-  it('doubles the lock each failure past the allowance', () => {
-    expect(lockSecondsForAttempts(FREE_ATTEMPTS + 1)).toBe(30);
-    expect(lockSecondsForAttempts(FREE_ATTEMPTS + 2)).toBe(60);
-    expect(lockSecondsForAttempts(FREE_ATTEMPTS + 3)).toBe(120);
+  it('wipes only after more than the allowed attempts', () => {
+    for (let i = 0; i <= MAX_PIN_ATTEMPTS; i++) expect(shouldWipe(i)).toBe(false);
+    expect(shouldWipe(MAX_PIN_ATTEMPTS + 1)).toBe(true);
   });
 
-  it('caps the lock at one hour', () => {
-    expect(lockSecondsForAttempts(FREE_ATTEMPTS + 50)).toBe(3600);
+  it('escalates the delay as failures mount', () => {
+    expect(lockSecondsForAttempts(0)).toBe(0);
+    expect(lockSecondsForAttempts(2)).toBe(0);
+    expect(lockSecondsForAttempts(3)).toBe(5);
+    expect(lockSecondsForAttempts(4)).toBe(15);
+    expect(lockSecondsForAttempts(5)).toBe(60);
   });
 
   it('counts down remaining lock time', () => {
     const now = 1_000_000;
-    // 6 failures => 30s lock; 10s elapsed => 20s remain
-    expect(remainingLockSeconds(6, now - 10_000, now)).toBe(20);
-    // fully elapsed
-    expect(remainingLockSeconds(6, now - 40_000, now)).toBe(0);
-    // within free allowance => never locked
-    expect(remainingLockSeconds(3, now, now)).toBe(0);
+    // 5 failures => 60s lock; 20s elapsed => 40s remain
+    expect(remainingLockSeconds(5, now - 20_000, now)).toBe(40);
+    expect(remainingLockSeconds(5, now - 61_000, now)).toBe(0);
+    // within the first attempts => never locked
+    expect(remainingLockSeconds(2, now, now)).toBe(0);
   });
 });

@@ -10,7 +10,7 @@ export default function Index() {
   return (
     <View className="flex-1 items-center justify-center gap-6 bg-ink">
       <Txt variant="display">{BRAND.name}</Txt>
-      <ActivityIndicator color="#7C6FF0" />
+      <ActivityIndicator color="#6EA8FE" />
     </View>
   );
 }

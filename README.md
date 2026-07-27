@@ -13,7 +13,7 @@ Locklune keeps everything on your phone: no account, no cloud, no analytics, no 
 ```
 locklune/
 ├─ packages/core   # Pure TS: prediction engine + crypto envelope + types (Vitest-tested)
-├─ apps/mobile     # Expo (SDK 57) app: expo-router, NativeWind, SQLCipher, secure-store, biometrics
+├─ apps/mobile     # Expo (SDK 57) app: expo-router, gluestack-ui/NativeWind, SQLCipher, secure-store
 └─ apps/web        # Next.js static site: landing + privacy policy (no tracking)
 ```
 
@@ -27,7 +27,7 @@ Envelope encryption bound to the PIN, with hardware-backed storage:
 2. The DEK is wrapped by a **KEK** derived from the PIN with **scrypt** (`@noble/hashes`), sealed with AES-256-GCM (`@noble/ciphers`).
 3. Only `{salt, nonce, wrappedDEK}` is stored, in the OS keystore (`expo-secure-store`, device-only).
 4. Unlock = PIN → KEK → unwrap DEK → open DB. A wrong PIN fails GCM authentication (with lockout/backoff).
-5. Optional biometric unlock keeps a second copy of the DEK behind an OS auth gate. Auto-lock clears the key on background.
+5. Auto-lock clears the key from memory on background; after 5 wrong PINs the vault self-erases.
 
 The pure crypto + prediction logic lives in `packages/core` and is unit-tested (`packages/core/src/*.test.ts`).
 

@@ -65,8 +65,11 @@ export default function Calendar() {
     const ovulation = new Set<EpochDay>();
     for (const u of prediction.upcoming) {
       for (let d = u.periodStart; d <= u.periodEnd; d++) predicted.add(d);
-      for (let d = u.fertileWindow.start; d <= u.fertileWindow.end; d++) fertile.add(d);
-      ovulation.add(u.ovulationDay);
+      // Fertile / ovulation markers only when they're meaningful for the mode.
+      if (prediction.fertilityApplicable) {
+        for (let d = u.fertileWindow.start; d <= u.fertileWindow.end; d++) fertile.add(d);
+        ovulation.add(u.ovulationDay);
+      }
     }
     return { periodSet: period, predictedSet: predicted, fertileSet: fertile, ovulationSet: ovulation };
   }, [cycles, prediction, today]);
@@ -126,8 +129,12 @@ export default function Calendar() {
         <View className="gap-2">
           <LegendRow className="bg-period" label="Period (logged)" />
           <LegendRow className="border border-period" label="Predicted period" />
-          <LegendRow className="bg-fertile/40" label="Fertile window" />
-          <LegendRow className="bg-ovulation" label="Estimated ovulation" />
+          {prediction.fertilityApplicable && (
+            <>
+              <LegendRow className="bg-fertile/40" label="Fertile window" />
+              <LegendRow className="bg-ovulation" label="Estimated ovulation" />
+            </>
+          )}
         </View>
       </Card>
     </Screen>

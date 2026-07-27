@@ -11,7 +11,7 @@ Privacy-first, **offline**, encrypted period tracker (Expo) + its static privacy
 ## Layout & where things live
 
 - `packages/core` — **pure TS, no React Native.** Prediction engine (`prediction.ts`), crypto envelope (`crypto/envelope.ts`), epoch-day date utils (`dates.ts`), lockout policy (`lockout.ts`), domain types (`types.ts`), brand (`brand.ts`). Unit-tested with **Vitest** (`*.test.ts`). Consumed by the app via its **compiled `dist/`** (run `npm run build` in core after changing it).
-- `apps/mobile` — Expo SDK 57, `expo-router` (routes in `src/app`), **NativeWind v4** styling (`tailwind.config.js`, `src/global.css`). Key modules: `src/lib/vault.ts` (secure-store + core crypto + biometrics + lockout), `src/lib/db.ts` (SQLCipher), `src/lib/notifications.ts`, Zustand stores in `src/stores/`, UI primitives in `src/components/ui/`.
+- `apps/mobile` — Expo SDK 57, `expo-router` (routes in `src/app`), **NativeWind v4** styling (`tailwind.config.js`, `src/global.css`). Key modules: `src/lib/vault.ts` (secure-store + core crypto + lockout/auto-wipe), `src/lib/db.ts` (SQLCipher), `src/lib/notifications.ts`, Zustand stores in `src/stores/`, UI primitives in `src/components/ui/`.
 - `apps/web` — Next.js App Router, **static export** (`output: 'export'`), Tailwind, **system fonts / no external requests**, no analytics/cookies. Brand mirrored in `apps/web/lib/site.ts` (kept dependency-free — do NOT import `@locklune/core` here, to avoid pulling crypto into the site).
 
 ## Commands

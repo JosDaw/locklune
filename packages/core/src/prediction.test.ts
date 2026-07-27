@@ -80,4 +80,34 @@ describe('predict', () => {
     const p = predict(cyclesFromLengths(0, [28, 28, 28, 28]), { lutealPhaseDays: 12 });
     expect(p.upcoming[0]!.ovulationDay).toBe(140 - 12);
   });
+
+  it('defaults to tracking mode with fertility applicable', () => {
+    const p = predict(cyclesFromLengths(0, [28, 28, 28]));
+    expect(p.mode).toBe('tracking');
+    expect(p.fertilityApplicable).toBe(true);
+  });
+
+  it('suppresses fertility on hormonal contraception but still predicts bleeds', () => {
+    const p = predict(cyclesFromLengths(0, [28, 28, 28]), {
+      cycleMode: 'contraception',
+      contraceptionMethod: 'pill',
+    });
+    expect(p.fertilityApplicable).toBe(false);
+    expect(p.upcoming.length).toBeGreaterThan(0);
+  });
+
+  it('keeps fertility for non-hormonal contraception', () => {
+    const p = predict(cyclesFromLengths(0, [28, 28, 28]), {
+      cycleMode: 'contraception',
+      contraceptionMethod: 'copper_iud',
+    });
+    expect(p.fertilityApplicable).toBe(true);
+  });
+
+  it('makes no period projections while pregnant', () => {
+    const p = predict(cyclesFromLengths(0, [28, 28, 28]), { cycleMode: 'pregnant' });
+    expect(p.mode).toBe('pregnant');
+    expect(p.upcoming).toHaveLength(0);
+    expect(p.fertilityApplicable).toBe(false);
+  });
 });

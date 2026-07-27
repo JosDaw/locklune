@@ -7,7 +7,7 @@ export const BRAND = {
   tagline: 'Your cycle. Locked to your device.',
   /** "lock" (privacy/security) + "lune" (moon/cycle). */
   description:
-    'A 100% on-device, encrypted period tracker. No account, no cloud, no tracking — your data never leaves your phone.',
+    'A 100% on-device, encrypted period tracker. No account, no cloud, no tracking. Your data never leaves your phone.',
   /** Reverse-DNS id used for the app bundle identifier / package name. */
   appId: 'app.locklune',
   supportEmail: 'support@locklune.app',

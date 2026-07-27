@@ -51,6 +51,38 @@ export interface DayLog {
   note: string | null;
 }
 
+/** How the app interprets cycles for the user's current life stage. */
+export type CycleMode = 'tracking' | 'trying' | 'contraception' | 'pregnant';
+
+/** Contraception method (only relevant in 'contraception' mode). */
+export type ContraceptionMethod =
+  | 'none'
+  | 'pill'
+  | 'mini_pill'
+  | 'patch'
+  | 'ring'
+  | 'injection'
+  | 'implant'
+  | 'hormonal_iud'
+  | 'copper_iud'
+  | 'condoms'
+  | 'other';
+
+/** Methods that suppress ovulation, making fertility estimates unreliable. */
+export const HORMONAL_METHODS: readonly ContraceptionMethod[] = [
+  'pill',
+  'mini_pill',
+  'patch',
+  'ring',
+  'injection',
+  'implant',
+  'hormonal_iud',
+];
+
+export function isHormonalContraception(method: ContraceptionMethod): boolean {
+  return HORMONAL_METHODS.includes(method);
+}
+
 /** User-configurable settings that influence predictions and locking. */
 export interface Settings {
   /** Length of the luteal phase in days (ovulation ≈ nextPeriod − this). */
@@ -61,10 +93,14 @@ export interface Settings {
   defaultPeriodLength: number;
   /** Minutes of inactivity before the app auto-locks. */
   autoLockMinutes: number;
-  /** Whether biometric unlock is enrolled. */
-  biometricEnabled: boolean;
   /** Local reminders (days before predicted period) to notify on. */
   reminderDaysBefore: number[];
+  /** Current life stage / tracking mode. */
+  cycleMode: CycleMode;
+  /** Contraception method (used when cycleMode === 'contraception'). */
+  contraceptionMethod: ContraceptionMethod;
+  /** Estimated due date (epoch-day) when cycleMode === 'pregnant'. */
+  pregnancyDueDay: EpochDay | null;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -72,8 +108,10 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultCycleLength: 28,
   defaultPeriodLength: 5,
   autoLockMinutes: 2,
-  biometricEnabled: false,
   reminderDaysBefore: [2],
+  cycleMode: 'tracking',
+  contraceptionMethod: 'none',
+  pregnancyDueDay: null,
 };
 
 /** Confidence tier attached to a prediction. */
@@ -112,6 +150,24 @@ export interface Prediction {
   cyclesAnalyzed: number;
   /** Whether estimates are still defaults (not enough data yet). */
   usingDefaults: boolean;
-  /** Next N predicted cycles (soonest first). */
+  /** Next N predicted cycles (soonest first). Empty in 'pregnant' mode. */
   upcoming: CyclePrediction[];
+  /** The cycle mode this prediction was computed for. */
+  mode: CycleMode;
+  /** Whether ovulation / fertile-window estimates are meaningful in this mode. */
+  fertilityApplicable: boolean;
+}
+
+/** Pregnancy progress derived from a due date. */
+export interface Pregnancy {
+  dueDay: EpochDay;
+  /** Gestational age in whole days (from LMP = dueDay − 280). */
+  daysPregnant: number;
+  /** Completed weeks of gestation. */
+  week: number;
+  /** Day within the current week (0–6). */
+  dayOfWeek: number;
+  trimester: 1 | 2 | 3;
+  /** Days until the due date (negative if overdue). */
+  daysRemaining: number;
 }

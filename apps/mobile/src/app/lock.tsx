@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
 import { BRAND } from '@locklune/core';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
@@ -15,25 +15,11 @@ export default function Lock() {
   const [error, setError] = useState<string | null>(null);
 
   const unlockPin = useAuthStore((s) => s.unlockPin);
-  const unlockBiometric = useAuthStore((s) => s.unlockBiometric);
-  const biometricEnabled = useAuthStore((s) => s.biometricEnabled);
-
-  const tryBiometric = useCallback(async () => {
-    setBusy(true);
-    const ok = await unlockBiometric();
-    setBusy(false);
-    if (!ok) setError('Biometric unlock canceled — enter your PIN.');
-  }, [unlockBiometric]);
 
   // Restore any active lockout (e.g. after the app was killed mid-timeout).
   useEffect(() => {
     void currentLockSeconds().then(setRemaining);
   }, []);
-
-  // Offer biometrics immediately when enabled.
-  useEffect(() => {
-    if (biometricEnabled) void tryBiometric();
-  }, [biometricEnabled, tryBiometric]);
 
   // Countdown timer while locked out.
   useEffect(() => {
@@ -55,7 +41,7 @@ export default function Lock() {
         setError('Too many attempts. Please wait before trying again.');
       } else {
         setError(
-          `Incorrect PIN — ${s.attemptsRemaining} attempt${s.attemptsRemaining === 1 ? '' : 's'} left before a timeout.`,
+          `Incorrect PIN. ${s.attemptsRemaining} attempt${s.attemptsRemaining === 1 ? '' : 's'} left before all data is erased.`,
         );
       }
     }
@@ -70,7 +56,7 @@ export default function Lock() {
 
       <View className="gap-3">
         {remaining > 0 ? (
-          <Txt className="text-center text-danger">Locked — try again in {remaining}s</Txt>
+          <Txt className="text-center text-danger">Locked. Try again in {remaining}s</Txt>
         ) : error ? (
           <Txt className="text-center text-danger">{error}</Txt>
         ) : (
@@ -79,15 +65,7 @@ export default function Lock() {
         <PinPad length={PIN_LENGTH} disabled={busy || remaining > 0} onComplete={handleComplete} />
       </View>
 
-      {biometricEnabled ? (
-        <Pressable onPress={() => void tryBiometric()} className="items-center py-2">
-          <Txt variant="body" className="text-primary-soft">
-            Use biometric unlock
-          </Txt>
-        </Pressable>
-      ) : (
-        <View className="h-10" />
-      )}
+      <View className="h-10" />
     </Screen>
   );
 }

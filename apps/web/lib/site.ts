@@ -1,41 +1,61 @@
 /**
- * Brand + content constants for the marketing/privacy site. Mirrors the mobile
- * app's brand (see packages/core/src/brand.ts) but kept dependency-free so the
- * site never pulls in app/crypto code.
+ * Brand + content constants for the marketing/privacy site. Kept dependency-free
+ * so the site never pulls in app/crypto code.
  */
 export const site = {
   name: 'Locklune',
-  tagline: 'Your cycle. Locked to your device.',
+  tagline: "Finally, a period tracker that's actually private.",
   description:
-    'A period tracker that keeps everything on your phone, encrypted with your PIN. No account, no cloud, no tracking.',
+    'Locklune keeps your cycle on your device, encrypted with your PIN. No cloud, no account, no tracking.',
   supportEmail: 'support@locklune.app',
   url: 'https://locklune.app',
+  github: 'https://github.com/JosDaw/locklune',
   lastUpdated: 'July 27, 2026',
 };
 
-export const features = [
+export const comparison: { label: string; locklune: string; others: string }[] = [
+  { label: 'Where your data lives', locklune: 'Local-only, on your device', others: 'Synced to the cloud' },
+  { label: 'Access', locklune: 'PIN protected', others: 'Login required' },
+  { label: 'Analytics', locklune: 'None', others: 'Usage tracking' },
+  { label: 'Account', locklune: 'No account', others: 'Email required' },
+  { label: 'Encryption', locklune: 'On-device AES-256', others: 'Varies, often server-side' },
   {
-    title: 'Encrypted on your device',
-    body: 'Everything is stored in an AES-256 encrypted database (SQLCipher), unlocked only by your PIN.',
+    label: 'Government or legal requests',
+    locklune: 'No data exists to seize',
+    others: 'Cloud data can be handed over',
+  },
+  { label: 'Repeated wrong PINs', locklune: 'Erases all data after 5 tries', others: 'Account lockout' },
+];
+
+export const security: { title: string; body: string }[] = [
+  {
+    title: 'End-to-end local encryption',
+    body: 'Your data lives in an AES-256 encrypted database (SQLCipher), unlocked only by your PIN.',
+  },
+  { title: 'PIN lock', body: 'A PIN you choose derives the encryption key. It is never stored or transmitted.' },
+  { title: 'Offline support', body: 'Everything works with no connection. There is nothing to sync.' },
+  { title: 'No servers', body: 'There is no backend to breach, subpoena, or sell. We hold nothing.' },
+  { title: 'No third-party analytics', body: 'No SDKs, no trackers, no identifiers. Not in the app, not on this site.' },
+  {
+    title: 'Auto-erase',
+    body: 'After 5 incorrect PIN attempts, everything on the device is wiped, so a lost or stolen phone reveals nothing.',
+  },
+];
+
+export const testimonials: { quote: string; name: string; role: string }[] = [
+  {
+    quote: 'The first tracker I actually trust. It feels calm, and nothing ever leaves my phone.',
+    name: 'Maya',
+    role: 'Designer',
   },
   {
-    title: 'Truly offline',
-    body: 'There is no server and no network code. Your data physically cannot leave your phone.',
+    quote: 'No account, no email, no cloud. Just my cycle, locked to my device. Exactly what I wanted.',
+    name: 'Priya',
+    role: 'Software engineer',
   },
   {
-    title: 'No account, no tracking',
-    body: 'We collect nothing — no email, no analytics, no identifiers, no ads. Ever.',
-  },
-  {
-    title: 'Smart predictions',
-    body: 'An adaptive model learns your cycle to forecast periods, fertile windows and ovulation — all computed on-device.',
-  },
-  {
-    title: 'Biometric unlock',
-    body: 'Optional Face ID / fingerprint unlock, with your PIN always as the backup.',
-  },
-  {
-    title: 'You are in control',
-    body: 'Log flow, mood and symptoms, get local reminders, and erase everything instantly whenever you want.',
+    quote: 'Beautiful, quiet, and private. It disappears into the background and just works.',
+    name: 'Elena',
+    role: 'Researcher',
   },
 ];

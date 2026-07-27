@@ -7,22 +7,22 @@ export const metadata: Metadata = {
 };
 
 function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="mt-10 text-2xl font-bold text-moon">{children}</h2>;
+  return <h2 className="mt-10 font-display text-2xl font-semibold text-fg">{children}</h2>;
 }
 
 function P({ children }: { children: React.ReactNode }) {
-  return <p className="mt-4 leading-relaxed text-text-muted">{children}</p>;
+  return <p className="mt-4 leading-relaxed text-fg-soft">{children}</p>;
 }
 
 export default function Privacy() {
   return (
-    <article className="py-16">
-      <h1 className="text-4xl font-bold text-moon">Privacy Policy</h1>
-      <p className="mt-3 text-sm text-text-faint">Last updated: {site.lastUpdated}</p>
+    <article className="mx-auto max-w-3xl px-6 py-20">
+      <h1 className="font-display text-4xl font-semibold tracking-tight text-fg">Privacy Policy</h1>
+      <p className="mt-3 text-sm text-fg-muted">Last updated: {site.lastUpdated}</p>
 
       <P>
         {site.name} is designed so that your data never leaves your device. This policy explains what
-        that means in practice. The short version: <strong className="text-text">we collect nothing.</strong>
+        that means in practice. The short version: <strong className="text-fg">we collect nothing.</strong>
       </P>
 
       <H2>Data we collect</H2>
@@ -34,7 +34,7 @@ export default function Privacy() {
 
       <H2>Where your data lives</H2>
       <P>
-        All information you enter — period dates, flow, mood, symptoms and notes — is stored only on
+        All information you enter (period dates, flow, mood, symptoms and notes) is stored only on
         your device, inside a database encrypted with AES-256 (SQLCipher). The encryption key is
         derived from your PIN and is held in your device&apos;s secure hardware keystore. Without your
         PIN, the data is unreadable.
@@ -56,25 +56,30 @@ export default function Privacy() {
       <H2>Recovery</H2>
       <P>
         Because your data is encrypted with your PIN and we hold no copy of anything, a forgotten PIN
-        means the data cannot be recovered — by you or by us. This is a deliberate security trade-off.
+        means the data cannot be recovered, by you or by us. This is a deliberate security trade-off.
       </P>
 
       <H2>Deleting your data</H2>
       <P>
-        You can erase everything instantly from within the app (Settings → Erase all data), or by
+        You can erase everything instantly from within the app (Settings, then Erase all data), or by
         deleting the app. There is nothing stored elsewhere to delete.
       </P>
 
       <H2>This website</H2>
       <P>
-        This site is a static page served without cookies, analytics, or third-party fonts or scripts.
-        Standard server access logs may be kept briefly by the hosting provider for security, but this
-        site sets no identifiers and runs no tracking of its own.
+        The pages of this site are served without cookies, analytics, or third-party scripts. Fonts
+        are self-hosted, so loading a page makes no third-party requests. Standard server access logs
+        may be kept briefly by the hosting provider for security, but this site sets no identifiers
+        and runs no tracking of its own.
+      </P>
+      <P>
+        If you use the contact form, the name, email and message you submit are sent to our support
+        inbox (via our email provider, Brevo) so we can reply. They are used only to respond to you.
       </P>
 
       <H2>Children</H2>
       <P>
-        {site.name} does not knowingly collect data from anyone — including children — because it does
+        {site.name} does not knowingly collect data from anyone, including children, because it does
         not collect data at all.
       </P>
 
@@ -86,11 +91,11 @@ export default function Privacy() {
 
       <H2>Contact</H2>
       <P>
-        Questions? Email{' '}
-        <a href={`mailto:${site.supportEmail}`} className="text-primary-soft underline">
-          {site.supportEmail}
-        </a>
-        .
+        Questions? Use the{' '}
+        <a href="/support" className="text-lock underline underline-offset-4">
+          contact form
+        </a>{' '}
+        on our support page.
       </P>
     </article>
   );

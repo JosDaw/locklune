@@ -1,19 +1,8 @@
 import { create } from 'zustand';
-import { FREE_ATTEMPTS } from '@locklune/core';
+import { MAX_PIN_ATTEMPTS } from '@locklune/core';
 import { closeDb, deleteDb, openEncryptedDb } from '../lib/db';
 import { cancelAllReminders } from '../lib/notifications';
-import {
-  changeVaultPin,
-  disableBiometric as disableBio,
-  enableBiometric as enableBio,
-  hasVault,
-  initVault,
-  isBiometricEnabled,
-  isBiometricSupported,
-  unlockWithBiometric,
-  unlockWithPin,
-  wipeVault,
-} from '../lib/vault';
+import { changeVaultPin, hasVault, initVault, unlockWithPin, wipeVault } from '../lib/vault';
 import { useDataStore } from './dataStore';
 
 type Status = 'loading' | 'onboarding' | 'locked' | 'unlocked';
@@ -21,21 +10,16 @@ type Status = 'loading' | 'onboarding' | 'locked' | 'unlocked';
 interface AuthState {
   status: Status;
   dekHex: string | null;
-  biometricSupported: boolean;
-  biometricEnabled: boolean;
   /** Seconds remaining on an active brute-force lockout. */
   lockedForSeconds: number;
-  /** PIN attempts left before throttling begins. */
+  /** PIN attempts left before the vault self-erases. */
   attemptsRemaining: number;
 
   init: () => Promise<void>;
   createPin: (pin: string) => Promise<void>;
   unlockPin: (pin: string) => Promise<boolean>;
-  unlockBiometric: () => Promise<boolean>;
   lock: () => Promise<void>;
   changePin: (oldPin: string, newPin: string) => Promise<boolean>;
-  enableBiometric: () => Promise<boolean>;
-  disableBiometric: () => Promise<void>;
   wipe: () => Promise<void>;
 }
 
@@ -47,28 +31,18 @@ async function afterUnlock(dekHex: string): Promise<void> {
 export const useAuthStore = create<AuthState>((set, get) => ({
   status: 'loading',
   dekHex: null,
-  biometricSupported: false,
-  biometricEnabled: false,
   lockedForSeconds: 0,
-  attemptsRemaining: FREE_ATTEMPTS,
+  attemptsRemaining: MAX_PIN_ATTEMPTS,
 
   init: async () => {
-    const [exists, bioSupported, bioEnabled] = await Promise.all([
-      hasVault(),
-      isBiometricSupported(),
-      isBiometricEnabled(),
-    ]);
-    set({
-      biometricSupported: bioSupported,
-      biometricEnabled: bioEnabled && bioSupported,
-      status: exists ? 'locked' : 'onboarding',
-    });
+    const exists = await hasVault();
+    set({ status: exists ? 'locked' : 'onboarding' });
   },
 
   createPin: async (pin) => {
     const dekHex = await initVault(pin);
     await afterUnlock(dekHex);
-    set({ status: 'unlocked', dekHex, attemptsRemaining: FREE_ATTEMPTS, lockedForSeconds: 0 });
+    set({ status: 'unlocked', dekHex, attemptsRemaining: MAX_PIN_ATTEMPTS, lockedForSeconds: 0 });
   },
 
   unlockPin: async (pin) => {
@@ -78,16 +52,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ status: 'unlocked', dekHex: res.dekHex, lockedForSeconds: 0 });
       return true;
     }
+    if (res.wiped) {
+      // Too many wrong PINs — erase everything and return to onboarding.
+      await get().wipe();
+      return false;
+    }
     set({ lockedForSeconds: res.lockedForSeconds, attemptsRemaining: res.attemptsRemaining });
     return false;
-  },
-
-  unlockBiometric: async () => {
-    const dekHex = await unlockWithBiometric();
-    if (!dekHex) return false;
-    await afterUnlock(dekHex);
-    set({ status: 'unlocked', dekHex, lockedForSeconds: 0 });
-    return true;
   },
 
   lock: async () => {
@@ -98,19 +69,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   changePin: (oldPin, newPin) => changeVaultPin(oldPin, newPin),
 
-  enableBiometric: async () => {
-    const dekHex = get().dekHex;
-    if (!dekHex) return false;
-    await enableBio(dekHex);
-    set({ biometricEnabled: true });
-    return true;
-  },
-
-  disableBiometric: async () => {
-    await disableBio();
-    set({ biometricEnabled: false });
-  },
-
   wipe: async () => {
     await cancelAllReminders();
     await deleteDb();
@@ -119,8 +77,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({
       status: 'onboarding',
       dekHex: null,
-      biometricEnabled: false,
-      attemptsRemaining: FREE_ATTEMPTS,
+      attemptsRemaining: MAX_PIN_ATTEMPTS,
       lockedForSeconds: 0,
     });
   },

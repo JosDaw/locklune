@@ -1,28 +1,25 @@
 /**
  * Device-side vault: binds the pure crypto envelope from `@locklune/core` to the
- * OS keystore (expo-secure-store) and biometric hardware (expo-local-authentication).
+ * OS keystore (expo-secure-store).
  *
  * Nothing here ever leaves the device. The vault descriptor is stored in the
- * hardware-backed keystore and is useless without the PIN. Biometric unlock keeps
- * a second copy of the raw key behind an OS authentication gate.
+ * hardware-backed keystore and is useless without the PIN.
  */
-import * as LocalAuthentication from 'expo-local-authentication';
 import * as SecureStore from 'expo-secure-store';
 import {
+  attemptsRemaining,
   changePin as changePinCore,
   createVault,
   dekToHex,
-  FREE_ATTEMPTS,
   openVault,
   remainingLockSeconds,
+  shouldWipe,
   VaultAuthError,
   type VaultMeta,
 } from '@locklune/core';
 import { deviceRng } from './rng';
 
 const META_KEY = 'locklune.vault.v1';
-const BIO_KEY = 'locklune.vault.bioKey.v1';
-const BIO_FLAG_KEY = 'locklune.vault.bioEnabled.v1';
 const ATTEMPTS_KEY = 'locklune.vault.attempts.v1';
 
 /** Keep secrets device-local (never synced to iCloud Keychain / cloud backup). */
@@ -73,7 +70,8 @@ export async function initVault(pin: string): Promise<string> {
 
 export type UnlockResult =
   | { ok: true; dekHex: string }
-  | { ok: false; lockedForSeconds: number; attemptsRemaining: number };
+  | { ok: false; wiped: true }
+  | { ok: false; wiped: false; lockedForSeconds: number; attemptsRemaining: number };
 
 /** How long (seconds) the user must currently wait before trying a PIN. */
 export async function currentLockSeconds(): Promise<number> {
@@ -88,7 +86,14 @@ export async function unlockWithPin(pin: string): Promise<UnlockResult> {
 
   const state = await loadAttempts();
   const waiting = remainingLockSeconds(state.count, state.lastFailedAt, Date.now());
-  if (waiting > 0) return { ok: false, lockedForSeconds: waiting, attemptsRemaining: 0 };
+  if (waiting > 0) {
+    return {
+      ok: false,
+      wiped: false,
+      lockedForSeconds: waiting,
+      attemptsRemaining: attemptsRemaining(state.count),
+    };
+  }
 
   try {
     const dek = openVault(pin, meta);
@@ -98,11 +103,14 @@ export async function unlockWithPin(pin: string): Promise<UnlockResult> {
     if (err instanceof VaultAuthError) {
       const count = state.count + 1;
       const now = Date.now();
+      // Too many wrong attempts — signal a full erase (handled by the auth store).
+      if (shouldWipe(count)) return { ok: false, wiped: true };
       await saveAttempts({ count, lastFailedAt: now });
       return {
         ok: false,
+        wiped: false,
         lockedForSeconds: remainingLockSeconds(count, now, now),
-        attemptsRemaining: Math.max(0, FREE_ATTEMPTS - count),
+        attemptsRemaining: attemptsRemaining(count),
       };
     }
     throw err;
@@ -124,54 +132,10 @@ export async function changeVaultPin(oldPin: string, newPin: string): Promise<bo
   }
 }
 
-// --- Biometric unlock -------------------------------------------------------
-
-export async function isBiometricSupported(): Promise<boolean> {
-  const [hasHardware, enrolled] = await Promise.all([
-    LocalAuthentication.hasHardwareAsync(),
-    LocalAuthentication.isEnrolledAsync(),
-  ]);
-  return hasHardware && enrolled;
-}
-
-export async function isBiometricEnabled(): Promise<boolean> {
-  return (await SecureStore.getItemAsync(BIO_FLAG_KEY, secureOpts)) === '1';
-}
-
-/** Store the DEK behind an OS authentication gate (Face ID / fingerprint / passcode). */
-export async function enableBiometric(dekHex: string): Promise<void> {
-  await SecureStore.setItemAsync(BIO_KEY, dekHex, {
-    ...secureOpts,
-    requireAuthentication: true,
-  });
-  await SecureStore.setItemAsync(BIO_FLAG_KEY, '1', secureOpts);
-}
-
-export async function disableBiometric(): Promise<void> {
-  await SecureStore.deleteItemAsync(BIO_KEY, secureOpts);
-  await SecureStore.deleteItemAsync(BIO_FLAG_KEY, secureOpts);
-}
-
-/** Unlock via biometrics. Returns the DB key, or null if authentication failed. */
-export async function unlockWithBiometric(): Promise<string | null> {
-  try {
-    const dekHex = await SecureStore.getItemAsync(BIO_KEY, {
-      ...secureOpts,
-      requireAuthentication: true,
-      authenticationPrompt: 'Unlock Locklune',
-    });
-    return dekHex ?? null;
-  } catch {
-    return null;
-  }
-}
-
 /** Irreversibly delete the vault and all key material. The DB file is removed separately. */
 export async function wipeVault(): Promise<void> {
   await Promise.all([
     SecureStore.deleteItemAsync(META_KEY, secureOpts),
-    SecureStore.deleteItemAsync(BIO_KEY, secureOpts),
-    SecureStore.deleteItemAsync(BIO_FLAG_KEY, secureOpts),
     SecureStore.deleteItemAsync(ATTEMPTS_KEY, secureOpts),
   ]);
 }

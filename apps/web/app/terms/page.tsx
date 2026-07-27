@@ -7,18 +7,18 @@ export const metadata: Metadata = {
 };
 
 function H2({ children }: { children: React.ReactNode }) {
-  return <h2 className="mt-10 text-2xl font-bold text-moon">{children}</h2>;
+  return <h2 className="mt-10 font-display text-2xl font-semibold text-fg">{children}</h2>;
 }
 
 function P({ children }: { children: React.ReactNode }) {
-  return <p className="mt-4 leading-relaxed text-text-muted">{children}</p>;
+  return <p className="mt-4 leading-relaxed text-fg-soft">{children}</p>;
 }
 
 export default function Terms() {
   return (
-    <article className="py-16">
-      <h1 className="text-4xl font-bold text-moon">Terms of Use</h1>
-      <p className="mt-3 text-sm text-text-faint">Last updated: {site.lastUpdated}</p>
+    <article className="mx-auto max-w-3xl px-6 py-20">
+      <h1 className="font-display text-4xl font-semibold tracking-tight text-fg">Terms of Use</h1>
+      <p className="mt-3 text-sm text-fg-muted">Last updated: {site.lastUpdated}</p>
 
       <H2>Acceptance</H2>
       <P>By using {site.name}, you agree to these terms. If you do not agree, please do not use the app.</P>
@@ -54,11 +54,11 @@ export default function Terms() {
 
       <H2>Contact</H2>
       <P>
-        Questions about these terms? Email{' '}
-        <a href={`mailto:${site.supportEmail}`} className="text-primary-soft underline">
-          {site.supportEmail}
-        </a>
-        .
+        Questions about these terms? Use the{' '}
+        <a href="/support" className="text-lock underline underline-offset-4">
+          contact form
+        </a>{' '}
+        on our support page.
       </P>
     </article>
   );

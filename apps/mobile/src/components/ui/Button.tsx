@@ -41,7 +41,7 @@ export function Button({
       {...rest}
     >
       {loading ? (
-        <ButtonSpinner color={variant === 'primary' ? '#12101B' : '#ECE9F7'} />
+        <ButtonSpinner color={variant === 'primary' ? '#0F172A' : '#F8FAFC'} />
       ) : (
         <ButtonText className={`font-semibold ${LABEL[variant]}`}>{title}</ButtonText>
       )}

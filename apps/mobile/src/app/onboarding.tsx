@@ -1,22 +1,25 @@
-import { useState } from 'react';
-import { Alert, View } from 'react-native';
+import { type ReactNode, useState } from 'react';
+import { Linking, Pressable, Text as RNText, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { BRAND } from '@locklune/core';
+import { Button } from '../components/ui/Button';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
+import { colors } from '../theme/colors';
 import { useAuthStore } from '../stores/authStore';
 
 const PIN_LENGTH = 6;
 
 export default function Onboarding() {
-  const [phase, setPhase] = useState<'create' | 'confirm'>('create');
+  const [phase, setPhase] = useState<'consent' | 'create' | 'confirm'>('consent');
   const [firstPin, setFirstPin] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [agreedLegal, setAgreedLegal] = useState(false);
+  const [agreedMedical, setAgreedMedical] = useState(false);
 
   const createPin = useAuthStore((s) => s.createPin);
-  const biometricSupported = useAuthStore((s) => s.biometricSupported);
-  const enableBiometric = useAuthStore((s) => s.enableBiometric);
 
   const handleComplete = async (pin: string) => {
     if (busy) return;
@@ -35,16 +38,6 @@ export default function Onboarding() {
     setBusy(true);
     try {
       await createPin(pin);
-      if (biometricSupported) {
-        Alert.alert(
-          'Enable biometric unlock?',
-          'Unlock with Face ID / fingerprint, with your PIN as the backup.',
-          [
-            { text: 'Not now', style: 'cancel' },
-            { text: 'Enable', onPress: () => void enableBiometric() },
-          ],
-        );
-      }
     } catch {
       setError('Something went wrong creating your PIN. Please try again.');
       setFirstPin('');
@@ -52,6 +45,52 @@ export default function Onboarding() {
       setBusy(false);
     }
   };
+
+  if (phase === 'consent') {
+    return (
+      <Screen scroll={false} contentClassName="justify-between">
+        <View className="items-center gap-2 pt-6">
+          <Txt variant="display">{BRAND.name}</Txt>
+          <Txt variant="muted" className="text-center">Before you begin</Txt>
+        </View>
+
+        <View className="gap-5">
+          <CheckboxRow checked={agreedLegal} onToggle={() => setAgreedLegal((v) => !v)}>
+            <RNText className="text-base leading-6 text-text">
+              I agree to the{' '}
+              <RNText
+                className="text-primary-soft underline"
+                onPress={() => void Linking.openURL(`${BRAND.websiteUrl}/privacy`)}
+              >
+                Privacy Policy
+              </RNText>{' '}
+              and{' '}
+              <RNText
+                className="text-primary-soft underline"
+                onPress={() => void Linking.openURL(`${BRAND.websiteUrl}/terms`)}
+              >
+                Terms &amp; Conditions
+              </RNText>
+              .
+            </RNText>
+          </CheckboxRow>
+
+          <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((v) => !v)}>
+            <RNText className="text-base leading-6 text-text">
+              I understand {BRAND.name} is for informational purposes only and is not medical or
+              health advice.
+            </RNText>
+          </CheckboxRow>
+        </View>
+
+        <Button
+          title="Continue"
+          disabled={!(agreedLegal && agreedMedical)}
+          onPress={() => setPhase('create')}
+        />
+      </Screen>
+    );
+  }
 
   return (
     <Screen scroll={false} contentClassName="justify-between">
@@ -75,10 +114,36 @@ export default function Onboarding() {
 
       <View className="rounded-2xl border border-border bg-surface p-4">
         <Txt variant="faint" className="text-center leading-5">
-          Your PIN encrypts everything on this device. It is never stored or sent anywhere — so if
-          you forget it, your data can’t be recovered.
+          Your PIN encrypts everything on this device and is never stored or sent anywhere. If you
+          forget it, your data can’t be recovered, and after 5 incorrect attempts, all data is
+          erased.
         </Txt>
       </View>
     </Screen>
+  );
+}
+
+function CheckboxRow({
+  checked,
+  onToggle,
+  children,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <View className="flex-row items-start gap-3">
+      <Pressable
+        onPress={onToggle}
+        hitSlop={8}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked }}
+        className={`mt-0.5 h-6 w-6 items-center justify-center rounded-md border ${checked ? 'border-primary bg-primary' : 'border-border'}`}
+      >
+        {checked && <Ionicons name="checkmark" size={16} color={colors.ink} />}
+      </Pressable>
+      <View className="flex-1">{children}</View>
+    </View>
   );
 }

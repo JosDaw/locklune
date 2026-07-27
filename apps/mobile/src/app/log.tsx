@@ -129,7 +129,7 @@ export default function LogModal() {
             value={note}
             onChangeText={setNote}
             placeholder="Anything you want to remember…"
-            placeholderTextColor="#6F6A87"
+            placeholderTextColor="#94A3B8"
             className="text-text"
           />
         </Textarea>

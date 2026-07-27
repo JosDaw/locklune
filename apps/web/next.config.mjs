@@ -3,11 +3,10 @@ process.env.NEXT_TELEMETRY_DISABLED = '1';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Fully static site — deployable to any static host, no server runtime/logging.
-  output: 'export',
+  // Pages are static; the contact form posts to a server route (/api/contact),
+  // which forwards to Brevo. No analytics, no cookies, no external scripts.
   reactStrictMode: true,
   images: { unoptimized: true },
-  // No analytics, no redirects to third parties, no external scripts.
 };
 
 export default nextConfig;

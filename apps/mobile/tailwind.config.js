@@ -21,9 +21,9 @@ module.exports = {
         primary: {
           ...scale('primary'),
           // Locklune brand accents (used by app classNames like bg-primary).
-          DEFAULT: '#7C6FF0',
-          dark: '#5B4FD1',
-          soft: '#A79CF6',
+          DEFAULT: '#6EA8FE',
+          dark: '#4C86E8',
+          soft: '#AFC8FF',
         },
         secondary: scale('secondary'),
         tertiary: {
@@ -66,17 +66,17 @@ module.exports = {
           error: 'rgb(var(--color-indicator-error)/<alpha-value>)',
         },
 
-        // --- Locklune custom palette (a calm "moon at night" theme) ---
-        ink: '#12101B',
-        surface: '#1E1B2E',
-        surfaceMuted: '#2A2640',
-        border: '#332F4A',
-        accent: '#E9B8D6',
-        moon: '#F4F1FF',
-        text: { DEFAULT: '#ECE9F7', muted: '#A39FB8', faint: '#6F6A87' },
-        period: '#E8688C',
-        fertile: '#86C7F2',
-        ovulation: '#5AD1B0',
+        // --- Locklune custom palette (slate / moonlight) ---
+        ink: '#0F172A',
+        surface: '#1E293B',
+        surfaceMuted: '#273449',
+        border: 'rgba(255,255,255,0.08)',
+        accent: '#AFC8FF',
+        moon: '#E2E8F0',
+        text: { DEFAULT: '#F8FAFC', muted: '#CBD5E1', faint: '#94A3B8' },
+        period: '#6EA8FE',
+        fertile: '#AFC8FF',
+        ovulation: '#34D399',
         danger: '#F87171',
       },
       fontFamily: {
