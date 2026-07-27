@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { fromEpochDay, toEpochDay, todayEpochDay, type EpochDay } from '@locklune/core';
@@ -96,27 +96,27 @@ export default function Calendar() {
 
   return (
     <Screen>
+      {/* Header */}
       <View className="flex-row items-center justify-between pt-2">
-        <Pressable
-          onPress={() => shiftMonth(-1)}
-          className="h-10 w-10 items-center justify-center rounded-full active:bg-surfaceMuted"
-        >
-          <Ionicons name="chevron-back" size={22} color={colors.text} />
-        </Pressable>
-        <Txt variant="title">{monthLabel}</Txt>
-        <Pressable
-          onPress={() => shiftMonth(1)}
-          className="h-10 w-10 items-center justify-center rounded-full active:bg-surfaceMuted"
-        >
-          <Ionicons name="chevron-forward" size={22} color={colors.text} />
-        </Pressable>
+        <ArrowButton icon="chevron-back" label="Previous month" onPress={() => shiftMonth(-1)} />
+        <View className="items-center gap-1">
+          <View className="flex-row items-center gap-2">
+            <Ionicons name="moon" size={15} color={colors.primarySoft} />
+            <Txt variant="title">{monthLabel}</Txt>
+          </View>
+          <Txt variant="faint">Your cycle stays private.</Txt>
+        </View>
+        <ArrowButton icon="chevron-forward" label="Next month" onPress={() => shiftMonth(1)} />
       </View>
 
-      <Card>
-        <View className="flex-row">
+      {/* Calendar — the centerpiece */}
+      <Card className="px-3 py-5">
+        <View className="mb-1 flex-row">
           {WEEKDAYS.map((w, i) => (
-            <View key={i} className="flex-1 items-center pb-2">
-              <Txt variant="faint">{w}</Txt>
+            <View key={i} className="flex-1 items-center pb-3">
+              <Txt variant="faint" className="text-2xs uppercase tracking-widest">
+                {w}
+              </Txt>
             </View>
           ))}
         </View>
@@ -142,32 +142,45 @@ export default function Calendar() {
         ))}
       </Card>
 
-      <Card>
-        <Txt variant="label" className="mb-3">
-          Legend
-        </Txt>
-        <View className="gap-2">
-          <LegendRow className="bg-period" label="Period (logged)" />
-          <LegendRow className="border border-period" label="Predicted period" />
-          {prediction.fertilityApplicable && (
-            <>
-              <LegendRow className="bg-fertile/40" label="Fertile window" />
-              <LegendRow className="bg-ovulation" label="Estimated ovulation" />
-            </>
-          )}
-          <View className="flex-row items-center gap-3">
-            <View className="h-5 w-5 items-center justify-center">
-              <View className="h-1.5 w-1.5 rounded-full bg-primary-soft" />
-            </View>
-            <Txt variant="muted">Logged entry</Txt>
-          </View>
-        </View>
-      </Card>
+      {/* Legend as elegant chips */}
+      <View className="flex-row flex-wrap gap-2">
+        <LegendChip icon="ellipse" color={colors.period} label="Period" />
+        <LegendChip icon="moon" color={colors.primarySoft} label="Logged" />
+        <LegendChip icon="ellipse-outline" color={colors.period} label="Predicted" />
+        {prediction.fertilityApplicable && (
+          <>
+            <LegendChip icon="sparkles" color={colors.fertile} label="Fertile" />
+            <LegendChip icon="leaf" color={colors.ovulation} label="Ovulation" />
+          </>
+        )}
+      </View>
 
       <Txt variant="faint" className="text-center">
         Tap any day to add, end, or correct a period.
       </Txt>
     </Screen>
+  );
+}
+
+function ArrowButton({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={styles.arrow}
+      className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface active:opacity-70"
+    >
+      <Ionicons name={icon} size={20} color={colors.text} />
+    </Pressable>
   );
 }
 
@@ -190,18 +203,23 @@ function DayCell({
   hasLog: boolean;
   onPress: () => void;
 }) {
-  if (day === null) return <View className="flex-1 p-1" style={{ aspectRatio: 1 }} />;
+  if (day === null) return <View className="flex-1 p-1.5" style={{ aspectRatio: 1 }} />;
 
-  const bg = isPeriod
-    ? 'bg-period'
-    : isOvulation
-      ? 'bg-ovulation'
-      : isFertile
-        ? 'bg-fertile/30'
-        : '';
-  const ring =
-    isPredicted && !isPeriod ? 'border border-period' : isToday ? 'border border-primary-soft' : '';
-  const textClass = isPeriod || isOvulation ? 'text-ink' : 'text-text';
+  const dottedRing = isPredicted && !isPeriod && !isOvulation && !isFertile;
+  let fill = '';
+  let textClass = 'text-text';
+  let glow: object | undefined;
+  if (isPeriod) {
+    fill = 'bg-period';
+    textClass = 'text-ink';
+    glow = styles.periodGlow;
+  } else if (isOvulation) {
+    fill = 'bg-ovulation';
+    textClass = 'text-ink';
+  } else if (isFertile) {
+    fill = 'bg-fertile/15';
+  }
+  const todayRing = isToday && !isPeriod && !isOvulation ? 'border border-primary-soft' : '';
 
   const states = [
     isToday && 'today',
@@ -224,22 +242,76 @@ function DayCell({
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={label}
-      className="flex-1 p-1"
+      className="flex-1 p-1.5"
       style={{ aspectRatio: 1 }}
     >
-      <View className={`flex-1 items-center justify-center rounded-xl ${bg} ${ring}`}>
-        <Txt className={textClass}>{fromEpochDay(day).getDate()}</Txt>
-        {hasLog && <View className="mt-0.5 h-1.5 w-1.5 rounded-full bg-primary-soft" />}
+      <View
+        className={`flex-1 items-center justify-center rounded-full ${fill} ${todayRing}`}
+        style={[glow, dottedRing ? styles.dottedRing : null]}
+      >
+        <Txt className={`${textClass} text-base font-body-medium`}>
+          {fromEpochDay(day).getDate()}
+        </Txt>
+        {isPeriod && <View style={styles.highlight} />}
+        {hasLog && <View style={styles.logDot} />}
       </View>
     </Pressable>
   );
 }
 
-function LegendRow({ className, label }: { className: string; label: string }) {
+function LegendChip({
+  icon,
+  color,
+  label,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  label: string;
+}) {
   return (
-    <View className="flex-row items-center gap-3">
-      <View className={`h-5 w-5 rounded-md ${className}`} />
-      <Txt variant="muted">{label}</Txt>
+    <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-3 py-2">
+      <Ionicons name={icon} size={13} color={color} />
+      <Txt variant="faint" className="text-text-muted">
+        {label}
+      </Txt>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  arrow: {
+    shadowColor: '#000000',
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  periodGlow: {
+    shadowColor: colors.primary,
+    shadowOpacity: 0.55,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 5,
+  },
+  dottedRing: {
+    borderWidth: 1.5,
+    borderColor: colors.period,
+    borderStyle: 'dotted',
+  },
+  highlight: {
+    position: 'absolute',
+    top: 7,
+    right: 10,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.75)',
+  },
+  logDot: {
+    position: 'absolute',
+    bottom: 5,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.moon,
+  },
+});

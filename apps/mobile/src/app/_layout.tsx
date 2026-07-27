@@ -1,8 +1,11 @@
 import '../global.css';
 import { useEffect, useRef } from 'react';
-import { AppState } from 'react-native';
+import { AppState, View } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import { Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GluestackUIProvider } from '../components/gs/gluestack-ui-provider';
@@ -57,6 +60,13 @@ function useAutoLock() {
 
 export default function RootLayout() {
   const init = useAuthStore((s) => s.init);
+  const [fontsLoaded] = useFonts({
+    Manrope_600SemiBold,
+    Manrope_700Bold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+  });
 
   useEffect(() => {
     void init();
@@ -64,6 +74,11 @@ export default function RootLayout() {
 
   useAuthRouting();
   useAutoLock();
+
+  // Hold on the dark backdrop until the premium type is ready, to avoid a flash.
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, backgroundColor: colors.ink }} />;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.ink }}>

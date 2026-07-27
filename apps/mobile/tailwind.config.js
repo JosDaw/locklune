@@ -68,19 +68,27 @@ module.exports = {
 
         // --- Locklune custom palette (slate / moonlight) ---
         ink: '#0F172A',
-        surface: '#1E293B',
+        ink2: '#111827',
+        surface: '#162032',
         surfaceMuted: '#273449',
         border: 'rgba(255,255,255,0.08)',
         accent: '#AFC8FF',
         moon: '#E2E8F0',
+        star: '#FFD166',
         text: { DEFAULT: '#F8FAFC', muted: '#CBD5E1', faint: '#94A3B8' },
         period: '#6EA8FE',
         fertile: '#AFC8FF',
-        ovulation: '#34D399',
+        ovulation: '#6EE7B7',
         danger: '#F87171',
       },
       fontFamily: {
         roboto: ['Roboto', 'sans-serif'],
+        // Locklune premium type: Manrope for headings, Inter for body.
+        display: ['Manrope_700Bold'],
+        heading: ['Manrope_600SemiBold'],
+        body: ['Inter_400Regular'],
+        'body-medium': ['Inter_500Medium'],
+        'body-semibold': ['Inter_600SemiBold'],
       },
       fontWeight: {
         extrablack: '950',
@@ -91,6 +99,7 @@ module.exports = {
       borderRadius: {
         xl: '16px',
         '2xl': '22px',
+        '3xl': '28px',
       },
       boxShadow: {
         'hard-1': '-2px 2px 8px 0px rgba(38, 38, 38, 0.20)',
