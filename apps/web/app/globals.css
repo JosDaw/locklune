@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background-color: #12101b;
+  color: #ece9f7;
+}
+
+/* Smooth in-page anchor scrolling for the one-page marketing layout. */
+html {
+  scroll-behavior: smooth;
+}

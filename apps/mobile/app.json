@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "Locklune",
+    "slug": "locklune",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "locklune",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#12101B",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "app.locklune",
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "app.locklune",
+      "adaptiveIcon": {
+        "backgroundColor": "#12101B",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "allowBackup": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#12101B",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ],
+      ["expo-sqlite", { "useSQLCipher": true }],
+      ["expo-secure-store", { "configureAndroidBackup": false }],
+      [
+        "expo-local-authentication",
+        { "faceIDPermission": "Unlock Locklune with Face ID." }
+      ],
+      ["expo-notifications", { "color": "#7C6FF0" }]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

@@ -1,0 +1,50 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+*.tsbuildinfo
+
+# expo
+.expo/
+.expo-shared/
+apps/mobile/ios/
+apps/mobile/android/
+web-build/
+expo-env.d.ts
+
+# test / coverage
+coverage/
+
+# native / eas
+*.keystore
+*.p8
+*.p12
+*.key
+*.mobileprovision
+ios/
+android/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
