@@ -83,7 +83,16 @@ export const useDataStore = create<DataState>((set, get) => {
 
     startPeriod: (day) =>
       mutate(async () => {
-        await db.addCycle(day);
+        // If a period is already open, a nearby new "start" is a correction of that
+        // same period (real cycles are never < ~2 weeks apart), so move its start
+        // rather than create a second, overlapping open period.
+        const RECONCILE_DAYS = 15;
+        const ongoing = [...get().cycles].reverse().find((c) => c.endDay === null);
+        if (ongoing && Math.abs(ongoing.startDay - day) < RECONCILE_DAYS) {
+          if (day !== ongoing.startDay) await db.moveCycleStart(ongoing.id, day);
+        } else {
+          await db.addCycle(day);
+        }
         await refreshCycles();
       }, 'Could not save the period.'),
 

@@ -25,6 +25,10 @@ export default function Today() {
 
   const last = cycles[cycles.length - 1];
   const onPeriod = last !== undefined && last.endDay === null && today >= last.startDay;
+  const periodDay = onPeriod ? today - last!.startDay + 1 : 0;
+  const periodDaysLeft = onPeriod
+    ? Math.max(0, Math.max(1, Math.round(prediction.averagePeriodLength)) - periodDay)
+    : 0;
   const next = prediction.upcoming[0];
   const fertility = prediction.fertilityApplicable;
   const pregnant = settings.cycleMode === 'pregnant';
@@ -35,11 +39,10 @@ export default function Today() {
 
   return (
     <Screen>
-      <View className="gap-1 pt-2">
-        <Txt variant="label">
+      <View className="pt-2">
+        <Txt variant="heading">
           {formatDay(today, { weekday: 'long', month: 'long', day: 'numeric' })}
         </Txt>
-        <Txt variant="display">{BRAND.name}</Txt>
       </View>
 
       {pregnant ? (
@@ -82,8 +85,13 @@ export default function Today() {
                 <Txt variant="label" className="text-period">
                   On your period
                 </Txt>
-                <Txt variant="heading">Day {today - last!.startDay + 1}</Txt>
+                <Txt variant="heading">Day {periodDay}</Txt>
                 <Txt variant="muted">Started {formatDay(last!.startDay)}</Txt>
+                {periodDaysLeft > 0 && (
+                  <Txt variant="faint">
+                    About {periodDaysLeft} more day{periodDaysLeft === 1 ? '' : 's'} expected
+                  </Txt>
+                )}
                 <Button title="End period today" variant="secondary" onPress={onEnd} />
               </View>
             ) : next ? (
@@ -135,6 +143,9 @@ export default function Today() {
                   <Txt variant="title">Cycle outlook</Txt>
                   <Txt variant="faint">{confidenceLabel(prediction.confidence)}</Txt>
                 </View>
+                {prediction.confidence === 'low' && (
+                  <Txt variant="faint">Confidence will increase as more data is added.</Txt>
+                )}
                 {fertility && settings.cycleMode !== 'trying' && (
                   <>
                     <Row
@@ -161,12 +172,12 @@ export default function Today() {
 
       <Button
         title="Log symptoms for today"
-        variant="ghost"
+        variant="secondary"
         onPress={() => router.push({ pathname: '/log', params: { day: String(today) } })}
       />
 
       <Txt variant="faint" className="text-center">
-        For organisation only. Locklune is not medical or health advice.
+        For educational purposes only. Locklune is not medical or health advice.
       </Txt>
     </Screen>
   );

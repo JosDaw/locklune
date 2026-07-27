@@ -71,6 +71,14 @@ export default function Calendar() {
         ovulation.add(u.ovulationDay);
       }
     }
+    // Predicted remaining days of the current, still-open period — the "next few
+    // days" of an ongoing bleed, based on the average period length.
+    const current = cycles[cycles.length - 1];
+    if (current && current.endDay === null) {
+      const expectedEnd =
+        current.startDay + Math.max(1, Math.round(prediction.averagePeriodLength)) - 1;
+      for (let d = today + 1; d <= expectedEnd; d++) predicted.add(d);
+    }
     return {
       periodSet: period,
       predictedSet: predicted,
@@ -147,8 +155,18 @@ export default function Calendar() {
               <LegendRow className="bg-ovulation" label="Estimated ovulation" />
             </>
           )}
+          <View className="flex-row items-center gap-3">
+            <View className="h-5 w-5 items-center justify-center">
+              <View className="h-1.5 w-1.5 rounded-full bg-primary-soft" />
+            </View>
+            <Txt variant="muted">Logged entry</Txt>
+          </View>
         </View>
       </Card>
+
+      <Txt variant="faint" className="text-center">
+        Tap any day to add, end, or correct a period.
+      </Txt>
     </Screen>
   );
 }
@@ -211,7 +229,7 @@ function DayCell({
     >
       <View className={`flex-1 items-center justify-center rounded-xl ${bg} ${ring}`}>
         <Txt className={textClass}>{fromEpochDay(day).getDate()}</Txt>
-        {hasLog && <View className="mt-0.5 h-1 w-1 rounded-full bg-primary-soft" />}
+        {hasLog && <View className="mt-0.5 h-1.5 w-1.5 rounded-full bg-primary-soft" />}
       </View>
     </Pressable>
   );

@@ -1,5 +1,6 @@
-import { ActivityIndicator, View } from 'react-native';
+import { View } from 'react-native';
 import { BRAND } from '@locklune/core';
+import { MoonLoader } from '../components/ui/MoonLoader';
 import { Txt } from '../components/ui/Text';
 
 /**
@@ -10,7 +11,7 @@ export default function Index() {
   return (
     <View className="flex-1 items-center justify-center gap-6 bg-ink">
       <Txt variant="display">{BRAND.name}</Txt>
-      <ActivityIndicator color="#6EA8FE" />
+      <MoonLoader />
     </View>
   );
 }

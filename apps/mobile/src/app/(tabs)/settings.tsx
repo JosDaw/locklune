@@ -19,7 +19,7 @@ import { Txt } from '../../components/ui/Text';
 import { colors } from '../../theme/colors';
 import { formatDay } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
-import { KOFI_URL, MAKER_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
+import { KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
 import { useAuthStore } from '../../stores/authStore';
@@ -191,6 +191,12 @@ export default function Settings() {
             onChange={(v) => void updateSettings({ lutealPhaseDays: v })}
           />
         </View>
+        <Txt variant="faint" className="mt-3">
+          The luteal phase is the time from ovulation to your next period — usually 12–14 days and
+          fairly steady between cycles. Locklune uses it to estimate ovulation and your fertile
+          window. If you confirm ovulation when logging a day, your own luteal length is learned and
+          used instead.
+        </Txt>
       </Card>
 
       {/* Reminders */}
@@ -212,11 +218,7 @@ export default function Settings() {
           About
         </Txt>
         <RNText className="text-base leading-5 text-text-muted">
-          Locklune is made by one person,{' '}
-          <RNText className="font-medium text-primary-soft" onPress={() => openLink(MAKER_URL)}>
-            Josie Daw
-          </RNText>
-          . It is intentionally private, with no ads and no tracking.
+          Locklune is intentionally private, with no ads and no tracking.
         </RNText>
         <View className="mt-4">
           <AboutRow icon="star-outline" label="Rate Locklune" onPress={() => openLink(RATE_URL)} />
@@ -248,7 +250,7 @@ export default function Settings() {
           100% on-device · encrypted · no accounts, no tracking, no network
         </Txt>
         <Txt variant="faint" className="text-center">
-          For organisation only. Not medical or health advice.
+          For educational purposes only. Not medical or health advice.
         </Txt>
       </View>
     </Screen>

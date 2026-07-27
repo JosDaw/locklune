@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '../../theme/colors';
 import { setToastHandler, type ToastVariant } from '../../lib/toast';
 
 interface ToastState {
@@ -9,10 +8,14 @@ interface ToastState {
   variant: ToastVariant;
 }
 
-const ACCENT: Record<ToastVariant, string> = {
-  error: colors.danger,
-  success: colors.success,
-  info: colors.primary,
+/**
+ * Each variant is a solid, high-contrast colour with explicit white text, so the
+ * message is always readable regardless of the screen behind it or device theme.
+ */
+const VARIANT: Record<ToastVariant, { bg: string; fg: string }> = {
+  error: { bg: '#B42318', fg: '#FFFFFF' },
+  success: { bg: '#15803D', fg: '#FFFFFF' },
+  info: { bg: '#1E293B', fg: '#F8FAFC' },
 };
 
 /**
@@ -55,6 +58,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const variant = toast ? VARIANT[toast.variant] : VARIANT.info;
+
   return (
     <View style={styles.root}>
       {children}
@@ -67,10 +72,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             onPress={dismiss}
             accessibilityRole="alert"
             accessibilityLabel={toast.message}
-            style={[styles.toast, { borderColor: ACCENT[toast.variant] }]}
+            style={[styles.toast, { backgroundColor: variant.bg }]}
           >
-            <View style={[styles.dot, { backgroundColor: ACCENT[toast.variant] }]} />
-            <Text style={styles.text}>{toast.message}</Text>
+            <Text style={[styles.text, { color: variant.fg }]}>{toast.message}</Text>
           </Pressable>
         </Animated.View>
       )}
@@ -87,21 +91,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toast: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
     maxWidth: 480,
     borderRadius: 14,
-    borderWidth: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: colors.surface,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
     elevation: 6,
   },
-  dot: { width: 8, height: 8, borderRadius: 4 },
-  text: { flex: 1, color: colors.text, fontSize: 14, lineHeight: 19 },
+  text: { fontSize: 14, lineHeight: 19, fontWeight: '500', textAlign: 'center' },
 });

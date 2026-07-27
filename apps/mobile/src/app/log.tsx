@@ -227,6 +227,8 @@ export default function LogModal() {
             onChangeText={setNote}
             placeholder="Anything you want to remember…"
             placeholderTextColor="#94A3B8"
+            multiline
+            textAlignVertical="top"
             className="text-text"
           />
         </Textarea>

@@ -101,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <div className="mt-12 border-t border-line pt-6 text-xs text-fg-muted">
               <p className="text-center">
-                Locklune is for organisation only and is not medical or health advice.
+                Locklune is for educational purposes only and is not medical or health advice.
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <p>© {new Date().getFullYear()} {site.name}</p>
@@ -111,15 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
                 <span className="flex items-center gap-1.5">
-                  Made with <HeartIcon className="h-4 w-4 text-lock" /> by
-                  <a
-                    href="https://constantlearning.org"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-medium text-fg-soft hover:text-fg"
-                  >
-                    Josie Daw
-                  </a>
+                  Made with <HeartIcon className="h-4 w-4 text-lock" />
                 </span>
                 <a
                   href="https://ko-fi.com/constantlearning"

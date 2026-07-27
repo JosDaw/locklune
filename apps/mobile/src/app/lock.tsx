@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { BRAND } from '@locklune/core';
+import { MoonLoader } from '../components/ui/MoonLoader';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
@@ -66,16 +67,23 @@ export default function Lock() {
         <Txt variant="muted">Enter your PIN to unlock</Txt>
       </View>
 
-      <View className="gap-3">
-        {remaining > 0 ? (
-          <Txt className="text-center text-danger">Locked. Try again in {remaining}s</Txt>
-        ) : error ? (
-          <Txt className="text-center text-danger">{error}</Txt>
-        ) : (
-          <View className="h-5" />
-        )}
-        <PinPad length={PIN_LENGTH} disabled={busy || remaining > 0} onComplete={handleComplete} />
-      </View>
+      {busy ? (
+        <View className="items-center gap-5 py-8">
+          <MoonLoader />
+          <Txt variant="muted">Unlocking…</Txt>
+        </View>
+      ) : (
+        <View className="gap-3">
+          {remaining > 0 ? (
+            <Txt className="text-center text-danger">Locked. Try again in {remaining}s</Txt>
+          ) : error ? (
+            <Txt className="text-center text-danger">{error}</Txt>
+          ) : (
+            <View className="h-5" />
+          )}
+          <PinPad length={PIN_LENGTH} disabled={remaining > 0} onComplete={handleComplete} />
+        </View>
+      )}
 
       <View className="h-10" />
     </Screen>

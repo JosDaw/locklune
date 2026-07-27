@@ -19,7 +19,7 @@ export function Txt({
   variant = 'body',
   className,
   ...rest
-}: TextProps & { variant?: TextVariant }) {
+}: Omit<TextProps, 'style'> & { variant?: TextVariant }) {
   const cls = (extra: string) => `${extra} ${className ?? ''}`;
   switch (variant) {
     case 'display':

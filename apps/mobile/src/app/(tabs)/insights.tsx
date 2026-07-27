@@ -148,14 +148,11 @@ export default function Insights() {
                 <CycleRow key={cyc.id} cycle={cyc} onDelete={() => confirmDelete(cyc)} />
               ))}
           </View>
-          <Txt variant="faint" className="mt-4">
-            Tap any day in the calendar to add, end, or correct a period.
-          </Txt>
         </Card>
       )}
 
       <Txt variant="faint" className="text-center">
-        For organisation only. Locklune is not medical or health advice.
+        For educational purposes only. Locklune is not medical or health advice.
       </Txt>
     </Screen>
   );

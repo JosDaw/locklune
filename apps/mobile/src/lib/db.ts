@@ -102,6 +102,11 @@ export async function setCycleEnd(id: number, endDay: EpochDay | null): Promise<
   await requireDb().runAsync('UPDATE cycles SET end_day = ? WHERE id = ?', endDay, id);
 }
 
+/** Move a cycle's start day (used to correct a mis-dated period start). */
+export async function moveCycleStart(id: number, startDay: EpochDay): Promise<void> {
+  await requireDb().runAsync('UPDATE cycles SET start_day = ? WHERE id = ?', startDay, id);
+}
+
 export async function deleteCycle(id: number): Promise<void> {
   await requireDb().runAsync('DELETE FROM cycles WHERE id = ?', id);
 }
