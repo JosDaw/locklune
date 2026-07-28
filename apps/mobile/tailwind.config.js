@@ -67,8 +67,8 @@ module.exports = {
         },
 
         // --- Locklune custom palette (slate / moonlight) ---
-        ink: '#000027',
-        ink2: '#000035',
+        ink: '#000022',
+        ink2: '#000030',
         surface: '#162032',
         surfaceMuted: '#273449',
         border: 'rgba(255,255,255,0.08)',

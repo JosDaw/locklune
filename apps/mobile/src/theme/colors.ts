@@ -5,8 +5,8 @@
  * Slate / moonlight theme (matches the marketing site).
  */
 export const colors = {
-  ink: '#000027', // app background (night)
-  ink2: '#000035', // secondary background (gradient toward this)
+  ink: '#000022', // app background (night)
+  ink2: '#000030', // secondary background (gradient toward this)
   surface: '#162032', // cards
   surfaceMuted: '#273449', // inputs / chips / pressed
   border: 'rgba(255,255,255,0.08)', // hairline
