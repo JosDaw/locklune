@@ -15,7 +15,7 @@ export function ContactForm() {
 
   const clientValidate = (): string | null => {
     const e = email.trim();
-    if (e && !EMAIL_RE.test(e)) return 'That email address doesn't look right.';
+    if (e && !EMAIL_RE.test(e)) return "That email address doesn't look right.";
     if (message.trim().length < 10) return 'Please enter a message of at least 10 characters.';
     return null;
   };
