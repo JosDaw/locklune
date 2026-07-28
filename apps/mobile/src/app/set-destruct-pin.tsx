@@ -72,6 +72,12 @@ export default function SetDestructPin() {
           Make sure it is different from your unlock PIN. Entering it at the lock screen will
           immediately erase all data - with no confirmation.
         </Txt>
+        <Txt variant="faint" className="text-center text-xs">
+          This feature is intended solely for clearing your own personal data. In most jurisdictions,
+          if law enforcement presents a valid warrant, you may be legally obliged to provide the key
+          to encrypted data. Locklune is not responsible for any consequences arising from an
+          individual's failure to comply with applicable law.
+        </Txt>
       </View>
 
       <View className="gap-3">

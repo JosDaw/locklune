@@ -1,5 +1,5 @@
-import type { Metadata } from 'next';
 import { site } from '@/lib/site';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
@@ -47,6 +47,22 @@ export default function Privacy() {
         never sent anywhere in the first place.
       </P>
 
+      <H2>Legal requests</H2>
+      <P>
+        Because {site.name} collects, holds, and transmits no personal information whatsoever, we
+        are unable to respond to any legal request, warrant, court order, or subpoena for user data.
+        There is nothing in our possession to provide. We have no means of identifying users,
+        accessing device data, or decrypting anything stored on your device.
+      </P>
+
+      <H2>Device security</H2>
+      <P>
+        The security of your data depends on the security of your device. If your device is lost,
+        stolen, compromised, or accessed by another person, {site.name} and its developers accept
+        no responsibility for any resulting loss or exposure. We recommend keeping your device
+        secured with a screen lock in addition to the {site.name} PIN.
+      </P>
+
       <H2>Notifications</H2>
       <P>
         If you enable reminders, they are scheduled locally by your operating system based on
@@ -73,14 +89,33 @@ export default function Privacy() {
         and runs no tracking of its own.
       </P>
       <P>
-        If you use the contact form, the name, email and message you submit are sent to our support
-        inbox (via our email provider, Brevo) so we can reply. They are used only to respond to you.
+        If you use the contact form, only your email address (optional) and message are sent to our
+        support inbox via Brevo (our email service provider) solely to enable us to reply. Providing
+        an email address is entirely optional - you may contact us anonymously by leaving it blank.
+        Any information submitted is not used for any other purpose and is not shared further. Brevo
+        processes this data under its own privacy policy; {site.name} and its developers accept no
+        liability for Brevo's handling of that data. If you do not wish your contact details to be
+        processed in this way, please do not use the contact form.
       </P>
 
       <H2>Children</H2>
       <P>
         {site.name} does not knowingly collect data from anyone, including children, because it does
         not collect data at all.
+      </P>
+
+      <H2>Limitation of liability</H2>
+      <P>
+        To the maximum extent permitted by law, {site.name} and its associated developers accept no
+        liability for any loss, damage, or consequence arising from your use of the app or this
+        site, including but not limited to loss of data, device compromise, or any failure of
+        on-device encryption resulting from circumstances outside our control.
+      </P>
+
+      <H2>Governing law</H2>
+      <P>
+        This privacy policy is governed by the laws of Australia. Any disputes relating to this
+        policy will be subject to the exclusive jurisdiction of the courts of Australia.
       </P>
 
       <H2>Changes</H2>

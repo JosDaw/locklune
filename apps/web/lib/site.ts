@@ -10,7 +10,7 @@ export const site = {
   supportEmail: 'locklune@constantlearning.org',
   url: 'https://locklune.com',
   github: 'https://github.com/JosDaw/locklune',
-  lastUpdated: 'July 27, 2026',
+  lastUpdated: 'July 28, 2026',
 };
 
 export const comparison: { label: string; locklune: string; others: string }[] = [
