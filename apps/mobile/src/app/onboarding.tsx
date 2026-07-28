@@ -104,7 +104,7 @@ export default function Onboarding() {
       <Screen scroll={false} contentClassName="justify-between">
         <Image
           source={require('../../assets/images/locklune_logo.png')}
-          style={{ width: '100%' }}
+          style={{ width: '100%', height: 260 }}
           resizeMode="contain"
         />
 
