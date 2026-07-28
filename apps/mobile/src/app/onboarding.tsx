@@ -4,6 +4,7 @@ import { type ReactNode, useState } from 'react';
 import { Image, Linking, Pressable, Text as RNText, View } from 'react-native';
 import { Switch } from '../components/gs/switch';
 import { Button } from '../components/ui/Button';
+import { MoonLoader } from '../components/ui/MoonLoader';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
@@ -38,6 +39,7 @@ export default function Onboarding() {
   const [notifyFertileStart, setNotifyFertileStart] = useState(false);
 
   const createPin = useAuthStore((s) => s.createPin);
+  const wipe = useAuthStore((s) => s.wipe);
   const updateSettings = useDataStore((s) => s.updateSettings);
 
   const handlePinEntry = async (pin: string) => {
@@ -75,9 +77,12 @@ export default function Onboarding() {
       };
       await updateSettings(patch);
       haptics.success();
-    } catch {
+    } catch (err) {
       haptics.error();
-      setError('Something went wrong creating your PIN. Please try again.');
+      // Wipe any partial vault/DB state so the retry starts clean.
+      await wipe().catch(() => undefined);
+      const detail = err instanceof Error ? err.message : String(err);
+      setError(`Setup failed (${detail}). Please try again.`);
       setConfirmedPin('');
       setFirstPin('');
       setPhase('create');
@@ -217,6 +222,15 @@ export default function Onboarding() {
     );
   }
 
+  // ── Finishing (createPin in progress) ────────────────────────────────────────
+  if (busy) {
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' }}>
+        <MoonLoader size={64} />
+      </View>
+    );
+  }
+
   // ── Notifications ─────────────────────────────────────────────────────────────
   return (
     <Screen scroll={false} contentClassName="justify-between">
@@ -230,7 +244,7 @@ export default function Onboarding() {
             <Txt variant="display" className="text-center">Allow reminders</Txt>
             <Txt variant="muted" className="text-center">
               Enable any reminder below and {BRAND.name} will ask for notification permission.
-              All reminders are local to your device — nothing is sent anywhere.
+              All reminders are local to your device - nothing is sent anywhere.
             </Txt>
           </View>
         </View>

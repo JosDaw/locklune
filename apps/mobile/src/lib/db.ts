@@ -30,15 +30,32 @@ function requireDb(): SQLite.SQLiteDatabase {
 export async function openEncryptedDb(dekHex: string): Promise<void> {
   if (db) return;
   const database = await SQLite.openDatabaseAsync(DB_NAME);
-  // SQLCipher: the key MUST be set before touching any table.
-  await database.execAsync(`PRAGMA key = "x'${dekHex}'";`);
-  await database.execAsync('PRAGMA journal_mode = WAL;');
-  await migrate(database);
+  try {
+    // SQLCipher: the key MUST be set before touching any table.
+    await database.execAsync(`PRAGMA key = "x'${dekHex}'";`);
+    await database.execAsync('PRAGMA journal_mode = WAL;');
+    await migrate(database);
+  } catch (err) {
+    // Close the connection before re-throwing so we never leave a leaked handle
+    // that would prevent deleteDb() from removing the file on a subsequent retry.
+    await database.closeAsync().catch(() => undefined);
+    throw err;
+  }
   db = database;
 }
 
 export async function closeDb(): Promise<void> {
   if (db) {
+    // Checkpoint the WAL and switch back to rollback-journal mode before
+    // closing. expo-sqlite's deleteDatabaseAsync only removes the main .db
+    // file, so a stale .db-wal encrypted with the old DEK would remain and
+    // cause a NullPointerException when a new database is opened at the same
+    // path and SQLCipher tries to recover the WAL with the new (wrong) key.
+    try {
+      await db.execAsync('PRAGMA journal_mode = DELETE;');
+    } catch {
+      // best-effort — proceed with close even if the checkpoint fails
+    }
     await db.closeAsync();
     db = null;
   }

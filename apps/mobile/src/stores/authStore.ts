@@ -55,8 +55,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   createPin: async (pin) => {
-    const dekHex = await initVault(pin);
-    await afterUnlock(dekHex);
+    // Delete any stale DB from a previous failed onboarding so the new vault
+    // and DB are always encrypted with the same key.
+    await deleteDb().catch(() => undefined);
+    const dekHex = await initVault(pin).catch((err: unknown) => {
+      throw new Error(`vault:${err instanceof Error ? err.message : String(err)}`);
+    });
+    await afterUnlock(dekHex).catch((err: unknown) => {
+      throw new Error(`db:${err instanceof Error ? err.message : String(err)}`);
+    });
     set({ status: 'unlocked', dekHex, attemptsRemaining: MAX_PIN_ATTEMPTS, lockedForSeconds: 0 });
   },
 
@@ -66,10 +73,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       try {
         await afterUnlock(res.dekHex);
       } catch {
-        // Correct PIN, but the database could not be opened (e.g. corrupt file).
-        toast.error('Unlocked, but your data could not be opened.');
-        await closeDb().catch(() => undefined);
-        set({ dekHex: null });
+        // Correct PIN but DB is corrupt or key-mismatched — unrecoverable.
+        // Wipe everything so the user can start fresh rather than being locked out.
+        toast.error('Your data appears corrupted and has been reset. Sorry for the inconvenience.');
+        await get().wipe();
         return false;
       }
       set({ status: 'unlocked', dekHex: res.dekHex, lockedForSeconds: 0 });

@@ -212,7 +212,7 @@ export default function Settings() {
         )}
       </Card>
 
-      {/* Cycle — not relevant when pregnant */}
+      {/* Cycle - not relevant when pregnant */}
       {settings.cycleMode !== 'pregnant' && <Card>
         <SectionLabel icon="sync-outline" label="Cycle" />
         <View className="flex-row items-center justify-between">

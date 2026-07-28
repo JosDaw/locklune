@@ -281,7 +281,9 @@ export default function LogModal() {
           <Txt variant="label">Mood</Txt>
         ) : (
           <Text style={{ fontFamily: 'Manrope_600SemiBold', fontSize: 22, color: colors.text }}>
-            How are you feeling today?
+            {day === today
+              ? 'How are you feeling today?'
+              : `How did you feel on ${formatDay(day, { weekday: 'long', month: 'long', day: 'numeric' })}?`}
           </Text>
         )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -342,7 +344,7 @@ export default function LogModal() {
                     )}
                     {status.isStart && (
                       <Button
-                        title="Remove period start"
+                        title="Remove start"
                         variant="danger"
                         onPress={removeStart}
                         containerStyle={{ flex: 1 }}

@@ -197,6 +197,9 @@ export default function Today() {
                   </Txt>
                 </View>
                 <PillButton label="Log period started today" large onPress={onStart} />
+                <Txt variant="faint" className="text-center">
+                  To add entries for previous days, go to the calendar and select the date you want to update.
+                </Txt>
               </View>
             ) : onPeriod ? (
               // ON PERIOD
@@ -441,7 +444,7 @@ function PillButton({
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
-    <Animated.View style={[anim, { alignSelf: 'flex-start', borderRadius: 99 }]}>
+    <Animated.View style={[anim, { alignSelf: large ? 'center' : 'flex-start', borderRadius: 99 }]}>
       <Pressable
         onPress={onPress}
         onPressIn={() => {
