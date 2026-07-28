@@ -39,8 +39,10 @@ export default function Today() {
 
   return (
     <Screen>
-      <View className="pt-2">
-        <Txt variant="heading">
+      {/* Date header */}
+      <View className="flex-row items-center gap-2 pb-1 pt-2">
+        <Ionicons name="moon" size={14} color={colors.primarySoft} />
+        <Txt variant="faint">
           {formatDay(today, { weekday: 'long', month: 'long', day: 'numeric' })}
         </Txt>
       </View>
@@ -52,7 +54,7 @@ export default function Today() {
               <Txt variant="label" className="text-primary-soft">
                 Pregnancy
               </Txt>
-              <Txt variant="heading">
+              <Txt variant="display">
                 Week {preg.week}
                 {preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
               </Txt>
@@ -81,40 +83,70 @@ export default function Today() {
           {/* Status */}
           <Card>
             {onPeriod ? (
-              <View className="gap-3">
-                <Txt variant="label" className="text-period">
-                  On your period
-                </Txt>
-                <Txt variant="heading">Day {periodDay}</Txt>
-                <Txt variant="muted">Started {formatDay(last!.startDay)}</Txt>
-                {periodDaysLeft > 0 && (
-                  <Txt variant="faint">
-                    About {periodDaysLeft} more day{periodDaysLeft === 1 ? '' : 's'} expected
+              <View className="flex-row gap-4">
+                {/* Period accent stripe */}
+                <View
+                  style={{
+                    width: 3,
+                    borderRadius: 99,
+                    backgroundColor: colors.period,
+                    minHeight: 40,
+                  }}
+                />
+                <View className="flex-1 gap-3">
+                  <Txt variant="label" className="text-period">
+                    On your period
                   </Txt>
-                )}
-                <Button title="End period today" variant="secondary" onPress={onEnd} />
+                  <Txt variant="display">Day {periodDay}</Txt>
+                  <View className="gap-0.5">
+                    <Txt variant="muted">Started {formatDay(last!.startDay)}</Txt>
+                    {periodDaysLeft > 0 && (
+                      <Txt variant="faint">
+                        About {periodDaysLeft} more day{periodDaysLeft === 1 ? '' : 's'} expected
+                      </Txt>
+                    )}
+                  </View>
+                  <Button title="End period today" variant="secondary" onPress={onEnd} />
+                </View>
               </View>
             ) : next ? (
-              <View className="gap-2">
+              <View className="gap-3">
                 <Txt variant="label">
                   {settings.cycleMode === 'contraception' ? 'Next expected bleed' : 'Next period'}
                 </Txt>
-                <Txt variant="heading">{relativeDays(next.periodStart)}</Txt>
-                <Txt variant="muted">
-                  {formatDay(next.periodStart)} · window{' '}
-                  {formatRange(next.periodStartRange.start, next.periodStartRange.end)}
-                </Txt>
-                <Button title="Log period started today" className="mt-2" onPress={onStart} />
+                <Txt variant="display">{relativeDays(next.periodStart)}</Txt>
+                <View className="flex-row items-center gap-1.5">
+                  <Ionicons name="calendar-outline" size={13} color={colors.textFaint} />
+                  <Txt variant="faint">
+                    {formatDay(next.periodStart)} · window{' '}
+                    {formatRange(next.periodStartRange.start, next.periodStartRange.end)}
+                  </Txt>
+                </View>
+                <Button title="Log period started today" className="mt-1" onPress={onStart} />
               </View>
             ) : (
-              <View className="gap-3">
-                <View className="flex-row items-center gap-2">
-                  <Txt variant="heading">Welcome</Txt>
-                  <Ionicons name="moon" size={22} color={colors.primarySoft} />
+              <View className="items-center gap-5 py-4">
+                <View
+                  style={{
+                    width: 72,
+                    height: 72,
+                    borderRadius: 36,
+                    backgroundColor: 'rgba(110,168,254,0.1)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Ionicons name="moon" size={34} color={colors.primarySoft} />
                 </View>
-                <Txt variant="muted">
-                  Log the first day of your period and {BRAND.name} will start learning your cycle.
-                </Txt>
+                <View className="items-center gap-2">
+                  <Txt variant="heading" className="text-center">
+                    Welcome
+                  </Txt>
+                  <Txt variant="muted" className="text-center">
+                    Log your first period and {BRAND.name} will learn your cycle — all on-device,
+                    always private.
+                  </Txt>
+                </View>
                 <Button title="Log period started today" onPress={onStart} />
               </View>
             )}
@@ -122,7 +154,11 @@ export default function Today() {
 
           {/* Fertile window emphasis when trying to conceive */}
           {next && fertility && settings.cycleMode === 'trying' && (
-            <Card className="border-fertile/40">
+            <Card
+              style={{
+                borderColor: 'rgba(175,200,255,0.3)',
+              }}
+            >
               <Txt variant="label" className="text-fertile">
                 Fertile window
               </Txt>

@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { fromEpochDay, toEpochDay, todayEpochDay, type EpochDay } from '@locklune/core';
@@ -162,6 +167,8 @@ export default function Calendar() {
   );
 }
 
+const ARROW_SPRING = { damping: 18, stiffness: 350, mass: 0.5 } as const;
+
 function ArrowButton({
   icon,
   label,
@@ -171,16 +178,21 @@ function ArrowButton({
   label: string;
   onPress: () => void;
 }) {
+  const scale = useSharedValue(1);
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      style={styles.arrow}
-      className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface active:opacity-70"
-    >
-      <Ionicons name={icon} size={20} color={colors.text} />
-    </Pressable>
+    <Animated.View style={[styles.arrow, anim]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.9, ARROW_SPRING); }}
+        onPressOut={() => { scale.value = withSpring(1, ARROW_SPRING); }}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"
+      >
+        <Ionicons name={icon} size={20} color={colors.text} />
+      </Pressable>
+    </Animated.View>
   );
 }
 

@@ -47,15 +47,17 @@ export default function Insights() {
 
   return (
     <Screen>
-      <Txt variant="display" className="pt-2">
-        Insights
-      </Txt>
+      <View className="flex-row items-center gap-2 pb-1 pt-2">
+        <Ionicons name="stats-chart" size={14} color={colors.primarySoft} />
+        <Txt variant="faint">Your cycle, over time</Txt>
+      </View>
 
+      {/* Illuminated stat tiles */}
       <Card>
-        <View className="flex-row justify-between">
-          <Stat label="Avg cycle" value={`${Math.round(prediction.averageCycleLength)}d`} />
-          <Stat label="Avg period" value={`${Math.round(prediction.averagePeriodLength)}d`} />
-          <Stat label="Variation" value={`±${Math.round(prediction.variability)}d`} />
+        <View className="flex-row gap-3">
+          <StatTile label="Avg cycle" value={`${Math.round(prediction.averageCycleLength)}d`} />
+          <StatTile label="Avg period" value={`${Math.round(prediction.averagePeriodLength)}d`} />
+          <StatTile label="Variation" value={`±${Math.round(prediction.variability)}d`} />
         </View>
         <Txt variant="faint" className="mt-4 text-center">
           {confidenceLabel(prediction.confidence)} · {prediction.cyclesAnalyzed} cycle
@@ -63,20 +65,32 @@ export default function Insights() {
         </Txt>
       </Card>
 
+      {/* Cycle length bar chart */}
       <Card>
         <Txt variant="title" className="mb-4">
           Recent cycle lengths
         </Txt>
         {lengths.length === 0 ? (
-          <Txt variant="muted">Log at least two periods to see your cycle lengths.</Txt>
+          <View className="items-center gap-3 py-4">
+            <Ionicons name="analytics-outline" size={32} color={colors.textFaint} />
+            <Txt variant="muted" className="text-center">
+              Log at least two periods to see your cycle lengths.
+            </Txt>
+          </View>
         ) : (
-          <View className="gap-2">
+          <View className="gap-3">
             {lengths.map((len, i) => (
               <View key={i} className="flex-row items-center gap-3">
+                <Txt variant="faint" className="w-5 text-right text-2xs">
+                  {i + 1}
+                </Txt>
                 <View className="h-4 flex-1 overflow-hidden rounded-full bg-surfaceMuted">
                   <View
-                    className="h-4 rounded-full bg-primary"
-                    style={{ width: `${Math.min(100, (len / maxLen) * 100)}%` }}
+                    className="h-4 rounded-full bg-period"
+                    style={{
+                      width: `${Math.min(100, (len / maxLen) * 100)}%`,
+                      opacity: 0.7 + 0.3 * (i / Math.max(1, lengths.length - 1)),
+                    }}
                   />
                 </View>
                 <Txt variant="muted" className="w-12 text-right">
@@ -88,14 +102,16 @@ export default function Insights() {
         )}
       </Card>
 
+      {/* Upcoming or pregnancy */}
       {settings.cycleMode === 'pregnant' ? (
         <Card>
-          <Txt variant="title" className="mb-4">
-            Pregnancy
-          </Txt>
+          <View className="flex-row items-center gap-2 mb-4">
+            <Ionicons name="heart-outline" size={14} color={colors.textFaint} />
+            <Txt variant="title">Pregnancy</Txt>
+          </View>
           {preg ? (
             <View className="gap-2">
-              <Txt variant="heading">
+              <Txt variant="display">
                 Week {preg.week}
                 {preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
               </Txt>
@@ -115,19 +131,30 @@ export default function Insights() {
         </Card>
       ) : (
         <Card>
-          <Txt variant="title" className="mb-4">
-            {settings.cycleMode === 'contraception' ? 'Upcoming bleeds' : 'Upcoming periods'}
-          </Txt>
+          <View className="flex-row items-center gap-2 mb-4">
+            <Ionicons name="calendar-outline" size={14} color={colors.textFaint} />
+            <Txt variant="title">
+              {settings.cycleMode === 'contraception' ? 'Upcoming bleeds' : 'Upcoming periods'}
+            </Txt>
+          </View>
           {prediction.upcoming.length === 0 ? (
-            <Txt variant="muted">Log your first period to see predictions.</Txt>
+            <View className="items-center gap-3 py-2">
+              <Txt variant="muted" className="text-center">
+                Log your first period to see predictions.
+              </Txt>
+            </View>
           ) : (
             <View className="gap-3">
               {prediction.upcoming.map((u, i) => (
-                <View key={i} className="flex-row items-center justify-between">
+                <View
+                  key={i}
+                  className="flex-row items-center justify-between py-1"
+                  style={i > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}
+                >
                   <Txt variant="body">
                     {formatDay(u.periodStart, { month: 'long', day: 'numeric' })}
                   </Txt>
-                  <Txt variant="muted">{relativeDays(u.periodStart)}</Txt>
+                  <Txt variant="faint">{relativeDays(u.periodStart)}</Txt>
                 </View>
               ))}
             </View>
@@ -135,11 +162,13 @@ export default function Insights() {
         </Card>
       )}
 
+      {/* Cycle history */}
       {cycles.length > 0 && (
         <Card>
-          <Txt variant="title" className="mb-4">
-            Cycle history
-          </Txt>
+          <View className="flex-row items-center gap-2 mb-4">
+            <Ionicons name="time-outline" size={14} color={colors.textFaint} />
+            <Txt variant="title">Cycle history</Txt>
+          </View>
           <View className="gap-3">
             {[...cycles]
               .reverse()
@@ -155,6 +184,24 @@ export default function Insights() {
         For educational purposes only. Locklune is not medical or health advice.
       </Txt>
     </Screen>
+  );
+}
+
+function StatTile({ label, value }: { label: string; value: string }) {
+  return (
+    <View
+      className="flex-1 items-center gap-2 rounded-2xl py-4"
+      style={{
+        backgroundColor: 'rgba(110,168,254,0.06)',
+        borderWidth: 1,
+        borderColor: 'rgba(110,168,254,0.18)',
+      }}
+    >
+      <Txt variant="heading" className="text-primary-soft">
+        {value}
+      </Txt>
+      <Txt variant="faint">{label}</Txt>
+    </View>
   );
 }
 
@@ -180,15 +227,6 @@ function CycleRow({ cycle, onDelete }: { cycle: Cycle; onDelete: () => void }) {
       >
         <Ionicons name="trash-outline" size={18} color={colors.textMuted} />
       </Pressable>
-    </View>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="items-center gap-1">
-      <Txt variant="heading">{value}</Txt>
-      <Txt variant="faint">{label}</Txt>
     </View>
   );
 }

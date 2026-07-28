@@ -1,7 +1,14 @@
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { Button as GSButton, ButtonSpinner, ButtonText } from '../gs/button';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type Size = 'md' | 'lg';
+
+const SPRING = { damping: 18, stiffness: 350, mass: 0.5 } as const;
 
 const CONTAINER: Record<Variant, string> = {
   primary: 'bg-primary border-0',
@@ -25,6 +32,8 @@ export function Button({
   loading = false,
   disabled,
   className,
+  onPressIn: callerPressIn,
+  onPressOut: callerPressOut,
   ...rest
 }: Omit<React.ComponentProps<typeof GSButton>, 'variant' | 'size'> & {
   title: string;
@@ -32,19 +41,32 @@ export function Button({
   size?: Size;
   loading?: boolean;
 }) {
+  const scale = useSharedValue(1);
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const isDisabled = disabled || loading;
+
   return (
-    <GSButton
-      size={size}
-      disabled={isDisabled}
-      className={`rounded-2xl ${CONTAINER[variant]} ${isDisabled ? 'opacity-50' : ''} ${className ?? ''}`}
-      {...rest}
-    >
-      {loading ? (
-        <ButtonSpinner color={variant === 'primary' ? '#0F172A' : '#F8FAFC'} />
-      ) : (
-        <ButtonText className={`font-semibold ${LABEL[variant]}`}>{title}</ButtonText>
-      )}
-    </GSButton>
+    <Animated.View style={anim}>
+      <GSButton
+        size={size}
+        disabled={isDisabled}
+        className={`rounded-2xl ${CONTAINER[variant]} ${isDisabled ? 'opacity-50' : ''} ${className ?? ''}`}
+        onPressIn={(e) => {
+          if (!isDisabled) scale.value = withSpring(0.97, SPRING);
+          callerPressIn?.(e);
+        }}
+        onPressOut={(e) => {
+          scale.value = withSpring(1, SPRING);
+          callerPressOut?.(e);
+        }}
+        {...rest}
+      >
+        {loading ? (
+          <ButtonSpinner color={variant === 'primary' ? '#0F172A' : '#F8FAFC'} />
+        ) : (
+          <ButtonText className={`font-semibold ${LABEL[variant]}`}>{title}</ButtonText>
+        )}
+      </GSButton>
+    </Animated.View>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { Switch } from '../../components/gs/switch';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { PressScale } from '../../components/ui/PressScale';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
 import { colors } from '../../theme/colors';
@@ -87,15 +88,14 @@ export default function Settings() {
 
   return (
     <Screen>
-      <Txt variant="display" className="pt-2">
-        Settings
-      </Txt>
+      <View className="flex-row items-center gap-2 pb-1 pt-2">
+        <Ionicons name="settings" size={14} color={colors.primarySoft} />
+        <Txt variant="faint">Preferences</Txt>
+      </View>
 
       {/* Cycle mode */}
       <Card>
-        <Txt variant="label" className="mb-3">
-          I am currently
-        </Txt>
+        <SectionLabel icon="moon-outline" label="I am currently" />
         <View>
           {CYCLE_MODES.map((m) => (
             <ModeRow
@@ -153,16 +153,14 @@ export default function Settings() {
 
       {/* Security */}
       <Card>
-        <Txt variant="label" className="mb-3">
-          Security
-        </Txt>
-        <Pressable
+        <SectionLabel icon="shield-checkmark-outline" label="Security" />
+        <PressScale
           onPress={() => router.push('/change-pin')}
           className="flex-row items-center justify-between py-3"
         >
           <Txt variant="body">Change PIN</Txt>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-        </Pressable>
+        </PressScale>
 
         <Txt variant="faint" className="mb-2 mt-2">
           Auto-lock after inactivity
@@ -176,9 +174,7 @@ export default function Settings() {
 
       {/* Cycle */}
       <Card>
-        <Txt variant="label" className="mb-3">
-          Cycle
-        </Txt>
+        <SectionLabel icon="sync-outline" label="Cycle" />
         <View className="flex-row items-center justify-between">
           <View className="flex-1 pr-4">
             <Txt variant="body">Luteal phase length</Txt>
@@ -201,9 +197,7 @@ export default function Settings() {
 
       {/* Reminders */}
       <Card>
-        <Txt variant="label" className="mb-3">
-          Reminders
-        </Txt>
+        <SectionLabel icon="notifications-outline" label="Reminders" />
         <SwitchRow
           label="Period reminder"
           hint="A local notification 2 days before"
@@ -214,9 +208,7 @@ export default function Settings() {
 
       {/* About */}
       <Card>
-        <Txt variant="label" className="mb-3">
-          About
-        </Txt>
+        <SectionLabel icon="information-circle-outline" label="About" />
         <RNText className="text-base leading-5 text-text-muted">
           Locklune is intentionally private, with no ads and no tracking.
         </RNText>
@@ -232,10 +224,12 @@ export default function Settings() {
       </Card>
 
       {/* Danger zone */}
-      <Card className="border-danger/40">
-        <Txt variant="label" className="mb-3 text-danger">
-          Danger zone
-        </Txt>
+      <Card
+        style={{
+          borderColor: 'rgba(248,113,113,0.3)',
+        }}
+      >
+        <SectionLabel icon="alert-circle-outline" label="Danger zone" labelClass="text-danger" />
         <View className="gap-3">
           <Button title="Lock now" variant="secondary" onPress={() => void lock()} />
           <Button title="Erase all data" variant="danger" onPress={confirmWipe} />
@@ -254,6 +248,25 @@ export default function Settings() {
         </Txt>
       </View>
     </Screen>
+  );
+}
+
+function SectionLabel({
+  icon,
+  label,
+  labelClass,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  labelClass?: string;
+}) {
+  return (
+    <View className="mb-3 flex-row items-center gap-2">
+      <Ionicons name={icon} size={14} color={colors.textFaint} />
+      <Txt variant="label" className={labelClass}>
+        {label}
+      </Txt>
+    </View>
   );
 }
 
@@ -298,16 +311,17 @@ function Segmented({
       {options.map((o) => {
         const active = o.value === value;
         return (
-          <Pressable
+          <PressScale
             key={o.value}
+            containerStyle={{ flex: 1 }}
             onPress={() => onChange(o.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             accessibilityLabel={o.label}
-            className={`flex-1 items-center rounded-xl py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
+            className={`items-center rounded-xl py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
           >
             <Txt className={active ? 'text-ink' : 'text-text-muted'}>{o.label}</Txt>
-          </Pressable>
+          </PressScale>
         );
       })}
     </View>
@@ -326,7 +340,7 @@ function ModeRow({
   onPress: () => void;
 }) {
   return (
-    <Pressable
+    <PressScale
       onPress={onPress}
       accessibilityRole="radio"
       accessibilityState={{ checked: active }}
@@ -336,6 +350,16 @@ function ModeRow({
     >
       <View
         className={`h-5 w-5 items-center justify-center rounded-full border ${active ? 'border-primary bg-primary' : 'border-border'}`}
+        style={
+          active
+            ? {
+                shadowColor: colors.primary,
+                shadowOpacity: 0.4,
+                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 0 },
+              }
+            : undefined
+        }
       >
         {active && <Ionicons name="checkmark" size={13} color={colors.ink} />}
       </View>
@@ -343,13 +367,13 @@ function ModeRow({
         <Txt variant="body">{label}</Txt>
         <Txt variant="faint">{hint}</Txt>
       </View>
-    </Pressable>
+    </PressScale>
   );
 }
 
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
-    <Pressable
+    <PressScale
       onPress={onPress}
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
@@ -357,7 +381,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
       className={`rounded-full px-3.5 py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
     >
       <Txt className={active ? 'text-ink' : 'text-text-muted'}>{label}</Txt>
-    </Pressable>
+    </PressScale>
   );
 }
 
@@ -373,7 +397,7 @@ function AboutRow({
   last?: boolean;
 }) {
   return (
-    <Pressable
+    <PressScale
       onPress={onPress}
       accessibilityRole="button"
       className={`flex-row items-center gap-3 py-3 ${last ? '' : 'border-b border-border'}`}
@@ -383,7 +407,7 @@ function AboutRow({
         {label}
       </Txt>
       <Ionicons name="open-outline" size={16} color={colors.textMuted} />
-    </Pressable>
+    </PressScale>
   );
 }
 
@@ -400,25 +424,25 @@ function Stepper({
 }) {
   return (
     <View className="flex-row items-center gap-3">
-      <Pressable
+      <PressScale
         onPress={() => onChange(Math.max(min, value - 1))}
         accessibilityRole="button"
         accessibilityLabel="Decrease"
         className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
       >
         <Ionicons name="remove" size={20} color={colors.text} />
-      </Pressable>
+      </PressScale>
       <Txt variant="title" className="w-6 text-center">
         {value}
       </Txt>
-      <Pressable
+      <PressScale
         onPress={() => onChange(Math.min(max, value + 1))}
         accessibilityRole="button"
         accessibilityLabel="Increase"
         className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
       >
         <Ionicons name="add" size={20} color={colors.text} />
-      </Pressable>
+      </PressScale>
     </View>
   );
 }
