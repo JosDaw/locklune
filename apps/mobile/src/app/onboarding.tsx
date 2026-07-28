@@ -101,10 +101,10 @@ export default function Onboarding() {
   // ── Consent ──────────────────────────────────────────────────────────────────
   if (phase === 'consent') {
     return (
-      <Screen scroll={false} contentClassName="justify-between">
+      <Screen scroll={false} >
         <Image
           source={require('../../assets/images/locklune_logo.png')}
-          style={{ width: '100%', height: 300 }}
+          style={{ width: '100%', height: 500 }}
           resizeMode="contain"
         />
 
@@ -186,31 +186,30 @@ export default function Onboarding() {
         </View>
 
         <View className="gap-2">
-          {CYCLE_MODES.map((m) => (
-            <Pressable
-              key={m.value}
-              onPress={() => setSelectedMode(m.value)}
-              className={`flex-row items-center gap-4 rounded-2xl border p-4 ${
-                selectedMode === m.value
-                  ? 'border-primary bg-primary/10'
-                  : 'border-border bg-surface'
-              }`}
-            >
-              <View
-                className={`h-5 w-5 items-center justify-center rounded-full border-2 ${
-                  selectedMode === m.value ? 'border-primary' : 'border-border'
+          {CYCLE_MODES.map((m) => {
+            const selected = selectedMode === m.value;
+            return (
+              <Pressable
+                key={m.value}
+                onPress={() => setSelectedMode(m.value)}
+                className={`flex-row items-center gap-4 rounded-2xl border p-4 ${
+                  selected ? 'border-primary bg-primary/10' : 'border-border bg-surface'
                 }`}
               >
-                {selectedMode === m.value && (
-                  <View className="h-2.5 w-2.5 rounded-full bg-primary" />
-                )}
-              </View>
-              <View className="flex-1">
-                <Txt variant="body">{m.label}</Txt>
-                <Txt variant="faint">{m.hint}</Txt>
-              </View>
-            </Pressable>
-          ))}
+                <View
+                  className={`h-6 w-6 items-center justify-center rounded-md border-2 ${
+                    selected ? 'border-primary bg-primary' : 'border-surfaceMuted'
+                  }`}
+                >
+                  {selected && <Ionicons name="checkmark" size={16} color={colors.ink} />}
+                </View>
+                <View className="flex-1">
+                  <Txt variant="body">{m.label}</Txt>
+                  <Txt variant="faint">{m.hint}</Txt>
+                </View>
+              </Pressable>
+            );
+          })}
         </View>
 
         <Button title="Continue" onPress={() => setPhase('notifications')} />
