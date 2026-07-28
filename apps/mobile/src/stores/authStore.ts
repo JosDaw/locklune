@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       try {
         await afterUnlock(res.dekHex);
       } catch {
-        // Correct PIN but DB is corrupt or key-mismatched — unrecoverable.
+        // Correct PIN but DB is corrupt or key-mismatched - unrecoverable.
         // Wipe everything so the user can start fresh rather than being locked out.
         toast.error('Your data appears corrupted and has been reset. Sorry for the inconvenience.');
         await get().wipe();

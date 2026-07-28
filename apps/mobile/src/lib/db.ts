@@ -54,7 +54,7 @@ export async function closeDb(): Promise<void> {
     try {
       await db.execAsync('PRAGMA journal_mode = DELETE;');
     } catch {
-      // best-effort — proceed with close even if the checkpoint fails
+      // best-effort - proceed with close even if the checkpoint fails
     }
     await db.closeAsync();
     db = null;
@@ -94,10 +94,14 @@ async function migrate(database: SQLite.SQLiteDatabase): Promise<void> {
   // Add columns introduced after a table's first version (no-op if present).
   try {
     await database.execAsync('ALTER TABLE day_logs ADD COLUMN ovulation INTEGER');
-  } catch { /* already exists */ }
+  } catch {
+    /* already exists */
+  }
   try {
     await database.execAsync('ALTER TABLE day_logs ADD COLUMN temperature REAL');
-  } catch { /* already exists */ }
+  } catch {
+    /* already exists */
+  }
 }
 
 // --- Cycles -----------------------------------------------------------------
