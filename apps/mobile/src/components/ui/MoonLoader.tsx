@@ -1,11 +1,11 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../theme/colors';
 
 /**
  * A calm, breathing moon used while the app is busy (unlocking, loading). Purely
- * decorative and device-local — a gentle pulse rather than a spinner, to match
+ * decorative and device-local - a gentle pulse rather than a spinner, to match
  * Locklune's quiet tone.
  */
 export function MoonLoader({ size = 48 }: { size?: number }) {

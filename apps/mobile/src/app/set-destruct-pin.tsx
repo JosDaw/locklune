@@ -1,14 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
-import { colors } from '../theme/colors';
 import * as haptics from '../lib/haptics';
 import * as toast from '../lib/toast';
 import { setDestructPin } from '../lib/vault';
+import { colors } from '../theme/colors';
 
 const PIN_LENGTH = 6;
 
@@ -70,7 +70,7 @@ export default function SetDestructPin() {
         </Txt>
         <Txt variant="faint" className="text-center">
           Make sure it is different from your unlock PIN. Entering it at the lock screen will
-          immediately erase all data — with no confirmation.
+          immediately erase all data - with no confirmation.
         </Txt>
       </View>
 

@@ -1,7 +1,3 @@
-import { useCallback, useState } from 'react';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { Alert, Pressable, Text as RNText, View } from 'react-native';
-import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
 import {
   BRAND,
@@ -12,21 +8,25 @@ import {
   todayEpochDay,
   type CycleMode,
 } from '@locklune/core';
+import Constants from 'expo-constants';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { Alert, Pressable, Text as RNText, TextInput, View } from 'react-native';
 import { Switch } from '../../components/gs/switch';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { PressScale } from '../../components/ui/PressScale';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
-import { colors } from '../../theme/colors';
 import { formatDay } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
-import { KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
+import { FEEDBACK_URL, KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
 import { clearDestructPin, hasDestructPin } from '../../lib/vault';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
+import { colors } from '../../theme/colors';
 
 const AUTO_LOCK_OPTIONS = [
   { label: 'Instant', value: 0 },
@@ -46,11 +46,23 @@ export default function Settings() {
   const wipe = useAuthStore((s) => s.wipe);
 
   const [hasDestruct, setHasDestruct] = useState(false);
+  const [newSymptom, setNewSymptom] = useState('');
   useFocusEffect(
     useCallback(() => {
       void hasDestructPin().then(setHasDestruct);
     }, []),
   );
+
+  const addSymptom = () => {
+    const trimmed = newSymptom.trim().toLowerCase();
+    if (!trimmed || settings.customSymptoms.includes(trimmed)) { setNewSymptom(''); return; }
+    void updateSettings({ customSymptoms: [...settings.customSymptoms, trimmed] });
+    setNewSymptom('');
+  };
+
+  const removeSymptom = (sym: string) => {
+    void updateSettings({ customSymptoms: settings.customSymptoms.filter((s) => s !== sym) });
+  };
 
   const remindersOn = settings.reminderDaysBefore.length > 0;
 
@@ -203,8 +215,8 @@ export default function Settings() {
         )}
       </Card>
 
-      {/* Cycle */}
-      <Card>
+      {/* Cycle — not relevant when pregnant */}
+      {settings.cycleMode !== 'pregnant' && <Card>
         <SectionLabel icon="sync-outline" label="Cycle" />
         <View className="flex-row items-center justify-between">
           <View className="flex-1 pr-4">
@@ -219,12 +231,12 @@ export default function Settings() {
           />
         </View>
         <Txt variant="faint" className="mt-3">
-          The luteal phase is the time from ovulation to your next period — usually 12–14 days and
+          The luteal phase is the time from ovulation to your next period - usually 12–14 days and
           fairly steady between cycles. Locklune uses it to estimate ovulation and your fertile
           window. If you confirm ovulation when logging a day, your own luteal length is learned and
           used instead.
         </Txt>
-      </Card>
+      </Card>}
 
       {/* Reminders */}
       <Card>
@@ -235,6 +247,87 @@ export default function Settings() {
           value={remindersOn}
           onValueChange={(v) => void toggleReminders(v)}
         />
+      </Card>
+
+      {/* Custom symptoms */}
+      <Card>
+        <SectionLabel icon="pricetag-outline" label="Custom symptoms" />
+        <Txt variant="faint" className="mb-3">
+          Add your own symptom tags - they appear in the log screen.
+        </Txt>
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+          <TextInput
+            value={newSymptom}
+            onChangeText={setNewSymptom}
+            placeholder="e.g. joint pain"
+            placeholderTextColor={colors.textFaint}
+            autoCapitalize="none"
+            autoCorrect={false}
+            returnKeyType="done"
+            onSubmitEditing={addSymptom}
+            style={{
+              flex: 1,
+              backgroundColor: colors.surfaceMuted,
+              borderRadius: 12,
+              paddingHorizontal: 12,
+              paddingVertical: 10,
+              color: colors.text,
+              fontFamily: 'Inter_400Regular',
+              fontSize: 14,
+            }}
+          />
+          <Pressable
+            onPress={addSymptom}
+            accessibilityRole="button"
+            accessibilityLabel="Add symptom"
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              backgroundColor: newSymptom.trim() ? colors.primary : colors.surfaceMuted,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons
+              name="add"
+              size={22}
+              color={newSymptom.trim() ? colors.ink : colors.textFaint}
+            />
+          </Pressable>
+        </View>
+        {settings.customSymptoms.length > 0 && (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+            {settings.customSymptoms.map((sym) => (
+              <Pressable
+                key={sym}
+                onPress={() => removeSymptom(sym)}
+                accessibilityRole="button"
+                accessibilityLabel={`Remove ${sym}`}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 4,
+                  backgroundColor: colors.surfaceMuted,
+                  borderRadius: 99,
+                  paddingHorizontal: 12,
+                  paddingVertical: 6,
+                }}
+              >
+                <RNText
+                  style={{
+                    fontFamily: 'Inter_500Medium',
+                    fontSize: 13,
+                    color: colors.textMuted,
+                  }}
+                >
+                  {sym}
+                </RNText>
+                <Ionicons name="close" size={12} color={colors.textFaint} />
+              </Pressable>
+            ))}
+          </View>
+        )}
       </Card>
 
       {/* Security */}
@@ -300,7 +393,7 @@ export default function Settings() {
       <Card>
         <SectionLabel icon="information-circle-outline" label="About" />
         <RNText className="text-base leading-5 text-text-muted">
-          Locklune is intentionally private, with no ads and no tracking.
+          Locklune is designed for record keeping purposes only. It is not a replacement for professional medical advice. If you have any health concerns, please consult a qualified healthcare provider.
         </RNText>
         <View className="mt-4">
           <AboutRow icon="star-outline" label="Rate Locklune" onPress={() => openLink(RATE_URL)} />
@@ -308,6 +401,11 @@ export default function Settings() {
             icon="heart-outline"
             label="Support the developer"
             onPress={() => openLink(KOFI_URL)}
+          />
+          <AboutRow
+            icon="bug-outline"
+            label="Report a bug or request a feature"
+            onPress={() => openLink(FEEDBACK_URL)}
           />
           <AboutRow icon="share-social-outline" label="Tell a friend" onPress={shareApp} last />
         </View>
@@ -331,10 +429,7 @@ export default function Settings() {
           {BRAND.name} v{Constants.expoConfig?.version ?? '0.1.0'}
         </Txt>
         <Txt variant="faint" className="text-center">
-          100% on-device · encrypted · no accounts, no tracking, no network
-        </Txt>
-        <Txt variant="faint" className="text-center">
-          For educational purposes only. Not medical or health advice.
+          100% on-device · encrypted · no tracking
         </Txt>
       </View>
     </Screen>

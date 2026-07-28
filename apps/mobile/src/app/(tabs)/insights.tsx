@@ -1,14 +1,14 @@
-import { useMemo } from 'react';
-import { Alert, Pressable, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { pregnancyProgress, todayEpochDay, type Cycle } from '@locklune/core';
+import { useMemo } from 'react';
+import { Alert, Pressable, View } from 'react-native';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
 import { confidenceLabel, formatDay, relativeDays } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
-import { colors } from '../../theme/colors';
 import { useDataStore } from '../../stores/dataStore';
+import { colors } from '../../theme/colors';
 
 export default function Insights() {
   const cycles = useDataStore((s) => s.cycles);
@@ -145,7 +145,7 @@ export default function Insights() {
             </View>
           ) : (
             <View className="gap-3">
-              {prediction.upcoming.map((u, i) => (
+              {prediction.upcoming.filter((u) => u.periodStart <= today + 183).map((u, i) => (
                 <View
                   key={i}
                   className="flex-row items-center justify-between py-1"
@@ -181,7 +181,7 @@ export default function Insights() {
       )}
 
       <Txt variant="faint" className="text-center">
-        For educational purposes only. Locklune is not medical or health advice.
+        For record keeping purposes only. Locklune is not medical or health advice.
       </Txt>
     </Screen>
   );

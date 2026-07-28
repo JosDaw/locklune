@@ -1,14 +1,14 @@
-import { type ReactNode, useState } from 'react';
-import { Linking, Pressable, Text as RNText, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BRAND } from '@locklune/core';
+import { type ReactNode, useState } from 'react';
+import { Linking, Pressable, Text as RNText, View } from 'react-native';
 import { Button } from '../components/ui/Button';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
-import { colors } from '../theme/colors';
 import * as haptics from '../lib/haptics';
 import { useAuthStore } from '../stores/authStore';
+import { colors } from '../theme/colors';
 
 const PIN_LENGTH = 6;
 
@@ -83,7 +83,7 @@ export default function Onboarding() {
 
           <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((v) => !v)}>
             <RNText className="text-base leading-6 text-text">
-              I understand {BRAND.name} is for informational purposes only and is not medical or
+              I understand {BRAND.name} is for record keeping purposes only and is not medical or
               health advice.
             </RNText>
           </CheckboxRow>

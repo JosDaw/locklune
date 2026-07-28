@@ -62,9 +62,8 @@ export default function Lock() {
 
   return (
     <Screen scroll={false} contentClassName="justify-between">
-      <View className="items-center gap-2 pt-6">
+      <View className="items-center pt-6">
         <Txt variant="display">{BRAND.name}</Txt>
-        <Txt variant="muted">Enter your PIN to unlock</Txt>
       </View>
 
       {busy ? (

@@ -1,6 +1,6 @@
 import { Card as GSCard } from '../gs/card';
 
-/** Soft, lifted card — large radius and a gentle shadow over the moonlit backdrop. */
+/** Soft, lifted card - large radius and a gentle shadow over the moonlit backdrop. */
 const cardShadow = {
   shadowColor: '#000000',
   shadowOpacity: 0.3,

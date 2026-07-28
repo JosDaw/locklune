@@ -5,7 +5,6 @@
  * Nothing here ever leaves the device. The vault descriptor is stored in the
  * hardware-backed keystore and is useless without the PIN.
  */
-import * as SecureStore from 'expo-secure-store';
 import {
   attemptsRemaining,
   changePin as changePinCore,
@@ -17,6 +16,7 @@ import {
   VaultAuthError,
   type VaultMeta,
 } from '@locklune/core';
+import * as SecureStore from 'expo-secure-store';
 import { deviceRng } from './rng';
 
 const META_KEY = 'locklune.vault.v1';
@@ -104,7 +104,7 @@ export async function unlockWithPin(pin: string): Promise<UnlockResult> {
     if (err instanceof VaultAuthError) {
       const count = state.count + 1;
       const now = Date.now();
-      // Too many wrong attempts — signal a full erase (handled by the auth store).
+      // Too many wrong attempts - signal a full erase (handled by the auth store).
       if (shouldWipe(count)) return { ok: false, wiped: true };
       await saveAttempts({ count, lastFailedAt: now });
       return {

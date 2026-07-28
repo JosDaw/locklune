@@ -1,5 +1,5 @@
 /**
- * App-wide toast messages, usable from anywhere — React components, Zustand
+ * App-wide toast messages, usable from anywhere - React components, Zustand
  * stores, and plain libs alike. A single <ToastProvider/> registers the handler
  * on mount; these functions are the imperative API everything else calls.
  *

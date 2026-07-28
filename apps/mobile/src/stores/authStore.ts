@@ -1,9 +1,16 @@
-import { create } from 'zustand';
 import { MAX_PIN_ATTEMPTS } from '@locklune/core';
+import { create } from 'zustand';
 import { closeDb, deleteDb, openEncryptedDb } from '../lib/db';
 import { cancelAllReminders } from '../lib/notifications';
 import * as toast from '../lib/toast';
-import { changeVaultPin, checkDestructPin, hasVault, initVault, unlockWithPin, wipeVault } from '../lib/vault';
+import {
+    changeVaultPin,
+    checkDestructPin,
+    hasVault,
+    initVault,
+    unlockWithPin,
+    wipeVault,
+} from '../lib/vault';
 import { useDataStore } from './dataStore';
 
 type Status = 'loading' | 'onboarding' | 'locked' | 'unlocked';
@@ -40,7 +47,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const exists = await hasVault();
       set({ status: exists ? 'locked' : 'onboarding' });
     } catch {
-      // Keystore read failed — safest is to present the lock screen rather than
+      // Keystore read failed - safest is to present the lock screen rather than
       // wrongly offering onboarding (which could overwrite an existing vault).
       toast.error('Could not read secure storage.');
       set({ status: 'locked' });
@@ -69,11 +76,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return true;
     }
     if (res.wiped) {
-      // Too many wrong PINs — erase everything and return to onboarding.
+      // Too many wrong PINs - erase everything and return to onboarding.
       await get().wipe();
       return false;
     }
-    // Wrong PIN — check for the self-destruct PIN before recording the failed attempt.
+    // Wrong PIN - check for the self-destruct PIN before recording the failed attempt.
     if (await checkDestructPin(pin)) {
       await get().wipe();
       return false;

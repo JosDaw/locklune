@@ -54,7 +54,7 @@ describe('predict', () => {
   });
 
   it('adapts toward recent cycle length', () => {
-    // older long cycles, recent short ones — recency weighting pulls the mean down
+    // older long cycles, recent short ones - recency weighting pulls the mean down
     const p = predict(cyclesFromLengths(0, [34, 34, 26, 26, 26]));
     expect(p.averageCycleLength).toBeLessThan(30);
     expect(p.averageCycleLength).toBeGreaterThan(26);
@@ -63,10 +63,8 @@ describe('predict', () => {
   it('widens the uncertainty window further into the future', () => {
     const p = predict(cyclesFromLengths(0, [24, 33, 26, 31, 28]));
     expect(p.variability).toBeGreaterThan(0);
-    const spread0 =
-      p.upcoming[0]!.periodStartRange.end - p.upcoming[0]!.periodStartRange.start;
-    const spread2 =
-      p.upcoming[2]!.periodStartRange.end - p.upcoming[2]!.periodStartRange.start;
+    const spread0 = p.upcoming[0]!.periodStartRange.end - p.upcoming[0]!.periodStartRange.start;
+    const spread2 = p.upcoming[2]!.periodStartRange.end - p.upcoming[2]!.periodStartRange.start;
     expect(spread2).toBeGreaterThan(spread0);
   });
 

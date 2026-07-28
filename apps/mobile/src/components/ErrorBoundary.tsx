@@ -1,7 +1,7 @@
 import { Component, type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { colors } from '../theme/colors';
 import { useAuthStore } from '../stores/authStore';
+import { colors } from '../theme/colors';
 
 interface Props {
   children: ReactNode;
@@ -15,7 +15,7 @@ interface State {
  * Catches render errors anywhere below it and shows a calm, on-brand fallback
  * instead of a white screen. Deliberately built from plain primitives with inline
  * styles (no themed components that could themselves be the crash) and, true to
- * Locklune, it reports nothing anywhere — it just lets the user recover.
+ * Locklune, it reports nothing anywhere - it just lets the user recover.
  */
 export class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null };

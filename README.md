@@ -1,12 +1,12 @@
 # Locklune
 
-**A 100% on-device, encrypted, zero-tracking period tracker** — plus its privacy/marketing site, in one monorepo.
+**A 100% on-device, encrypted, zero-tracking period tracker** - plus its privacy/marketing site, in one monorepo.
 
 _"lock" (privacy/security) + "lune" (moon/cycle)._
 
 Locklune keeps everything on your phone: no account, no cloud, no analytics, no network code at all. The only credential is a PIN, which derives the key that encrypts your data. It logs periods and symptoms and predicts upcoming periods, fertile windows and ovulation with an adaptive, on-device model.
 
-> **Important:** Predictions are estimates for awareness only — **not** medical or contraceptive advice. Because data is encrypted with your PIN and never leaves the device, **a forgotten PIN means the data is unrecoverable** (by design).
+> **Important:** Predictions are estimates for awareness only - **not** medical or contraceptive advice. Because data is encrypted with your PIN and never leaves the device, **a forgotten PIN means the data is unrecoverable** (by design).
 
 ## Monorepo layout
 
@@ -34,7 +34,7 @@ The pure crypto + prediction logic lives in `packages/core` and is unit-tested (
 ## Prerequisites
 
 - Node ≥ 22.11
-- For the mobile app on a device/simulator: Xcode (iOS) and/or Android Studio. **SQLCipher requires a dev/prebuild build — the app does not run in Expo Go.**
+- For the mobile app on a device/simulator: Xcode (iOS) and/or Android Studio. **SQLCipher requires a dev/prebuild build - the app does not run in Expo Go.**
 
 ## Commands
 

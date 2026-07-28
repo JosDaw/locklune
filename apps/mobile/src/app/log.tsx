@@ -1,8 +1,19 @@
-import { useEffect, useState } from 'react';
-import { Alert, LayoutAnimation, Platform, Pressable, UIManager, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { cycleForDay, Flow, Mood, pregnancyProgress, todayEpochDay, type EpochDay } from '@locklune/core';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Alert,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  UIManager,
+  View,
+} from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Switch } from '../components/gs/switch';
 import { Textarea, TextareaInput } from '../components/gs/textarea';
 import { Button } from '../components/ui/Button';
@@ -10,15 +21,8 @@ import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
 import { formatDay } from '../lib/format';
 import * as haptics from '../lib/haptics';
-import { colors } from '../theme/colors';
 import { useDataStore } from '../stores/dataStore';
-
-const FLOW_OPTIONS: { label: string; value: Flow }[] = [
-  { label: 'Spotting', value: Flow.Spotting },
-  { label: 'Light', value: Flow.Light },
-  { label: 'Medium', value: Flow.Medium },
-  { label: 'Heavy', value: Flow.Heavy },
-];
+import { colors } from '../theme/colors';
 
 const MOOD_OPTIONS: { icon: keyof typeof MaterialCommunityIcons.glyphMap; value: Mood }[] = [
   { icon: 'emoticon-cry-outline', value: Mood.Awful },
@@ -28,34 +32,31 @@ const MOOD_OPTIONS: { icon: keyof typeof MaterialCommunityIcons.glyphMap; value:
   { icon: 'emoticon-excited-outline', value: Mood.Great },
 ];
 
-const SYMPTOMS_INITIAL = ['cramps', 'headache', 'fatigue'];
+const MOOD_COLOR_MAP: Record<number, string> = {
+  1: '#94A3B8',
+  2: '#7DD3FC',
+  3: '#86EFAC',
+  4: '#FDE68A',
+  5: '#FCA5A5',
+};
 
-const SYMPTOMS_MORE = [
-  'bloating',
-  'nausea',
-  'back pain',
-  'mood swings',
-  'tender breasts',
-  'insomnia',
-  'cravings',
-  'acne',
-  'dizziness',
-  'anxiety',
-  'irritability',
-  'spotting',
-  'discharge',
-  'heartburn',
-  'constipation',
-  'hot flashes',
-  'swelling',
-  'brain fog',
-  'night sweats',
-  'low energy',
-  'skin changes',
-  'hair changes',
+const FLOW_OPTIONS: { label: string; value: Flow; drops: number }[] = [
+  { label: 'Spotting', value: Flow.Spotting, drops: 1 },
+  { label: 'Light', value: Flow.Light, drops: 2 },
+  { label: 'Medium', value: Flow.Medium, drops: 3 },
+  { label: 'Heavy', value: Flow.Heavy, drops: 4 },
 ];
 
-const ALL_SYMPTOMS = [...SYMPTOMS_INITIAL, ...SYMPTOMS_MORE];
+const SYMPTOM_CATEGORIES: { name: string; icon: keyof typeof Ionicons.glyphMap; items: string[] }[] = [
+  { name: 'Common',  icon: 'star-outline',        items: ['cramps', 'headache', 'fatigue', 'bloating', 'nausea'] },
+  { name: 'Pain',     icon: 'bandage-outline',      items: ['back pain', 'tender breasts', 'hot flashes', 'dizziness', 'swelling'] },
+  { name: 'Sleep',    icon: 'moon-outline',         items: ['insomnia', 'night sweats', 'low energy'] },
+  { name: 'Mind',     icon: 'bulb-outline',         items: ['mood swings', 'anxiety', 'irritability', 'brain fog'] },
+  { name: 'Gut',      icon: 'nutrition-outline',    items: ['heartburn', 'constipation', 'diarrhea', 'nausea', 'bloating'] },
+  { name: 'Skin',     icon: 'sparkles-outline',     items: ['acne', 'spotting', 'discharge', 'skin changes', 'hair changes'] },
+];
+
+type OrigLog = { flow: Flow | null; mood: Mood | null; syms: string[]; note: string; ov: boolean; temp: string };
 
 export default function LogModal() {
   const router = useRouter();
@@ -72,18 +73,25 @@ export default function LogModal() {
   const settings = useDataStore((s) => s.settings);
 
   const pregnant = settings.cycleMode === 'pregnant';
+  const fertilityTracking = settings.cycleMode !== 'pregnant' && settings.cycleMode !== 'period_only';
   const preg =
     pregnant && settings.pregnancyDueDay != null
       ? pregnancyProgress(settings.pregnancyDueDay, day)
       : null;
+
+  const lastCycle = cycles[cycles.length - 1];
+  const cycleDay = lastCycle && day >= lastCycle.startDay ? day - lastCycle.startDay + 1 : 0;
 
   const [flow, setFlow] = useState<Flow | null>(null);
   const [mood, setMood] = useState<Mood | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [ovulation, setOvulation] = useState(false);
+  const [temp, setTemp] = useState('');
   const [loaded, setLoaded] = useState(false);
-  const [showMoreSymptoms, setShowMoreSymptoms] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [origLog, setOrigLog] = useState<OrigLog | null>(null);
+  const [justSaved, setJustSaved] = useState(false);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -101,8 +109,25 @@ export default function LogModal() {
         setSymptoms(log.symptoms);
         setNote(log.note ?? '');
         setOvulation(log.ovulation);
-        // Auto-expand if any saved symptoms are in the hidden section.
-        if (log.symptoms.some((s) => SYMPTOMS_MORE.includes(s))) setShowMoreSymptoms(true);
+        const tempStr = log.temperature != null ? String(log.temperature) : '';
+        setTemp(tempStr);
+        setOrigLog({
+          flow: log.flow,
+          mood: log.mood,
+          syms: log.symptoms,
+          note: log.note ?? '',
+          ov: log.ovulation,
+          temp: tempStr,
+        });
+        const hasData =
+          log.flow != null ||
+          log.mood != null ||
+          log.symptoms.length > 0 ||
+          (log.note ?? '') !== '' ||
+          log.ovulation;
+        if (hasData) setExpanded(true);
+      } else {
+        setOrigLog({ flow: null, mood: null, syms: [], note: '', ov: false, temp: '' });
       }
       setLoaded(true);
     });
@@ -111,8 +136,33 @@ export default function LogModal() {
     };
   }, [day, getDayLog]);
 
+  const isDirty = useMemo(() => {
+    if (!loaded) return false;
+    const base = origLog ?? { flow: null, mood: null, syms: [], note: '', ov: false, temp: '' };
+    return (
+      flow !== base.flow ||
+      mood !== base.mood ||
+      note.trim() !== base.note ||
+      ovulation !== base.ov ||
+      temp.trim() !== base.temp ||
+      [...symptoms].sort().join('|') !== [...base.syms].sort().join('|')
+    );
+  }, [loaded, origLog, flow, mood, note, ovulation, symptoms, temp]);
+
   const toggleSymptom = (s: string) =>
     setSymptoms((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+
+  const handleMoodSelect = (m: Mood) => {
+    setMood((prev) => (prev === m ? null : m));
+    if (!expanded) {
+      LayoutAnimation.configureNext({
+        duration: 380,
+        create: { type: 'easeInEaseOut', property: 'opacity' },
+        update: { type: 'spring', springDamping: 0.8 },
+      });
+      setExpanded(true);
+    }
+  };
 
   // Where this day sits relative to recorded cycles, so we can offer the right action.
   const status = cycleForDay(cycles, day, today);
@@ -139,7 +189,7 @@ export default function LogModal() {
     haptics.warn();
     Alert.alert(
       'Remove period start?',
-      'This deletes this period from your history. Symptom logs for these days are kept.',
+      'This deletes this period and all logs (symptoms, flow, notes) for those days.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -152,35 +202,55 @@ export default function LogModal() {
   };
 
   const save = async () => {
-    if (await logDay({ day, flow, mood, symptoms, note: note.trim() || null, ovulation })) {
+    const parsedTemp = temp.trim() ? parseFloat(temp.trim()) : null;
+    const temperature = parsedTemp !== null && isFinite(parsedTemp) ? parsedTemp : null;
+    if (await logDay({ day, flow, mood, symptoms, note: note.trim() || null, ovulation, temperature })) {
       haptics.success();
-      router.back();
+      setOrigLog({ flow, mood, syms: symptoms, note: note.trim(), ov: ovulation, temp: temp.trim() });
+      setJustSaved(true);
+      setTimeout(() => router.back(), 700);
     }
   };
 
+  const saveLabel = justSaved ? '✓ Saved' : isDirty ? 'Save changes' : 'Save';
+
   return (
     <Screen>
-      <View className="flex-row items-center justify-between pt-2">
-        <Txt variant="title">
-          {formatDay(day, { weekday: 'long', month: 'long', day: 'numeric' })}
-        </Txt>
-        <Pressable
-          onPress={() => router.back()}
-          accessibilityRole="button"
-          accessibilityLabel="Close"
-          className="h-9 w-9 items-center justify-center rounded-full bg-surfaceMuted"
-        >
-          <Ionicons name="close" size={20} color={colors.text} />
-        </Pressable>
+      {/* Header */}
+      <View style={{ paddingTop: 8, paddingBottom: 20 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 32, color: colors.moon }}>
+              {formatDay(day, { weekday: 'long' })}
+            </Text>
+            <Txt variant="heading">{formatDay(day, { month: 'long', day: 'numeric' })}</Txt>
+            {!pregnant && cycleDay > 0 && cycleDay <= 60 && (
+              <Txt variant="faint">Day {cycleDay} of your cycle</Txt>
+            )}
+            {pregnant && preg && <Txt variant="faint">Week {preg.week} of pregnancy</Txt>}
+          </View>
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            accessibilityLabel="Close"
+            className="h-9 w-9 items-center justify-center rounded-full bg-surfaceMuted"
+          >
+            <Ionicons name="close" size={20} color={colors.text} />
+          </Pressable>
+        </View>
       </View>
 
-      {pregnant ? (
+      {/* Pregnancy info */}
+      {pregnant && (
         <View className="rounded-2xl border border-border bg-surface p-4 gap-2">
           {preg ? (
             <>
-              <Txt variant="label" className="text-primary-soft">Pregnancy</Txt>
+              <Txt variant="label" className="text-primary-soft">
+                Pregnancy
+              </Txt>
               <Txt variant="display">
-                Week {preg.week}{preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
+                Week {preg.week}
+                {preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
               </Txt>
               <Txt variant="muted">
                 Trimester {preg.trimester} ·{' '}
@@ -194,170 +264,403 @@ export default function LogModal() {
             </>
           ) : (
             <>
-              <Txt variant="label" className="text-primary-soft">Pregnancy</Txt>
+              <Txt variant="label" className="text-primary-soft">
+                Pregnancy
+              </Txt>
               <Txt variant="muted">
                 Set how many weeks along you are in Settings to track your pregnancy.
               </Txt>
             </>
           )}
         </View>
-      ) : (
+      )}
+
+      {/* Mood */}
+      <View style={{ gap: 14 }}>
+        {expanded ? (
+          <Txt variant="label">Mood</Txt>
+        ) : (
+          <Text style={{ fontFamily: 'Manrope_600SemiBold', fontSize: 22, color: colors.text }}>
+            How are you feeling today?
+          </Text>
+        )}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          {MOOD_OPTIONS.map((o) => (
+            <MoodButton
+              key={o.value}
+              option={o}
+              selected={mood === o.value}
+              expanded={expanded}
+              onPress={() => handleMoodSelect(o.value)}
+            />
+          ))}
+        </View>
+      </View>
+
+      {/* Expanded content */}
+      {expanded && (
         <>
-          <View className="gap-3">
-            <Txt variant="label">Period</Txt>
-            {day > today ? (
-              <Txt variant="faint">You can mark a period once the day has arrived.</Txt>
-            ) : !status.isBleedDay ? (
-              <Button
-                title="Mark period started this day"
-                variant="secondary"
-                onPress={() => void markStart()}
-              />
-            ) : (
-              <View className="gap-2">
-                <View className="rounded-2xl border border-period/40 bg-surface p-3">
-                  <Txt variant="body">{status.isStart ? 'Period started this day' : 'Period day'}</Txt>
-                  {!status.isStart && c && <Txt variant="faint">Started {formatDay(c.startDay)}</Txt>}
-                  {isEndDay && <Txt variant="faint">Marked as the last day</Txt>}
-                  {isOngoing && !status.isStart && <Txt variant="faint">Period ongoing</Txt>}
+          {!pregnant && (
+            <View style={{ gap: 12 }}>
+              <Txt variant="label">Period</Txt>
+              {day > today ? (
+                <Txt variant="faint">You can mark a period once the day has arrived.</Txt>
+              ) : !status.isBleedDay ? (
+                <Button
+                  title="Mark period started this day"
+                  variant="secondary"
+                  onPress={() => void markStart()}
+                />
+              ) : (
+                <View className="gap-2">
+                  <View className="rounded-2xl border border-period/40 bg-surface p-3">
+                    <Txt variant="body">
+                      {status.isStart ? 'Period started this day' : 'Period day'}
+                    </Txt>
+                    {!status.isStart && c && (
+                      <Txt variant="faint">Started {formatDay(c.startDay)}</Txt>
+                    )}
+                    {isEndDay && <Txt variant="faint">Marked as the last day</Txt>}
+                    {isOngoing && !status.isStart && <Txt variant="faint">Period ongoing</Txt>}
+                  </View>
+                  <View className="flex-row gap-2">
+                    {canSetEnd && (
+                      <Button
+                        title="Mark as last day"
+                        variant="ghost"
+                        onPress={() => void setEnd()}
+                        containerStyle={{ flex: 1 }}
+                      />
+                    )}
+                    {isEndDay && (
+                      <Button
+                        title="Clear end date"
+                        variant="ghost"
+                        onPress={() => void clearEnd()}
+                        containerStyle={{ flex: 1 }}
+                      />
+                    )}
+                    {status.isStart && (
+                      <Button
+                        title="Remove period start"
+                        variant="danger"
+                        onPress={removeStart}
+                        containerStyle={{ flex: 1 }}
+                      />
+                    )}
+                  </View>
                 </View>
-                {canSetEnd && (
-                  <Button title="Mark as my last day" variant="ghost" onPress={() => void setEnd()} />
-                )}
-                {isEndDay && (
-                  <Button title="Clear end date" variant="ghost" onPress={() => void clearEnd()} />
-                )}
-                {status.isStart && (
-                  <Button title="Remove period start" variant="danger" onPress={removeStart} />
-                )}
-              </View>
-            )}
+              )}
+            </View>
+          )}
+
+          {!pregnant && (
+            <View style={{ gap: 12 }}>
+              <Txt variant="label">Flow</Txt>
+              <FlowPicker value={flow} onChange={(f) => setFlow((prev) => (prev === f ? null : f))} />
+            </View>
+          )}
+
+          <View style={{ gap: 12 }}>
+            <Txt variant="label">Symptoms</Txt>
+            <SymptomPicker
+              symptoms={symptoms}
+              onToggle={toggleSymptom}
+              customSymptoms={settings.customSymptoms}
+            />
           </View>
 
-          <View className="gap-3">
-            <Txt variant="label">Flow</Txt>
-            <View className="flex-row gap-2">
-              {FLOW_OPTIONS.map((o) => (
-                <Chip
-                  key={o.value}
-                  label={o.label}
-                  active={flow === o.value}
-                  onPress={() => setFlow((f) => (f === o.value ? null : o.value))}
-                  activeClass="bg-period"
-                />
-              ))}
-            </View>
+          <View style={{ gap: 12 }}>
+            <Txt variant="label">Notes</Txt>
+            <Textarea className="rounded-2xl border-border bg-surface" style={{ minHeight: 100 }}>
+              <TextareaInput
+                value={note}
+                onChangeText={setNote}
+                placeholder="Anything you'd like to remember about today?"
+                placeholderTextColor={colors.textFaint}
+                multiline
+                textAlignVertical="top"
+                className="text-text"
+                style={{ paddingHorizontal: 14, paddingVertical: 12, minHeight: 100 }}
+              />
+            </Textarea>
           </View>
+
+          {fertilityTracking && (
+            <View className="flex-row items-center justify-between">
+              <View className="flex-1 pr-4">
+                <Txt variant="label">Ovulation</Txt>
+                <Txt variant="faint" className="mt-1">
+                  Confirmed today, e.g. a positive test. Improves your predictions.
+                </Txt>
+              </View>
+              <Switch
+                value={ovulation}
+                onValueChange={setOvulation}
+                trackColor={{ false: colors.surfaceMuted, true: colors.primary }}
+                thumbColor={colors.moon}
+              />
+            </View>
+          )}
+
+          {fertilityTracking && (
+            <View style={{ gap: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+                <Txt variant="label">Temperature</Txt>
+                <Txt variant="faint">BBT · °C</Txt>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <TextInput
+                  value={temp}
+                  onChangeText={setTemp}
+                  keyboardType="decimal-pad"
+                  placeholder="36.70"
+                  placeholderTextColor={colors.textFaint}
+                  style={{
+                    flex: 1,
+                    backgroundColor: colors.surfaceMuted,
+                    borderRadius: 14,
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    color: colors.text,
+                    fontFamily: 'Inter_400Regular',
+                    fontSize: 15,
+                  }}
+                />
+                {temp.trim() !== '' && (
+                  <Pressable onPress={() => setTemp('')} accessibilityLabel="Clear temperature">
+                    <Ionicons name="close-circle" size={20} color={colors.textFaint} />
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          )}
         </>
       )}
 
-      <View className="gap-3">
-        <Txt variant="label">Mood</Txt>
-        <View className="flex-row justify-between">
-          {MOOD_OPTIONS.map((o) => (
-            <Pressable
-              key={o.value}
-              onPress={() => setMood((m) => (m === o.value ? null : o.value))}
-              className={`h-14 w-14 items-center justify-center rounded-full ${mood === o.value ? 'bg-primary' : 'bg-surfaceMuted'}`}
-            >
-              <MaterialCommunityIcons
-                name={o.icon}
-                size={28}
-                color={mood === o.value ? colors.ink : colors.textMuted}
-              />
-            </Pressable>
-          ))}
-        </View>
-      </View>
-
-      <View className="gap-3">
-        <Txt variant="label">Symptoms</Txt>
-        <View className="flex-row flex-wrap gap-2">
-          {SYMPTOMS_INITIAL.map((s) => (
-            <Chip key={s} label={s} active={symptoms.includes(s)} onPress={() => toggleSymptom(s)} />
-          ))}
-          {showMoreSymptoms &&
-            SYMPTOMS_MORE.map((s) => (
-              <Chip
-                key={s}
-                label={s}
-                active={symptoms.includes(s)}
-                onPress={() => toggleSymptom(s)}
-              />
-            ))}
-        </View>
-        <Pressable
-          onPress={() => {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            setShowMoreSymptoms((v) => !v);
-          }}
-          className="flex-row items-center gap-1.5"
-          accessibilityRole="button"
-          accessibilityLabel={showMoreSymptoms ? 'Show fewer symptoms' : 'Show more symptoms'}
-        >
-          <Txt variant="faint">{showMoreSymptoms ? 'Show less' : 'Show more'}</Txt>
-          <Ionicons
-            name={showMoreSymptoms ? 'chevron-up' : 'chevron-down'}
-            size={13}
-            color={colors.textFaint}
-          />
-        </Pressable>
-      </View>
-
-      {!pregnant && (
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1 pr-4">
-            <Txt variant="label">Ovulation</Txt>
-            <Txt variant="faint" className="mt-1">
-              Confirmed today, e.g. a positive test. Improves your predictions.
-            </Txt>
-          </View>
-          <Switch
-            value={ovulation}
-            onValueChange={setOvulation}
-            trackColor={{ false: colors.surfaceMuted, true: colors.primary }}
-            thumbColor={colors.moon}
-          />
-        </View>
-      )}
-
-      <View className="gap-3">
-        <Txt variant="label">Note</Txt>
-        <Textarea className="min-h-24 rounded-2xl border-border bg-surface">
-          <TextareaInput
-            value={note}
-            onChangeText={setNote}
-            placeholder="Anything you want to remember…"
-            placeholderTextColor="#94A3B8"
-            multiline
-            textAlignVertical="top"
-            className="text-text"
-          />
-        </Textarea>
-      </View>
-
-      <Button title="Save" loading={!loaded} onPress={() => void save()} />
+      <Button title={saveLabel} loading={!loaded} onPress={() => void save()} />
     </Screen>
   );
 }
 
-function Chip({
-  label,
-  active,
+/* ------------------------------------------------------------------ */
+
+const MOOD_SPRING = { damping: 15, stiffness: 320, mass: 0.5 } as const;
+
+function MoodButton({
+  option,
+  selected,
   onPress,
-  activeClass = 'bg-primary',
+  expanded,
 }: {
-  label: string;
-  active: boolean;
+  option: { icon: keyof typeof MaterialCommunityIcons.glyphMap; value: Mood };
+  selected: boolean;
   onPress: () => void;
-  activeClass?: string;
+  expanded: boolean;
 }) {
+  const scale = useSharedValue(1);
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const size = expanded ? 52 : 60;
+  const color = MOOD_COLOR_MAP[option.value];
+
   return (
-    <Pressable
-      onPress={onPress}
-      className={`rounded-full px-4 py-2 ${active ? activeClass : 'bg-surfaceMuted'}`}
-    >
-      <Txt className={active ? 'text-ink' : 'text-text-muted'}>{label}</Txt>
-    </Pressable>
+    <Animated.View style={anim}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => {
+          scale.value = withSpring(0.9, MOOD_SPRING);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, MOOD_SPRING);
+        }}
+        accessibilityRole="button"
+        style={{
+          width: size,
+          height: size,
+          borderRadius: 999,
+          alignItems: 'center',
+          justifyContent: 'center',
+          ...(selected
+            ? {
+                backgroundColor: 'rgba(110,168,254,0.12)',
+                borderWidth: 1.5,
+                borderColor: colors.primary,
+                // elevation on circular Android views creates a hexagonal shadow
+                ...(Platform.OS !== 'android' && {
+                  shadowColor: color,
+                  shadowOpacity: 0.4,
+                  shadowRadius: 10,
+                  shadowOffset: { width: 0, height: 0 },
+                }),
+              }
+            : { backgroundColor: colors.surfaceMuted }),
+        }}
+      >
+        <MaterialCommunityIcons
+          name={option.icon}
+          size={expanded ? 26 : 32}
+          color={selected ? color : colors.textMuted}
+        />
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function FlowPicker({ value, onChange }: { value: Flow | null; onChange: (f: Flow) => void }) {
+  return (
+    <View style={{ flexDirection: 'row', gap: 8 }}>
+      {FLOW_OPTIONS.map((o) => {
+        const selected = value === o.value;
+        return (
+          <Pressable
+            key={o.value}
+            onPress={() => onChange(o.value)}
+            accessibilityRole="button"
+            accessibilityLabel={o.label}
+            style={{
+              flex: 1,
+              borderRadius: 16,
+              paddingVertical: 12,
+              gap: 8,
+              alignItems: 'center',
+              ...(selected
+                ? {
+                    borderWidth: 1,
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(110,168,254,0.12)',
+                  }
+                : { backgroundColor: colors.surfaceMuted }),
+            }}
+          >
+            <View style={{ flexDirection: 'row', gap: 1 }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Ionicons
+                  key={i}
+                  name={i < o.drops ? 'water' : 'water-outline'}
+                  size={13}
+                  color={
+                    i < o.drops
+                      ? selected
+                        ? colors.primary
+                        : colors.textMuted
+                      : 'rgba(255,255,255,0.12)'
+                  }
+                />
+              ))}
+            </View>
+            <Txt
+              className={selected ? 'text-primary-soft' : 'text-text-muted'}
+              variant="faint"
+            >
+              {o.label}
+            </Txt>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
+function SymptomPicker({
+  symptoms,
+  onToggle,
+  customSymptoms = [],
+}: {
+  symptoms: string[];
+  onToggle: (s: string) => void;
+  customSymptoms?: string[];
+}) {
+  const allCategories = useMemo(() => {
+    if (customSymptoms.length === 0) return SYMPTOM_CATEGORIES;
+    return [
+      ...SYMPTOM_CATEGORIES,
+      { name: 'Custom', icon: 'pricetag-outline' as keyof typeof Ionicons.glyphMap, items: customSymptoms },
+    ];
+  }, [customSymptoms]);
+
+  const [cat, setCat] = useState(0);
+  const safecat = cat < allCategories.length ? cat : 0;
+  const items = allCategories[safecat]!.items;
+
+  return (
+    <View style={{ gap: 12 }}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8 }}
+      >
+        {allCategories.map((category, i) => {
+          const active = safecat === i;
+          return (
+            <Pressable
+              key={category.name}
+              onPress={() => setCat(i)}
+              style={{
+                borderRadius: 99,
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                backgroundColor: active ? colors.primary : colors.surfaceMuted,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <Ionicons
+                  name={category.icon}
+                  size={12}
+                  color={active ? colors.ink : colors.textMuted}
+                />
+                <Text
+                  style={{
+                    fontFamily: 'Inter_500Medium',
+                    fontSize: 12,
+                    color: active ? colors.ink : colors.textMuted,
+                  }}
+                >
+                  {category.name}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        {items.map((s) => {
+          const active = symptoms.includes(s);
+          return (
+            <Pressable
+              key={s}
+              onPress={() => onToggle(s)}
+              style={{
+                borderRadius: 99,
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                backgroundColor: active ? colors.primary : colors.surfaceMuted,
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: 'Inter_500Medium',
+                  fontSize: 13,
+                  color: active ? colors.ink : colors.textMuted,
+                }}
+              >
+                {s}
+              </Text>
+            </Pressable>
+          );
+        })}
+        {items.length === 0 && (
+          <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 13, color: colors.textFaint }}>
+            No custom symptoms yet. Add them in Settings.
+          </Text>
+        )}
+      </View>
+
+      {symptoms.length > 0 && (
+        <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 11, color: colors.textFaint }}>
+          Selected: {symptoms.join(', ')}
+        </Text>
+      )}
+    </View>
   );
 }

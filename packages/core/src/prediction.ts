@@ -1,18 +1,18 @@
 import { addDays } from './dates.js';
 import {
-  DEFAULT_SETTINGS,
-  isHormonalContraception,
-  type Confidence,
-  type Cycle,
-  type CycleMode,
-  type CyclePrediction,
-  type EpochDay,
-  type Prediction,
-  type Settings,
+    DEFAULT_SETTINGS,
+    isHormonalContraception,
+    type Confidence,
+    type Cycle,
+    type CycleMode,
+    type CyclePrediction,
+    type EpochDay,
+    type Prediction,
+    type Settings,
 } from './types.js';
 
 /**
- * Adaptive, research-informed cycle prediction — all computed on the fly from
+ * Adaptive, research-informed cycle prediction - all computed on the fly from
  * the user's own history, nothing stored.
  *
  * Approach (a lightweight approximation of the state-space / hierarchical-Bayes
@@ -26,7 +26,7 @@ import {
  *    (nextPeriodStart − lutealPhaseDays); the fertile window spans sperm (~5d)
  *    and egg (~1d) viability.
  *
- * This is informational only — NOT medical advice or a contraceptive method.
+ * This is informational only - NOT medical advice or a contraceptive method.
  */
 
 /** Plausible cycle-length band; values outside are treated as logging errors. */
@@ -139,9 +139,7 @@ export function predict(
   const weights = recencyWeights(recent.length);
 
   const usingDefaults = recent.length === 0;
-  const averageCycleLength = usingDefaults
-    ? cfg.defaultCycleLength
-    : weightedMean(recent, weights);
+  const averageCycleLength = usingDefaults ? cfg.defaultCycleLength : weightedMean(recent, weights);
   const variability = usingDefaults
     ? DEFAULT_VARIABILITY
     : weightedStdDev(recent, weights, averageCycleLength);
@@ -155,6 +153,7 @@ export function predict(
   // (hormonal) contraception.
   const fertilityApplicable =
     mode !== 'pregnant' &&
+    mode !== 'period_only' &&
     !(mode === 'contraception' && isHormonalContraception(cfg.contraceptionMethod));
 
   // Confirmed ovulations refine the luteal phase and can anchor the next period.

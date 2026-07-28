@@ -2,13 +2,6 @@ import { StyleSheet, View, type DimensionValue } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../../theme/colors';
 
-/** Concentric soft circles fake a radial moon-glow (RN gradients are linear only). */
-const GLOW = [
-  { size: 380, opacity: 0.05 },
-  { size: 280, opacity: 0.06 },
-  { size: 180, opacity: 0.08 },
-];
-
 /** Scattered, barely-there stars. Percent positions keep them spread on any screen. */
 const STARS: { top: DimensionValue; left: DimensionValue; size: number; opacity: number }[] = [
   { top: '6%', left: '16%', size: 2, opacity: 0.5 },
@@ -37,21 +30,6 @@ export function Background() {
         end={{ x: 0, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      <View style={styles.glowWrap} pointerEvents="none">
-        {GLOW.map((g) => (
-          <View
-            key={g.size}
-            style={{
-              position: 'absolute',
-              width: g.size,
-              height: g.size,
-              borderRadius: g.size / 2,
-              backgroundColor: colors.primary,
-              opacity: g.opacity,
-            }}
-          />
-        ))}
-      </View>
       {STARS.map((s, i) => (
         <View
           key={i}
@@ -71,14 +49,3 @@ export function Background() {
   );
 }
 
-const styles = StyleSheet.create({
-  glowWrap: {
-    position: 'absolute',
-    top: -140,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 380,
-  },
-});

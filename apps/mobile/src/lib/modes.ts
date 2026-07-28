@@ -2,6 +2,11 @@ import type { ContraceptionMethod, CycleMode } from '@locklune/core';
 
 export const CYCLE_MODES: { value: CycleMode; label: string; hint: string }[] = [
   { value: 'tracking', label: 'Tracking my cycle', hint: 'Period and fertility estimates' },
+  {
+    value: 'period_only',
+    label: 'Period tracking only',
+    hint: 'Periods only - fertility content hidden',
+  },
   { value: 'trying', label: 'Trying to conceive', hint: 'Focus on your fertile window' },
   {
     value: 'contraception',

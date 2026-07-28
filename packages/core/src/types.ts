@@ -55,10 +55,12 @@ export interface DayLog {
    * next-period prediction. See {@link ./prediction.ts}.
    */
   ovulation: boolean;
+  /** Basal body temperature in °C, if logged. */
+  temperature: number | null;
 }
 
 /** How the app interprets cycles for the user's current life stage. */
-export type CycleMode = 'tracking' | 'trying' | 'contraception' | 'pregnant';
+export type CycleMode = 'tracking' | 'period_only' | 'trying' | 'contraception' | 'pregnant';
 
 /** Contraception method (only relevant in 'contraception' mode). */
 export type ContraceptionMethod =
@@ -114,6 +116,8 @@ export interface Settings {
    * recorded after this date.
    */
   postPregnancyAnchorDay: EpochDay | null;
+  /** User-defined symptom tags added on top of the built-in categories. */
+  customSymptoms: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -126,6 +130,7 @@ export const DEFAULT_SETTINGS: Settings = {
   contraceptionMethod: 'none',
   pregnancyDueDay: null,
   postPregnancyAnchorDay: null,
+  customSymptoms: [],
 };
 
 /** Confidence tier attached to a prediction. */

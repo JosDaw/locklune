@@ -3,6 +3,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import type { StyleProp, ViewStyle } from 'react-native';
 import { Button as GSButton, ButtonSpinner, ButtonText } from '../gs/button';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -32,6 +33,7 @@ export function Button({
   loading = false,
   disabled,
   className,
+  containerStyle,
   onPressIn: callerPressIn,
   onPressOut: callerPressOut,
   ...rest
@@ -40,13 +42,14 @@ export function Button({
   variant?: Variant;
   size?: Size;
   loading?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
   const isDisabled = disabled || loading;
 
   return (
-    <Animated.View style={anim}>
+    <Animated.View style={[anim, containerStyle]}>
       <GSButton
         size={size}
         disabled={isDisabled}

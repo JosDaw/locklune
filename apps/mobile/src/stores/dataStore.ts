@@ -30,6 +30,7 @@ interface DataState {
   deleteCycle: (id: number) => Promise<boolean>;
 
   logDay: (log: DayLog) => Promise<boolean>;
+  deleteLog: (day: EpochDay) => Promise<boolean>;
   getDayLog: (day: EpochDay) => Promise<DayLog | null>;
   getDayLogsInRange: (from: EpochDay, to: EpochDay) => Promise<DayLog[]>;
 
@@ -45,7 +46,7 @@ export const useDataStore = create<DataState>((set, get) => {
       db.getCycles(),
       db.getConfirmedOvulations(),
     ]);
-    const prediction = predict(cycles, get().settings, { confirmedOvulations: ovulationDays });
+    const prediction = predict(cycles, get().settings, { confirmedOvulations: ovulationDays, count: 6 });
     set({ cycles, ovulationDays, prediction });
     void syncReminders(prediction, get().settings.reminderDaysBefore).catch(() => undefined);
   }
@@ -75,7 +76,7 @@ export const useDataStore = create<DataState>((set, get) => {
           db.getSettings(),
           db.getConfirmedOvulations(),
         ]);
-        const prediction = predict(cycles, settings, { confirmedOvulations: ovulationDays });
+        const prediction = predict(cycles, settings, { confirmedOvulations: ovulationDays, count: 6 });
         set({ cycles, settings, ovulationDays, prediction, loaded: true });
         void syncReminders(prediction, settings.reminderDaysBefore).catch(() => undefined);
       } catch {
@@ -123,6 +124,11 @@ export const useDataStore = create<DataState>((set, get) => {
 
     deleteCycle: (id) =>
       mutate(async () => {
+        const cycle = get().cycles.find((c) => c.id === id);
+        if (cycle) {
+          const endDay = cycle.endDay ?? cycle.startDay + 14;
+          await db.deleteDayLogsInRange(cycle.startDay, endDay);
+        }
         await db.deleteCycle(id);
         await refreshAll();
       }, 'Could not remove the period.'),
@@ -133,6 +139,11 @@ export const useDataStore = create<DataState>((set, get) => {
         // A log can add/remove a confirmed ovulation, which changes the prediction.
         await refreshAll();
       }, 'Could not save your log.'),
+    deleteLog: (day) =>
+      mutate(async () => {
+        await db.deleteDayLog(day);
+        await refreshAll();
+      }, 'Could not delete the log.'),
     getDayLog: (day) => db.getDayLog(day),
     getDayLogsInRange: (from, to) => db.getDayLogsInRange(from, to),
 
@@ -142,6 +153,7 @@ export const useDataStore = create<DataState>((set, get) => {
         await db.saveSettings(next);
         const prediction = predict(get().cycles, next, {
           confirmedOvulations: get().ovulationDays,
+          count: 6,
         });
         set({ settings: next, prediction });
         void syncReminders(prediction, next.reminderDaysBefore).catch(() => undefined);
