@@ -102,16 +102,14 @@ export default function Onboarding() {
   if (phase === 'consent') {
     return (
       <Screen scroll={false} contentClassName="justify-between">
-        <View className="items-center gap-4 pt-6">
-          <Image
-            source={require('../../assets/images/locklune_logo.png')}
-            style={{ width: 280, height: 280 }}
-            resizeMode="contain"
-          />
-          <Txt variant="muted" className="text-center">Before you begin</Txt>
-        </View>
+        <Image
+          source={require('../../assets/images/locklune_logo.png')}
+          style={{ width: '100%' }}
+          resizeMode="contain"
+        />
 
         <View className="gap-5">
+          <Txt variant="muted">Before you begin</Txt>
           <CheckboxRow checked={agreedLegal} onToggle={() => setAgreedLegal((v) => !v)}>
             <RNText className="text-base leading-6 text-text">
               I agree to the{' '}
