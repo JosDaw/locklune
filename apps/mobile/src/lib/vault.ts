@@ -21,6 +21,7 @@ import { deviceRng } from './rng';
 
 const META_KEY = 'locklune.vault.v1';
 const ATTEMPTS_KEY = 'locklune.vault.attempts.v1';
+const DESTRUCT_KEY = 'locklune.vault.destruct.v1';
 
 /** Keep secrets device-local (never synced to iCloud Keychain / cloud backup). */
 const secureOpts: SecureStore.SecureStoreOptions = {
@@ -132,10 +133,28 @@ export async function changeVaultPin(oldPin: string, newPin: string): Promise<bo
   }
 }
 
+export async function setDestructPin(pin: string): Promise<void> {
+  await SecureStore.setItemAsync(DESTRUCT_KEY, pin, secureOpts);
+}
+
+export async function clearDestructPin(): Promise<void> {
+  await SecureStore.deleteItemAsync(DESTRUCT_KEY, secureOpts);
+}
+
+export async function hasDestructPin(): Promise<boolean> {
+  return (await SecureStore.getItemAsync(DESTRUCT_KEY, secureOpts)) !== null;
+}
+
+export async function checkDestructPin(pin: string): Promise<boolean> {
+  const stored = await SecureStore.getItemAsync(DESTRUCT_KEY, secureOpts);
+  return stored !== null && stored === pin;
+}
+
 /** Irreversibly delete the vault and all key material. The DB file is removed separately. */
 export async function wipeVault(): Promise<void> {
   await Promise.all([
     SecureStore.deleteItemAsync(META_KEY, secureOpts),
     SecureStore.deleteItemAsync(ATTEMPTS_KEY, secureOpts),
+    SecureStore.deleteItemAsync(DESTRUCT_KEY, secureOpts),
   ]);
 }

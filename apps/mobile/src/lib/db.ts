@@ -6,7 +6,6 @@
  * Storage is deliberately compact: one row per cycle, and day-logs are sparse
  * (a row exists only when the user recorded something).
  */
-import * as SQLite from 'expo-sqlite';
 import {
   DEFAULT_SETTINGS,
   type Cycle,
@@ -16,6 +15,7 @@ import {
   type Mood,
   type Settings,
 } from '@locklune/core';
+import * as SQLite from 'expo-sqlite';
 
 const DB_NAME = 'locklune.db';
 

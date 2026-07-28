@@ -1,3 +1,12 @@
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import {
+  fromEpochDay,
+  toEpochDay,
+  todayEpochDay,
+  type DayLog,
+  type EpochDay,
+} from '@locklune/core';
+import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
@@ -5,16 +14,30 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { fromEpochDay, toEpochDay, todayEpochDay, type EpochDay } from '@locklune/core';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
-import { colors } from '../../theme/colors';
+import { formatDay } from '../../lib/format';
 import { useDataStore } from '../../stores/dataStore';
+import { colors } from '../../theme/colors';
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+const FLOW_LABEL: Record<number, string> = {
+  1: 'Spotting',
+  2: 'Light',
+  3: 'Medium',
+  4: 'Heavy',
+};
+
+// Trimester day boundaries from LMP (= dueDay − 280).
+const PREGNANCY_DAYS = 280;
+const T1_END_DAY = 83;   // weeks 1–12
+const T2_END_DAY = 188;  // weeks 13–26, T3 is 189–279
+
+const T1_COLOR = 'rgba(52, 211, 153, 0.18)';
+const T2_COLOR = 'rgba(251, 191, 36, 0.18)';
+const T3_COLOR = 'rgba(167, 139, 250, 0.18)';
+const DUE_COLOR = 'rgba(139, 92, 246, 0.6)';
 
 function useMonthGrid(anchor: Date) {
   return useMemo(() => {
@@ -35,14 +58,23 @@ export default function Calendar() {
   const today = todayEpochDay();
   const cycles = useDataStore((s) => s.cycles);
   const prediction = useDataStore((s) => s.prediction);
+  const settings = useDataStore((s) => s.settings);
   const getDayLogsInRange = useDataStore((s) => s.getDayLogsInRange);
 
-  const [anchor, setAnchor] = useState(() => {
-    const d = fromEpochDay(today);
-    return new Date(d.getFullYear(), d.getMonth(), 1);
-  });
+  const pregnant = settings.cycleMode === 'pregnant';
+  const pregnantDueDay = pregnant ? settings.pregnancyDueDay : null;
+
+  const todayDate = fromEpochDay(today);
+  const [anchor, setAnchor] = useState(() => new Date(todayDate.getFullYear(), todayDate.getMonth(), 1));
   const cells = useMonthGrid(anchor);
-  const [loggedDays, setLoggedDays] = useState<Set<EpochDay>>(new Set());
+  const [monthLogs, setMonthLogs] = useState<DayLog[]>([]);
+
+  const isCurrentMonth =
+    anchor.getFullYear() === todayDate.getFullYear() &&
+    anchor.getMonth() === todayDate.getMonth();
+
+  const goToToday = () =>
+    setAnchor(new Date(todayDate.getFullYear(), todayDate.getMonth(), 1));
 
   useEffect(() => {
     const validDays = cells.filter((c): c is EpochDay => c !== null);
@@ -51,12 +83,12 @@ export default function Calendar() {
     const to = validDays[validDays.length - 1]!;
     let alive = true;
     void getDayLogsInRange(from, to).then((logs) => {
-      if (alive) setLoggedDays(new Set(logs.map((l) => l.day)));
+      if (alive) setMonthLogs(logs);
     });
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [cells, getDayLogsInRange]);
+
+  const loggedDays = useMemo(() => new Set(monthLogs.map((l) => l.day)), [monthLogs]);
 
   const { periodSet, predictedSet, fertileSet, ovulationSet } = useMemo(() => {
     const period = new Set<EpochDay>();
@@ -70,26 +102,18 @@ export default function Calendar() {
     const ovulation = new Set<EpochDay>();
     for (const u of prediction.upcoming) {
       for (let d = u.periodStart; d <= u.periodEnd; d++) predicted.add(d);
-      // Fertile / ovulation markers only when they're meaningful for the mode.
       if (prediction.fertilityApplicable) {
         for (let d = u.fertileWindow.start; d <= u.fertileWindow.end; d++) fertile.add(d);
         ovulation.add(u.ovulationDay);
       }
     }
-    // Predicted remaining days of the current, still-open period — the "next few
-    // days" of an ongoing bleed, based on the average period length.
     const current = cycles[cycles.length - 1];
     if (current && current.endDay === null) {
       const expectedEnd =
         current.startDay + Math.max(1, Math.round(prediction.averagePeriodLength)) - 1;
       for (let d = today + 1; d <= expectedEnd; d++) predicted.add(d);
     }
-    return {
-      periodSet: period,
-      predictedSet: predicted,
-      fertileSet: fertile,
-      ovulationSet: ovulation,
-    };
+    return { periodSet: period, predictedSet: predicted, fertileSet: fertile, ovulationSet: ovulation };
   }, [cycles, prediction, today]);
 
   const weeks: (EpochDay | null)[][] = [];
@@ -104,17 +128,28 @@ export default function Calendar() {
       {/* Header */}
       <View className="flex-row items-center justify-between pt-2">
         <ArrowButton icon="chevron-back" label="Previous month" onPress={() => shiftMonth(-1)} />
-        <View className="items-center gap-1">
+        <View className="items-center gap-1.5">
           <View className="flex-row items-center gap-2">
             <Ionicons name="moon" size={15} color={colors.primarySoft} />
             <Txt variant="title">{monthLabel}</Txt>
           </View>
-          <Txt variant="faint">Your cycle stays private.</Txt>
+          {isCurrentMonth ? (
+            <Txt variant="faint">Your cycle stays private.</Txt>
+          ) : (
+            <Pressable
+              onPress={goToToday}
+              accessibilityRole="button"
+              accessibilityLabel="Return to today"
+              className="rounded-full bg-white px-4 py-1.5"
+            >
+              <Txt className="text-ink text-xs font-body-medium">Today</Txt>
+            </Pressable>
+          )}
         </View>
         <ArrowButton icon="chevron-forward" label="Next month" onPress={() => shiftMonth(1)} />
       </View>
 
-      {/* Calendar — the centerpiece */}
+      {/* Calendar grid */}
       <Card className="px-3 py-5">
         <View className="mb-1 flex-row">
           {WEEKDAYS.map((w, i) => (
@@ -138,6 +173,7 @@ export default function Calendar() {
                 isFertile={day !== null && fertileSet.has(day)}
                 isOvulation={day !== null && ovulationSet.has(day)}
                 hasLog={day !== null && loggedDays.has(day)}
+                pregnantDueDay={pregnantDueDay}
                 onPress={() =>
                   day !== null && router.push({ pathname: '/log', params: { day: String(day) } })
                 }
@@ -147,22 +183,52 @@ export default function Calendar() {
         ))}
       </Card>
 
-      {/* Legend as elegant chips */}
+      {/* Legend */}
       <View className="flex-row flex-wrap gap-2">
-        <LegendChip icon="ellipse" color={colors.period} label="Period" />
-        <LegendChip icon="moon" color={colors.primarySoft} label="Logged" />
-        <LegendChip icon="ellipse-outline" color={colors.period} label="Predicted" />
-        {prediction.fertilityApplicable && (
+        {pregnantDueDay !== null ? (
           <>
-            <LegendChip icon="sparkles" color={colors.fertile} label="Fertile" />
-            <LegendChip icon="leaf" color={colors.ovulation} label="Ovulation" />
+            <LegendChip dotColor={T1_COLOR} label="Trimester 1" />
+            <LegendChip dotColor={T2_COLOR} label="Trimester 2" />
+            <LegendChip dotColor={T3_COLOR} label="Trimester 3" />
+            <LegendChip dotColor={DUE_COLOR} label="Due date" />
+            {monthLogs.length > 0 && (
+              <LegendChip icon="moon" iconColor={colors.primarySoft} label="Logged" />
+            )}
+          </>
+        ) : (
+          <>
+            <LegendChip icon="ellipse" iconColor={colors.period} label="Period" />
+            <LegendChip icon="ellipse" iconColor="rgba(110,168,254,0.3)" label="Predicted" />
+            <LegendChip icon="moon" iconColor={colors.primarySoft} label="Logged" />
+            {prediction.fertilityApplicable && (
+              <>
+                <LegendChip icon="star-outline" iconColor={colors.fertile} label="Fertile" />
+                <LegendChip icon="leaf" iconColor={colors.ovulation} label="Ovulation" />
+              </>
+            )}
           </>
         )}
       </View>
 
       <Txt variant="faint" className="text-center">
-        Tap any day to add, end, or correct a period.
+        Tap any day to add, end, or correct an entry.
       </Txt>
+
+      {/* Month log entries */}
+      {monthLogs.length > 0 && (
+        <View className="gap-3">
+          <Txt variant="label">This month</Txt>
+          {[...monthLogs].reverse().map((log) => (
+            <LogEntry
+              key={log.day}
+              log={log}
+              onPress={() =>
+                router.push({ pathname: '/log', params: { day: String(log.day) } })
+              }
+            />
+          ))}
+        </View>
+      )}
     </Screen>
   );
 }
@@ -204,6 +270,7 @@ function DayCell({
   isFertile,
   isOvulation,
   hasLog,
+  pregnantDueDay,
   onPress,
 }: {
   day: EpochDay | null;
@@ -213,39 +280,75 @@ function DayCell({
   isFertile: boolean;
   isOvulation: boolean;
   hasLog: boolean;
+  pregnantDueDay: EpochDay | null;
   onPress: () => void;
 }) {
   if (day === null) return <View className="flex-1 p-1.5" style={{ aspectRatio: 1 }} />;
 
-  const dottedRing = isPredicted && !isPeriod && !isOvulation && !isFertile;
+  // Pregnancy trimester coloring takes precedence over cycle coloring.
+  let trimesterBg: string | null = null;
+  let isDueDay = false;
+  if (pregnantDueDay !== null) {
+    const lmp = pregnantDueDay - PREGNANCY_DAYS;
+    const daysPreg = day - lmp;
+    if (day === pregnantDueDay) {
+      isDueDay = true;
+      trimesterBg = DUE_COLOR;
+    } else if (daysPreg >= 0 && daysPreg < PREGNANCY_DAYS) {
+      if (daysPreg <= T1_END_DAY) trimesterBg = T1_COLOR;
+      else if (daysPreg <= T2_END_DAY) trimesterBg = T2_COLOR;
+      else trimesterBg = T3_COLOR;
+    }
+  }
+
   let fill = '';
   let textClass = 'text-text';
   let glow: object | undefined;
-  if (isPeriod) {
-    fill = 'bg-period';
-    textClass = 'text-ink';
-    glow = styles.periodGlow;
-  } else if (isOvulation) {
-    fill = 'bg-ovulation';
-    textClass = 'text-ink';
-  } else if (isFertile) {
-    fill = 'bg-fertile/15';
+  let circleBorder: object | null = null;
+
+  if (trimesterBg !== null) {
+    if (isDueDay) textClass = 'text-white';
+  } else {
+    if (isPeriod) {
+      fill = 'bg-period';
+      textClass = 'text-ink';
+      glow = styles.periodGlow;
+    } else if (isOvulation) {
+      fill = 'bg-ovulation';
+      textClass = 'text-ink';
+    } else if (isFertile) {
+      fill = 'bg-fertile/15';
+    } else if (isPredicted) {
+      fill = 'bg-period/20';
+    }
+    if (!isPeriod && !isToday) {
+      if (isOvulation) {
+        circleBorder = { borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.3)' };
+      } else if (isFertile) {
+        circleBorder = { borderWidth: 1.5, borderColor: colors.fertile };
+      }
+    }
   }
-  const todayRing = isToday && !isPeriod && !isOvulation ? 'border border-primary-soft' : '';
+
+  const todayRingClass = isToday && !isPeriod && trimesterBg === null ? 'border border-primary-soft' : '';
+  const todayRingStyle =
+    isToday && trimesterBg !== null && !isDueDay
+      ? { borderWidth: 1.5, borderColor: colors.primarySoft }
+      : null;
+
+  const bgStyle = trimesterBg ? { backgroundColor: trimesterBg } : null;
 
   const states = [
     isToday && 'today',
     isPeriod && 'period',
+    isDueDay && 'due date',
+    trimesterBg && !isDueDay && 'pregnancy',
     !isPeriod && isPredicted && 'predicted period',
     isOvulation ? 'estimated ovulation' : isFertile && 'fertile window',
     hasLog && 'has a log',
   ].filter(Boolean);
   const label = [
-    fromEpochDay(day).toLocaleDateString(undefined, {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-    }),
+    fromEpochDay(day).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }),
     ...states,
   ].join(', ');
 
@@ -258,14 +361,22 @@ function DayCell({
       style={{ aspectRatio: 1 }}
     >
       <View
-        className={`flex-1 items-center justify-center rounded-full ${fill} ${todayRing}`}
-        style={[glow, dottedRing ? styles.dottedRing : null]}
+        className={`flex-1 items-center justify-center rounded-full ${fill} ${todayRingClass}`}
+        style={[{ borderRadius: 9999 }, glow, circleBorder, bgStyle, todayRingStyle]}
       >
         <Txt className={`${textClass} text-base font-body-medium`}>
           {fromEpochDay(day).getDate()}
         </Txt>
-        {isPeriod && <View style={styles.highlight} />}
-        {hasLog && <View style={styles.logDot} />}
+        {(isDueDay || (!trimesterBg && isPeriod)) && <View style={styles.highlight} />}
+        {hasLog && (
+          <View style={styles.indicators}>
+            <Ionicons
+              name="moon"
+              size={7}
+              color={isPeriod || isDueDay ? 'rgba(255,255,255,0.55)' : colors.primarySoft}
+            />
+          </View>
+        )}
       </View>
     </Pressable>
   );
@@ -273,22 +384,90 @@ function DayCell({
 
 function LegendChip({
   icon,
-  color,
+  iconColor,
+  dotColor,
   label,
 }: {
-  icon: keyof typeof Ionicons.glyphMap;
-  color: string;
+  icon?: keyof typeof Ionicons.glyphMap;
+  iconColor?: string;
+  dotColor?: string;
   label: string;
 }) {
   return (
     <View className="flex-row items-center gap-2 rounded-full border border-border bg-surface px-3 py-2">
-      <Ionicons name={icon} size={13} color={color} />
+      {icon && iconColor ? (
+        <Ionicons name={icon} size={13} color={iconColor} />
+      ) : dotColor ? (
+        <View style={{ width: 9, height: 9, borderRadius: 5, backgroundColor: dotColor }} />
+      ) : null}
       <Txt variant="faint" className="text-text-muted">
         {label}
       </Txt>
     </View>
   );
 }
+
+function LogEntry({ log, onPress }: { log: DayLog; onPress: () => void }) {
+  const meta: string[] = [];
+  if (log.flow != null) meta.push(FLOW_LABEL[log.flow] ?? '');
+  if (log.ovulation) meta.push('Ovulation confirmed');
+
+  const symptomText =
+    log.symptoms.length > 0
+      ? log.symptoms.slice(0, 3).join(', ') +
+        (log.symptoms.length > 3 ? ` +${log.symptoms.length - 3} more` : '')
+      : null;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Log for ${fromEpochDay(log.day).toLocaleDateString()}`}
+      className="rounded-2xl border border-border bg-surface p-3"
+    >
+      <View className="flex-row items-center justify-between">
+        <Txt variant="label">
+          {formatDay(log.day, { weekday: 'short', month: 'short', day: 'numeric' })}
+        </Txt>
+        <View className="flex-row items-center gap-1.5">
+          {log.note && (
+            <Ionicons name="document-text-outline" size={14} color={colors.textFaint} />
+          )}
+          {log.mood != null && MOOD_ICON[log.mood] && (
+            <MaterialCommunityIcons
+              name={MOOD_ICON[log.mood]!.icon}
+              size={18}
+              color={MOOD_ICON[log.mood]!.color}
+            />
+          )}
+        </View>
+      </View>
+      {meta.length > 0 && (
+        <Txt variant="faint" className="mt-1">
+          {meta.join(' · ')}
+        </Txt>
+      )}
+      {symptomText && (
+        <Txt variant="faint" className="mt-0.5">
+          {symptomText}
+        </Txt>
+      )}
+      {log.note && (
+        <Txt variant="faint" className="mt-0.5" numberOfLines={1}>
+          {log.note}
+        </Txt>
+      )}
+    </Pressable>
+  );
+}
+
+const MOOD_ICON: Record<number, { icon: keyof typeof MaterialCommunityIcons.glyphMap; color: string }> = {
+  1: { icon: 'emoticon-cry-outline',     color: '#94A3B8' },
+  2: { icon: 'emoticon-sad-outline',     color: '#7DD3FC' },
+  3: { icon: 'emoticon-neutral-outline', color: '#86EFAC' },
+  4: { icon: 'emoticon-happy-outline',   color: '#FDE68A' },
+  5: { icon: 'emoticon-excited-outline', color: '#FCA5A5' },
+};
 
 const styles = StyleSheet.create({
   arrow: {
@@ -304,11 +483,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     elevation: 5,
   },
-  dottedRing: {
-    borderWidth: 1.5,
-    borderColor: colors.period,
-    borderStyle: 'dotted',
-  },
   highlight: {
     position: 'absolute',
     top: 7,
@@ -318,12 +492,14 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: 'rgba(255,255,255,0.75)',
   },
-  logDot: {
+  indicators: {
     position: 'absolute',
-    bottom: 5,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.moon,
+    bottom: 4,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 2,
   },
 });

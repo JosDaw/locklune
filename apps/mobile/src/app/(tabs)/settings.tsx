@@ -1,4 +1,5 @@
-import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Alert, Pressable, Text as RNText, View } from 'react-native';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,6 +24,7 @@ import * as haptics from '../../lib/haptics';
 import { KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
+import { clearDestructPin, hasDestructPin } from '../../lib/vault';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
 
@@ -43,6 +45,13 @@ export default function Settings() {
   const lock = useAuthStore((s) => s.lock);
   const wipe = useAuthStore((s) => s.wipe);
 
+  const [hasDestruct, setHasDestruct] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      void hasDestructPin().then(setHasDestruct);
+    }, []),
+  );
+
   const remindersOn = settings.reminderDaysBefore.length > 0;
 
   const today = todayEpochDay();
@@ -54,6 +63,17 @@ export default function Settings() {
       const lastStart = cycles[cycles.length - 1]?.startDay;
       const dueDay = lastStart != null ? estimateDueDay(lastStart) : dueDayFromWeeksAlong(6, today);
       void updateSettings({ cycleMode: mode, pregnancyDueDay: dueDay });
+    } else if (mode !== 'pregnant' && settings.cycleMode === 'pregnant') {
+      const dueDay = settings.pregnancyDueDay;
+      if (dueDay != null) {
+        const gestationalAge = Math.max(0, today - (dueDay - 280));
+        // Resumption estimate scales with how far along the pregnancy was:
+        // early loss (<12 wk) ~4 weeks, mid-pregnancy ~5 weeks, near/full term ~8 weeks.
+        const resumptionDays = gestationalAge < 84 ? 28 : gestationalAge < 196 ? 35 : 56;
+        void updateSettings({ cycleMode: mode, postPregnancyAnchorDay: today + resumptionDays });
+      } else {
+        void updateSettings({ cycleMode: mode });
+      }
     } else {
       void updateSettings({ cycleMode: mode });
     }
@@ -130,46 +150,57 @@ export default function Settings() {
         )}
 
         {settings.cycleMode === 'pregnant' && (
-          <View className="mt-4 flex-row items-center justify-between border-t border-border pt-4">
-            <View className="flex-1 pr-4">
+          <View className="mt-4 gap-4 border-t border-border pt-4">
+            <View className="flex-row items-center justify-between">
               <Txt variant="body">Weeks along</Txt>
-              {settings.pregnancyDueDay != null && (
-                <Txt variant="faint">
-                  Due {formatDay(settings.pregnancyDueDay, { month: 'long', day: 'numeric' })}
-                </Txt>
-              )}
+              <Stepper
+                value={pregWeeks}
+                min={0}
+                max={42}
+                onChange={(w) =>
+                  void updateSettings({ pregnancyDueDay: dueDayFromWeeksAlong(w, today) })
+                }
+              />
             </View>
-            <Stepper
-              value={pregWeeks}
-              min={0}
-              max={42}
-              onChange={(w) =>
-                void updateSettings({ pregnancyDueDay: dueDayFromWeeksAlong(w, today) })
-              }
-            />
+            {settings.pregnancyDueDay != null && (
+              <View className="flex-row items-center justify-between">
+                <View>
+                  <Txt variant="body">Due date</Txt>
+                  <Txt variant="faint">
+                    {formatDay(settings.pregnancyDueDay, {
+                      weekday: 'short',
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </Txt>
+                </View>
+                <View className="flex-row gap-2">
+                  <PressScale
+                    onPress={() =>
+                      void updateSettings({ pregnancyDueDay: settings.pregnancyDueDay! - 1 })
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel="Move due date earlier by one day"
+                    className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
+                  >
+                    <Ionicons name="remove" size={20} color={colors.text} />
+                  </PressScale>
+                  <PressScale
+                    onPress={() =>
+                      void updateSettings({ pregnancyDueDay: settings.pregnancyDueDay! + 1 })
+                    }
+                    accessibilityRole="button"
+                    accessibilityLabel="Move due date later by one day"
+                    className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
+                  >
+                    <Ionicons name="add" size={20} color={colors.text} />
+                  </PressScale>
+                </View>
+              </View>
+            )}
           </View>
         )}
-      </Card>
-
-      {/* Security */}
-      <Card>
-        <SectionLabel icon="shield-checkmark-outline" label="Security" />
-        <PressScale
-          onPress={() => router.push('/change-pin')}
-          className="flex-row items-center justify-between py-3"
-        >
-          <Txt variant="body">Change PIN</Txt>
-          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
-        </PressScale>
-
-        <Txt variant="faint" className="mb-2 mt-2">
-          Auto-lock after inactivity
-        </Txt>
-        <Segmented
-          options={AUTO_LOCK_OPTIONS}
-          value={settings.autoLockMinutes}
-          onChange={(v) => void updateSettings({ autoLockMinutes: v })}
-        />
       </Card>
 
       {/* Cycle */}
@@ -203,6 +234,65 @@ export default function Settings() {
           hint="A local notification 2 days before"
           value={remindersOn}
           onValueChange={(v) => void toggleReminders(v)}
+        />
+      </Card>
+
+      {/* Security */}
+      <Card>
+        <SectionLabel icon="shield-checkmark-outline" label="Security" />
+        <PressScale
+          onPress={() => router.push('/change-pin')}
+          className="flex-row items-center justify-between py-3"
+        >
+          <Txt variant="body">Change PIN</Txt>
+          <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+        </PressScale>
+
+        <SwitchRow
+          label="Self-destruct PIN"
+          hint={
+            hasDestruct
+              ? 'Entering it at the lock screen wipes all data instantly'
+              : 'Set a separate PIN that triggers an instant, silent data wipe'
+          }
+          value={hasDestruct}
+          onValueChange={(v) => {
+            if (v) {
+              router.push('/set-destruct-pin');
+            } else {
+              haptics.warn();
+              Alert.alert(
+                'Remove self-destruct PIN?',
+                'The PIN will be cleared and the feature will be disabled.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Remove',
+                    style: 'destructive',
+                    onPress: () => void clearDestructPin().then(() => setHasDestruct(false)),
+                  },
+                ],
+              );
+            }
+          }}
+        />
+        {hasDestruct && (
+          <PressScale
+            onPress={() => router.push('/set-destruct-pin')}
+            className="flex-row items-center justify-between py-2"
+          >
+            <Txt variant="faint">Change self-destruct PIN</Txt>
+            <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
+          </PressScale>
+        )}
+
+        <Txt variant="faint" className="mb-2 mt-4">
+          Auto-lock after inactivity
+        </Txt>
+        <Segmented
+          options={AUTO_LOCK_OPTIONS}
+          value={settings.autoLockMinutes}
+          onChange={(v) => void updateSettings({ autoLockMinutes: v })}
         />
       </Card>
 

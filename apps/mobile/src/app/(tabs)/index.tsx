@@ -1,15 +1,17 @@
-import { useRouter } from 'expo-router';
-import { View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BRAND, pregnancyProgress, todayEpochDay } from '@locklune/core';
+import { useRouter } from 'expo-router';
+import { Pressable, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
+import { MoonLoader } from '../../components/ui/MoonLoader';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
 import { confidenceLabel, formatDay, formatRange, relativeDays } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
-import { colors } from '../../theme/colors';
 import { useDataStore } from '../../stores/dataStore';
+import { colors } from '../../theme/colors';
 
 export default function Today() {
   const router = useRouter();
@@ -106,7 +108,7 @@ export default function Today() {
                       </Txt>
                     )}
                   </View>
-                  <Button title="End period today" variant="secondary" onPress={onEnd} />
+                  <Button title="End period now" variant="secondary" onPress={onEnd} />
                 </View>
               </View>
             ) : next ? (
@@ -136,7 +138,7 @@ export default function Today() {
                     justifyContent: 'center',
                   }}
                 >
-                  <Ionicons name="moon" size={34} color={colors.primarySoft} />
+                  <MoonLoader size={34} />
                 </View>
                 <View className="items-center gap-2">
                   <Txt variant="heading" className="text-center">
@@ -206,16 +208,48 @@ export default function Today() {
         </>
       )}
 
-      <Button
-        title="Log symptoms for today"
-        variant="secondary"
-        onPress={() => router.push({ pathname: '/log', params: { day: String(today) } })}
-      />
+      <LogTodayButton onPress={() => router.push({ pathname: '/log', params: { day: String(today) } })} />
 
       <Txt variant="faint" className="text-center">
         For educational purposes only. Locklune is not medical or health advice.
       </Txt>
     </Screen>
+  );
+}
+
+const LOG_SPRING = { damping: 18, stiffness: 380, mass: 0.45 } as const;
+
+function LogTodayButton({ onPress }: { onPress: () => void }) {
+  const scale = useSharedValue(1);
+  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return (
+    <Animated.View style={[anim, { borderRadius: 20 }]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => { scale.value = withSpring(0.96, LOG_SPRING); }}
+        onPressOut={() => { scale.value = withSpring(1, LOG_SPRING); }}
+        accessibilityRole="button"
+        accessibilityLabel="Log symptoms for today"
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          paddingVertical: 18,
+          paddingHorizontal: 24,
+          borderRadius: 20,
+          backgroundColor: colors.primary,
+          shadowColor: colors.primary,
+          shadowOpacity: 0.45,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 8,
+        }}
+      >
+        <Ionicons name="pencil-outline" size={20} color={colors.ink} />
+        <Txt className="text-ink text-base font-semibold">Log symptoms for today</Txt>
+      </Pressable>
+    </Animated.View>
   );
 }
 

@@ -107,6 +107,13 @@ export interface Settings {
   contraceptionMethod: ContraceptionMethod;
   /** Estimated due date (epoch-day) when cycleMode === 'pregnant'. */
   pregnancyDueDay: EpochDay | null;
+  /**
+   * Expected first post-partum period day, set automatically when the user switches
+   * away from 'pregnant' mode. Computed from gestational age at switch time so early
+   * losses resume sooner than full-term deliveries. Cleared once a real period is
+   * recorded after this date.
+   */
+  postPregnancyAnchorDay: EpochDay | null;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -118,6 +125,7 @@ export const DEFAULT_SETTINGS: Settings = {
   cycleMode: 'tracking',
   contraceptionMethod: 'none',
   pregnancyDueDay: null,
+  postPregnancyAnchorDay: null,
 };
 
 /** Confidence tier attached to a prediction. */

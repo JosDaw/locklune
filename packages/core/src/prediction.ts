@@ -162,7 +162,18 @@ export function predict(
   const lutealPhase = empiricalLutealPhase(sorted, ovulations, cfg.lutealPhaseDays);
 
   const upcoming: CyclePrediction[] = [];
-  const anchor = sorted.length > 0 ? sorted[sorted.length - 1]!.startDay : null;
+  let anchor: EpochDay | null = sorted.length > 0 ? sorted[sorted.length - 1]!.startDay : null;
+  // If the user recently concluded a pregnancy and has no period recorded since,
+  // seed predictions so that the first upcoming cycle lands on the expected resumption
+  // day (stored directly in postPregnancyAnchorDay, computed from gestational age at
+  // the time the user switched out of pregnant mode).
+  if (
+    cfg.postPregnancyAnchorDay != null &&
+    mode !== 'pregnant' &&
+    (anchor === null || anchor < cfg.postPregnancyAnchorDay)
+  ) {
+    anchor = cfg.postPregnancyAnchorDay - Math.round(averageCycleLength);
+  }
   // No period projections while pregnant.
   if (anchor !== null && mode !== 'pregnant') {
     const cycleLen = Math.round(averageCycleLength);

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, LayoutAnimation, Platform, Pressable, UIManager, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { cycleForDay, Flow, Mood, todayEpochDay, type EpochDay } from '@locklune/core';
+import { cycleForDay, Flow, Mood, pregnancyProgress, todayEpochDay, type EpochDay } from '@locklune/core';
 import { Switch } from '../components/gs/switch';
 import { Textarea, TextareaInput } from '../components/gs/textarea';
 import { Button } from '../components/ui/Button';
@@ -28,19 +28,34 @@ const MOOD_OPTIONS: { icon: keyof typeof MaterialCommunityIcons.glyphMap; value:
   { icon: 'emoticon-excited-outline', value: Mood.Great },
 ];
 
-const SYMPTOMS = [
-  'cramps',
-  'headache',
+const SYMPTOMS_INITIAL = ['cramps', 'headache', 'fatigue'];
+
+const SYMPTOMS_MORE = [
   'bloating',
-  'fatigue',
-  'tender breasts',
-  'acne',
   'nausea',
   'back pain',
-  'cravings',
-  'insomnia',
   'mood swings',
+  'tender breasts',
+  'insomnia',
+  'cravings',
+  'acne',
+  'dizziness',
+  'anxiety',
+  'irritability',
+  'spotting',
+  'discharge',
+  'heartburn',
+  'constipation',
+  'hot flashes',
+  'swelling',
+  'brain fog',
+  'night sweats',
+  'low energy',
+  'skin changes',
+  'hair changes',
 ];
+
+const ALL_SYMPTOMS = [...SYMPTOMS_INITIAL, ...SYMPTOMS_MORE];
 
 export default function LogModal() {
   const router = useRouter();
@@ -54,6 +69,13 @@ export default function LogModal() {
   const startPeriod = useDataStore((s) => s.startPeriod);
   const endCycle = useDataStore((s) => s.endCycle);
   const deleteCycle = useDataStore((s) => s.deleteCycle);
+  const settings = useDataStore((s) => s.settings);
+
+  const pregnant = settings.cycleMode === 'pregnant';
+  const preg =
+    pregnant && settings.pregnancyDueDay != null
+      ? pregnancyProgress(settings.pregnancyDueDay, day)
+      : null;
 
   const [flow, setFlow] = useState<Flow | null>(null);
   const [mood, setMood] = useState<Mood | null>(null);
@@ -61,6 +83,13 @@ export default function LogModal() {
   const [note, setNote] = useState('');
   const [ovulation, setOvulation] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [showMoreSymptoms, setShowMoreSymptoms] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      UIManager.setLayoutAnimationEnabledExperimental?.(true);
+    }
+  }, []);
 
   useEffect(() => {
     let alive = true;
@@ -72,6 +101,8 @@ export default function LogModal() {
         setSymptoms(log.symptoms);
         setNote(log.note ?? '');
         setOvulation(log.ovulation);
+        // Auto-expand if any saved symptoms are in the hidden section.
+        if (log.symptoms.some((s) => SYMPTOMS_MORE.includes(s))) setShowMoreSymptoms(true);
       }
       setLoaded(true);
     });
@@ -143,51 +174,82 @@ export default function LogModal() {
         </Pressable>
       </View>
 
-      <View className="gap-3">
-        <Txt variant="label">Period</Txt>
-        {day > today ? (
-          <Txt variant="faint">You can mark a period once the day has arrived.</Txt>
-        ) : !status.isBleedDay ? (
-          <Button
-            title="Mark period started this day"
-            variant="secondary"
-            onPress={() => void markStart()}
-          />
-        ) : (
-          <View className="gap-2">
-            <View className="rounded-2xl border border-period/40 bg-surface p-3">
-              <Txt variant="body">{status.isStart ? 'Period started this day' : 'Period day'}</Txt>
-              {!status.isStart && c && <Txt variant="faint">Started {formatDay(c.startDay)}</Txt>}
-              {isEndDay && <Txt variant="faint">Marked as the last day</Txt>}
-              {isOngoing && !status.isStart && <Txt variant="faint">Period ongoing</Txt>}
-            </View>
-            {canSetEnd && (
-              <Button title="Mark as my last day" variant="ghost" onPress={() => void setEnd()} />
-            )}
-            {isEndDay && (
-              <Button title="Clear end date" variant="ghost" onPress={() => void clearEnd()} />
-            )}
-            {status.isStart && (
-              <Button title="Remove period start" variant="danger" onPress={removeStart} />
+      {pregnant ? (
+        <View className="rounded-2xl border border-border bg-surface p-4 gap-2">
+          {preg ? (
+            <>
+              <Txt variant="label" className="text-primary-soft">Pregnancy</Txt>
+              <Txt variant="display">
+                Week {preg.week}{preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
+              </Txt>
+              <Txt variant="muted">
+                Trimester {preg.trimester} ·{' '}
+                {preg.daysRemaining >= 0
+                  ? `${preg.daysRemaining} days to go`
+                  : `${-preg.daysRemaining} days over`}
+              </Txt>
+              <Txt variant="faint">
+                Due {formatDay(preg.dueDay, { weekday: 'short', month: 'long', day: 'numeric' })}
+              </Txt>
+            </>
+          ) : (
+            <>
+              <Txt variant="label" className="text-primary-soft">Pregnancy</Txt>
+              <Txt variant="muted">
+                Set how many weeks along you are in Settings to track your pregnancy.
+              </Txt>
+            </>
+          )}
+        </View>
+      ) : (
+        <>
+          <View className="gap-3">
+            <Txt variant="label">Period</Txt>
+            {day > today ? (
+              <Txt variant="faint">You can mark a period once the day has arrived.</Txt>
+            ) : !status.isBleedDay ? (
+              <Button
+                title="Mark period started this day"
+                variant="secondary"
+                onPress={() => void markStart()}
+              />
+            ) : (
+              <View className="gap-2">
+                <View className="rounded-2xl border border-period/40 bg-surface p-3">
+                  <Txt variant="body">{status.isStart ? 'Period started this day' : 'Period day'}</Txt>
+                  {!status.isStart && c && <Txt variant="faint">Started {formatDay(c.startDay)}</Txt>}
+                  {isEndDay && <Txt variant="faint">Marked as the last day</Txt>}
+                  {isOngoing && !status.isStart && <Txt variant="faint">Period ongoing</Txt>}
+                </View>
+                {canSetEnd && (
+                  <Button title="Mark as my last day" variant="ghost" onPress={() => void setEnd()} />
+                )}
+                {isEndDay && (
+                  <Button title="Clear end date" variant="ghost" onPress={() => void clearEnd()} />
+                )}
+                {status.isStart && (
+                  <Button title="Remove period start" variant="danger" onPress={removeStart} />
+                )}
+              </View>
             )}
           </View>
-        )}
-      </View>
 
-      <View className="gap-3">
-        <Txt variant="label">Flow</Txt>
-        <View className="flex-row gap-2">
-          {FLOW_OPTIONS.map((o) => (
-            <Chip
-              key={o.value}
-              label={o.label}
-              active={flow === o.value}
-              onPress={() => setFlow((f) => (f === o.value ? null : o.value))}
-              activeClass="bg-period"
-            />
-          ))}
-        </View>
-      </View>
+          <View className="gap-3">
+            <Txt variant="label">Flow</Txt>
+            <View className="flex-row gap-2">
+              {FLOW_OPTIONS.map((o) => (
+                <Chip
+                  key={o.value}
+                  label={o.label}
+                  active={flow === o.value}
+                  onPress={() => setFlow((f) => (f === o.value ? null : o.value))}
+                  activeClass="bg-period"
+                />
+              ))}
+            </View>
+          </View>
+        </>
+      )}
 
       <View className="gap-3">
         <Txt variant="label">Mood</Txt>
@@ -211,31 +273,53 @@ export default function LogModal() {
       <View className="gap-3">
         <Txt variant="label">Symptoms</Txt>
         <View className="flex-row flex-wrap gap-2">
-          {SYMPTOMS.map((s) => (
-            <Chip
-              key={s}
-              label={s}
-              active={symptoms.includes(s)}
-              onPress={() => toggleSymptom(s)}
-            />
+          {SYMPTOMS_INITIAL.map((s) => (
+            <Chip key={s} label={s} active={symptoms.includes(s)} onPress={() => toggleSymptom(s)} />
           ))}
+          {showMoreSymptoms &&
+            SYMPTOMS_MORE.map((s) => (
+              <Chip
+                key={s}
+                label={s}
+                active={symptoms.includes(s)}
+                onPress={() => toggleSymptom(s)}
+              />
+            ))}
         </View>
+        <Pressable
+          onPress={() => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setShowMoreSymptoms((v) => !v);
+          }}
+          className="flex-row items-center gap-1.5"
+          accessibilityRole="button"
+          accessibilityLabel={showMoreSymptoms ? 'Show fewer symptoms' : 'Show more symptoms'}
+        >
+          <Txt variant="faint">{showMoreSymptoms ? 'Show less' : 'Show more'}</Txt>
+          <Ionicons
+            name={showMoreSymptoms ? 'chevron-up' : 'chevron-down'}
+            size={13}
+            color={colors.textFaint}
+          />
+        </Pressable>
       </View>
 
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1 pr-4">
-          <Txt variant="label">Ovulation</Txt>
-          <Txt variant="faint" className="mt-1">
-            Confirmed today, e.g. a positive test. Improves your predictions.
-          </Txt>
+      {!pregnant && (
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1 pr-4">
+            <Txt variant="label">Ovulation</Txt>
+            <Txt variant="faint" className="mt-1">
+              Confirmed today, e.g. a positive test. Improves your predictions.
+            </Txt>
+          </View>
+          <Switch
+            value={ovulation}
+            onValueChange={setOvulation}
+            trackColor={{ false: colors.surfaceMuted, true: colors.primary }}
+            thumbColor={colors.moon}
+          />
         </View>
-        <Switch
-          value={ovulation}
-          onValueChange={setOvulation}
-          trackColor={{ false: colors.surfaceMuted, true: colors.primary }}
-          thumbColor={colors.moon}
-        />
-      </View>
+      )}
 
       <View className="gap-3">
         <Txt variant="label">Note</Txt>

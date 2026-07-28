@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GluestackUIProvider } from '../components/gs/gluestack-ui-provider';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { MoonLoader } from '../components/ui/MoonLoader';
 import { ToastProvider } from '../components/ui/Toast';
 import { colors } from '../theme/colors';
 import { useAuthStore } from '../stores/authStore';
@@ -75,9 +76,14 @@ export default function RootLayout() {
   useAuthRouting();
   useAutoLock();
 
-  // Hold on the dark backdrop until the premium type is ready, to avoid a flash.
+  // Hold on the dark backdrop until the premium type is ready. Show the moon so
+  // there's no animation-free window before auth resolves.
   if (!fontsLoaded) {
-    return <View style={{ flex: 1, backgroundColor: colors.ink }} />;
+    return (
+      <View style={{ flex: 1, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' }}>
+        <MoonLoader size={56} />
+      </View>
+    );
   }
 
   return (

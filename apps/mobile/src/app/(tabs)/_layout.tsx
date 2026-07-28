@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import type { ColorValue } from 'react-native';
@@ -13,13 +13,15 @@ const icon =
   ({ color, size, focused }: { color: ColorValue; size: number; focused: boolean }) => (
     <View
       style={{
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-        borderRadius: 16,
+        width: 52,
+        height: 34,
+        borderRadius: 17,
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: focused ? 'rgba(110,168,254,0.14)' : 'transparent',
       }}
     >
-      <Ionicons name={focused ? filled : outline} color={color as string} size={size} />
+      <Ionicons name={focused ? filled : outline} color={color as string} size={size || 22} />
     </View>
   );
 
@@ -32,20 +34,31 @@ export default function TabsLayout() {
         tabBarActiveTintColor: colors.primarySoft,
         tabBarInactiveTintColor: colors.textFaint,
         tabBarLabelStyle: { fontFamily: 'Inter_500Medium', fontSize: 11, marginTop: 2 },
-        tabBarBackground: () => (
-          <BlurView
-            intensity={30}
-            tint="dark"
-            style={{
-              flex: 1,
-              borderRadius: 26,
-              overflow: 'hidden',
-              backgroundColor: 'rgba(22,32,50,0.72)',
-              borderWidth: 1,
-              borderColor: colors.border,
-            }}
-          />
-        ),
+        tabBarBackground: () =>
+          Platform.OS === 'ios' ? (
+            <BlurView
+              intensity={30}
+              tint="dark"
+              style={{
+                flex: 1,
+                borderRadius: 26,
+                overflow: 'hidden',
+                backgroundColor: 'rgba(22,32,50,0.72)',
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            />
+          ) : (
+            <View
+              style={{
+                flex: 1,
+                borderRadius: 26,
+                backgroundColor: 'rgba(22,32,50,0.94)',
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            />
+          ),
         tabBarStyle: {
           position: 'absolute',
           left: 16,
