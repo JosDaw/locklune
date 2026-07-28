@@ -104,7 +104,7 @@ export default function Onboarding() {
       <Screen scroll={false} contentClassName="justify-between">
         <Image
           source={require('../../assets/images/locklune_logo.png')}
-          style={{ width: '100%', height: 260 }}
+          style={{ width: '100%', height: 300 }}
           resizeMode="contain"
         />
 
@@ -280,7 +280,7 @@ function CheckboxRow({
         hitSlop={8}
         accessibilityRole="checkbox"
         accessibilityState={{ checked }}
-        className={`mt-0.5 h-6 w-6 items-center justify-center rounded-md border ${checked ? 'border-primary bg-primary' : 'border-border'}`}
+        className={`mt-0.5 h-6 w-6 items-center justify-center rounded-md border-2 ${checked ? 'border-primary bg-primary' : 'border-surfaceMuted'}`}
       >
         {checked && <Ionicons name="checkmark" size={16} color={colors.ink} />}
       </Pressable>
