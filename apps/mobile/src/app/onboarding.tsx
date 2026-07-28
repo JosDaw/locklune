@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BRAND, type CycleMode, type Settings } from '@locklune/core';
 import { type ReactNode, useState } from 'react';
-import { Linking, Pressable, Text as RNText, View } from 'react-native';
+import { Image, Linking, Pressable, Text as RNText, View } from 'react-native';
 import { Switch } from '../components/gs/switch';
 import { Button } from '../components/ui/Button';
 import { PinPad } from '../components/ui/PinPad';
@@ -102,9 +102,16 @@ export default function Onboarding() {
   if (phase === 'consent') {
     return (
       <Screen scroll={false} contentClassName="justify-between">
-        <View className="items-center gap-2 pt-6">
-          <Txt variant="display">{BRAND.name}</Txt>
-          <Txt variant="muted" className="text-center">Before you begin</Txt>
+        <View className="items-center gap-4 pt-6">
+          <Image
+            source={require('../../assets/images/icon.png')}
+            style={{ width: 110, height: 110 }}
+            resizeMode="contain"
+          />
+          <View className="items-center gap-1">
+            <Txt variant="display">{BRAND.name}</Txt>
+            <Txt variant="muted" className="text-center">Before you begin</Txt>
+          </View>
         </View>
 
         <View className="gap-5">
@@ -130,7 +137,7 @@ export default function Onboarding() {
 
           <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((v) => !v)}>
             <RNText className="text-base leading-6 text-text">
-              I understand {BRAND.name} is for record keeping purposes only and is not medical or
+              I understand {BRAND.name} is for record keeping purposes only and is not intended to be used for medical or
               health advice.
             </RNText>
           </CheckboxRow>
