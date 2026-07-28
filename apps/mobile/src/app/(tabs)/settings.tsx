@@ -40,6 +40,7 @@ export default function Settings() {
   const router = useRouter();
   const settings = useDataStore((s) => s.settings);
   const updateSettings = useDataStore((s) => s.updateSettings);
+  const prediction = useDataStore((s) => s.prediction);
   const cycles = useDataStore((s) => s.cycles);
 
   const lock = useAuthStore((s) => s.lock);
@@ -63,8 +64,6 @@ export default function Settings() {
   const removeSymptom = (sym: string) => {
     void updateSettings({ customSymptoms: settings.customSymptoms.filter((s) => s !== sym) });
   };
-
-  const remindersOn = settings.reminderDaysBefore.length > 0;
 
   const today = todayEpochDay();
   const pregWeeks =
@@ -91,17 +90,15 @@ export default function Settings() {
     }
   };
 
-  const toggleReminders = async (value: boolean) => {
+  const toggleNotification = async (key: 'notifyPeriodTomorrow' | 'notifyPeriodToday' | 'notifyFertileTomorrow' | 'notifyFertileStart', value: boolean) => {
     if (value) {
       const granted = await requestNotificationPermission();
       if (!granted) {
         Alert.alert('Notifications off', 'Enable notifications for Locklune in system settings.');
         return;
       }
-      await updateSettings({ reminderDaysBefore: [2] });
-    } else {
-      await updateSettings({ reminderDaysBefore: [] });
     }
+    void updateSettings({ [key]: value });
   };
 
   const confirmWipe = () => {
@@ -242,11 +239,31 @@ export default function Settings() {
       <Card>
         <SectionLabel icon="notifications-outline" label="Reminders" />
         <SwitchRow
-          label="Period reminder"
-          hint="A local notification 2 days before"
-          value={remindersOn}
-          onValueChange={(v) => void toggleReminders(v)}
+          label="Period starting tomorrow"
+          hint="Morning of the day before your predicted period"
+          value={settings.notifyPeriodTomorrow}
+          onValueChange={(v) => void toggleNotification('notifyPeriodTomorrow', v)}
         />
+        <SwitchRow
+          label="Period starting today"
+          hint="Morning of your predicted period start"
+          value={settings.notifyPeriodToday}
+          onValueChange={(v) => void toggleNotification('notifyPeriodToday', v)}
+        />
+        {prediction.fertilityApplicable && <>
+          <SwitchRow
+            label="Fertile window tomorrow"
+            hint="Morning before your fertile window opens"
+            value={settings.notifyFertileTomorrow}
+            onValueChange={(v) => void toggleNotification('notifyFertileTomorrow', v)}
+          />
+          <SwitchRow
+            label="Fertile window opens"
+            hint="Morning your fertile window begins"
+            value={settings.notifyFertileStart}
+            onValueChange={(v) => void toggleNotification('notifyFertileStart', v)}
+          />
+        </>}
       </Card>
 
       {/* Custom symptoms */}

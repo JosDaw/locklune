@@ -48,7 +48,7 @@ export const useDataStore = create<DataState>((set, get) => {
     ]);
     const prediction = predict(cycles, get().settings, { confirmedOvulations: ovulationDays, count: 6 });
     set({ cycles, ovulationDays, prediction });
-    void syncReminders(prediction, get().settings.reminderDaysBefore).catch(() => undefined);
+    void syncReminders(prediction, get().settings).catch(() => undefined);
   }
 
   /** Run a DB mutation, surfacing a toast (and resolving `false`) on failure. */
@@ -78,7 +78,7 @@ export const useDataStore = create<DataState>((set, get) => {
         ]);
         const prediction = predict(cycles, settings, { confirmedOvulations: ovulationDays, count: 6 });
         set({ cycles, settings, ovulationDays, prediction, loaded: true });
-        void syncReminders(prediction, settings.reminderDaysBefore).catch(() => undefined);
+        void syncReminders(prediction, settings).catch(() => undefined);
       } catch {
         toast.error('Could not load your data.');
       }
@@ -156,7 +156,7 @@ export const useDataStore = create<DataState>((set, get) => {
           count: 6,
         });
         set({ settings: next, prediction });
-        void syncReminders(prediction, next.reminderDaysBefore).catch(() => undefined);
+        void syncReminders(prediction, next).catch(() => undefined);
       }, 'Could not save your settings.'),
   };
 });

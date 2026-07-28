@@ -101,8 +101,14 @@ export interface Settings {
   defaultPeriodLength: number;
   /** Minutes of inactivity before the app auto-locks. */
   autoLockMinutes: number;
-  /** Local reminders (days before predicted period) to notify on. */
-  reminderDaysBefore: number[];
+  /** Local notification: fire the morning before the predicted period start. */
+  notifyPeriodTomorrow: boolean;
+  /** Local notification: fire the morning the predicted period start day arrives. */
+  notifyPeriodToday: boolean;
+  /** Local notification: fire the morning before the predicted fertile window opens. */
+  notifyFertileTomorrow: boolean;
+  /** Local notification: fire the morning the fertile window opens. */
+  notifyFertileStart: boolean;
   /** Current life stage / tracking mode. */
   cycleMode: CycleMode;
   /** Contraception method (used when cycleMode === 'contraception'). */
@@ -125,7 +131,10 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultCycleLength: 28,
   defaultPeriodLength: 5,
   autoLockMinutes: 2,
-  reminderDaysBefore: [2],
+  notifyPeriodTomorrow: false,
+  notifyPeriodToday: false,
+  notifyFertileTomorrow: false,
+  notifyFertileStart: false,
   cycleMode: 'tracking',
   contraceptionMethod: 'none',
   pregnancyDueDay: null,
