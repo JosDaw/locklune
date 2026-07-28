@@ -104,14 +104,11 @@ export default function Onboarding() {
       <Screen scroll={false} contentClassName="justify-between">
         <View className="items-center gap-4 pt-6">
           <Image
-            source={require('../../assets/images/icon.png')}
-            style={{ width: 110, height: 110 }}
+            source={require('../../assets/images/locklune_logo.png')}
+            style={{ width: 280, height: 280 }}
             resizeMode="contain"
           />
-          <View className="items-center gap-1">
-            <Txt variant="display">{BRAND.name}</Txt>
-            <Txt variant="muted" className="text-center">Before you begin</Txt>
-          </View>
+          <Txt variant="muted" className="text-center">Before you begin</Txt>
         </View>
 
         <View className="gap-5">
