@@ -144,8 +144,8 @@ export const useDataStore = create<DataState>((set, get) => {
         await db.deleteDayLog(day);
         await refreshAll();
       }, 'Could not delete the log.'),
-    getDayLog: (day) => db.getDayLog(day),
-    getDayLogsInRange: (from, to) => db.getDayLogsInRange(from, to),
+    getDayLog: async (day) => { try { return await db.getDayLog(day); } catch { return null; } },
+    getDayLogsInRange: async (from, to) => { try { return await db.getDayLogsInRange(from, to); } catch { return []; } },
 
     updateSettings: (patch) =>
       mutate(async () => {
