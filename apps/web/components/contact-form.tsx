@@ -14,7 +14,8 @@ export function ContactForm() {
   const [error, setError] = useState<string | null>(null);
 
   const clientValidate = (): string | null => {
-    if (!EMAIL_RE.test(email.trim())) return 'Please enter a valid email.';
+    const e = email.trim();
+    if (e && !EMAIL_RE.test(e)) return 'That email address doesn't look right.';
     if (message.trim().length < 10) return 'Please enter a message of at least 10 characters.';
     return null;
   };
@@ -55,7 +56,9 @@ export function ContactForm() {
     return (
       <div className="surface p-6 text-center">
         <p className="font-display text-lg font-semibold text-fg">Thanks, your message was sent.</p>
-        <p className="mt-2 text-fg-muted">We will get back to you by email.</p>
+        <p className="mt-2 text-fg-muted">
+          {email.trim() ? 'We will get back to you by email.' : 'Your message was received anonymously.'}
+        </p>
       </div>
     );
   }
@@ -82,7 +85,7 @@ export function ContactForm() {
 
       <div>
         <label htmlFor="cf-email" className="mb-1.5 block text-sm text-fg-soft">
-          Email
+          Email <span className="text-fg-muted">(optional)</span>
         </label>
         <input
           id="cf-email"
@@ -92,6 +95,9 @@ export function ContactForm() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full rounded-2xl border border-line bg-night2 px-4 py-3 text-fg outline-none placeholder:text-fg-muted focus:border-lock"
         />
+        <p className="mt-1.5 text-xs text-fg-muted">
+          Include your email if you'd like a reply - or leave it blank to contact anonymously.
+        </p>
       </div>
 
       <div>

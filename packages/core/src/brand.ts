@@ -10,8 +10,8 @@ export const BRAND = {
     'A 100% on-device, encrypted period tracker. No account, no cloud, no tracking. Your data never leaves your phone.',
   /** Reverse-DNS id used for the app bundle identifier / package name. */
   appId: 'app.locklune',
-  supportEmail: 'support@locklune.app',
-  websiteUrl: 'https://locklune.app',
+  supportEmail: 'locklune@constantlearning.org',
+  websiteUrl: 'https://locklune.com',
 } as const;
 
 export type Brand = typeof BRAND;

@@ -6,7 +6,6 @@
  * Storage is deliberately compact: one row per cycle, and day-logs are sparse
  * (a row exists only when the user recorded something).
  */
-import * as SQLite from 'expo-sqlite';
 import {
   DEFAULT_SETTINGS,
   type Cycle,
@@ -16,6 +15,7 @@ import {
   type Mood,
   type Settings,
 } from '@locklune/core';
+import * as SQLite from 'expo-sqlite';
 
 const DB_NAME = 'locklune.db';
 
@@ -30,15 +30,32 @@ function requireDb(): SQLite.SQLiteDatabase {
 export async function openEncryptedDb(dekHex: string): Promise<void> {
   if (db) return;
   const database = await SQLite.openDatabaseAsync(DB_NAME);
-  // SQLCipher: the key MUST be set before touching any table.
-  await database.execAsync(`PRAGMA key = "x'${dekHex}'";`);
-  await database.execAsync('PRAGMA journal_mode = WAL;');
-  await migrate(database);
+  try {
+    // SQLCipher: the key MUST be set before touching any table.
+    await database.execAsync(`PRAGMA key = "x'${dekHex}'";`);
+    await database.execAsync('PRAGMA journal_mode = WAL;');
+    await migrate(database);
+  } catch (err) {
+    // Close the connection before re-throwing so we never leave a leaked handle
+    // that would prevent deleteDb() from removing the file on a subsequent retry.
+    await database.closeAsync().catch(() => undefined);
+    throw err;
+  }
   db = database;
 }
 
 export async function closeDb(): Promise<void> {
   if (db) {
+    // Checkpoint the WAL and switch back to rollback-journal mode before
+    // closing. expo-sqlite's deleteDatabaseAsync only removes the main .db
+    // file, so a stale .db-wal encrypted with the old DEK would remain and
+    // cause a NullPointerException when a new database is opened at the same
+    // path and SQLCipher tries to recover the WAL with the new (wrong) key.
+    try {
+      await db.execAsync('PRAGMA journal_mode = DELETE;');
+    } catch {
+      // best-effort — proceed with close even if the checkpoint fails
+    }
     await db.closeAsync();
     db = null;
   }
@@ -66,13 +83,21 @@ async function migrate(database: SQLite.SQLiteDatabase): Promise<void> {
       flow INTEGER,
       mood INTEGER,
       symptoms TEXT,
-      note TEXT
+      note TEXT,
+      ovulation INTEGER
     );
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
   `);
+  // Add columns introduced after a table's first version (no-op if present).
+  try {
+    await database.execAsync('ALTER TABLE day_logs ADD COLUMN ovulation INTEGER');
+  } catch { /* already exists */ }
+  try {
+    await database.execAsync('ALTER TABLE day_logs ADD COLUMN temperature REAL');
+  } catch { /* already exists */ }
 }
 
 // --- Cycles -----------------------------------------------------------------
@@ -102,8 +127,21 @@ export async function setCycleEnd(id: number, endDay: EpochDay | null): Promise<
   await requireDb().runAsync('UPDATE cycles SET end_day = ? WHERE id = ?', endDay, id);
 }
 
+/** Move a cycle's start day (used to correct a mis-dated period start). */
+export async function moveCycleStart(id: number, startDay: EpochDay): Promise<void> {
+  await requireDb().runAsync('UPDATE cycles SET start_day = ? WHERE id = ?', startDay, id);
+}
+
 export async function deleteCycle(id: number): Promise<void> {
   await requireDb().runAsync('DELETE FROM cycles WHERE id = ?', id);
+}
+
+export async function deleteDayLogsInRange(from: EpochDay, to: EpochDay): Promise<void> {
+  await requireDb().runAsync('DELETE FROM day_logs WHERE day BETWEEN ? AND ?', from, to);
+}
+
+export async function deleteDayLog(day: EpochDay): Promise<void> {
+  await requireDb().runAsync('DELETE FROM day_logs WHERE day = ?', day);
 }
 
 // --- Day logs (sparse) ------------------------------------------------------
@@ -114,6 +152,8 @@ interface DayLogRow {
   mood: number | null;
   symptoms: string | null;
   note: string | null;
+  ovulation: number | null;
+  temperature: number | null;
 }
 
 function rowToDayLog(r: DayLogRow): DayLog {
@@ -123,16 +163,25 @@ function rowToDayLog(r: DayLogRow): DayLog {
     mood: (r.mood as Mood | null) ?? null,
     symptoms: r.symptoms ? (JSON.parse(r.symptoms) as string[]) : [],
     note: r.note,
+    ovulation: r.ovulation === 1,
+    temperature: r.temperature ?? null,
   };
 }
 
 function isEmptyLog(log: DayLog): boolean {
-  return log.flow === null && log.mood === null && log.symptoms.length === 0 && !log.note;
+  return (
+    log.flow === null &&
+    log.mood === null &&
+    log.symptoms.length === 0 &&
+    !log.note &&
+    !log.ovulation &&
+    log.temperature === null
+  );
 }
 
 export async function getDayLog(day: EpochDay): Promise<DayLog | null> {
   const row = await requireDb().getFirstAsync<DayLogRow>(
-    'SELECT day, flow, mood, symptoms, note FROM day_logs WHERE day = ?',
+    'SELECT day, flow, mood, symptoms, note, ovulation, temperature FROM day_logs WHERE day = ?',
     day,
   );
   return row ? rowToDayLog(row) : null;
@@ -140,11 +189,19 @@ export async function getDayLog(day: EpochDay): Promise<DayLog | null> {
 
 export async function getDayLogsInRange(from: EpochDay, to: EpochDay): Promise<DayLog[]> {
   const rows = await requireDb().getAllAsync<DayLogRow>(
-    'SELECT day, flow, mood, symptoms, note FROM day_logs WHERE day BETWEEN ? AND ? ORDER BY day',
+    'SELECT day, flow, mood, symptoms, note, ovulation, temperature FROM day_logs WHERE day BETWEEN ? AND ? ORDER BY day',
     from,
     to,
   );
   return rows.map(rowToDayLog);
+}
+
+/** Days on which the user confirmed ovulation (used to sharpen predictions). */
+export async function getConfirmedOvulations(): Promise<EpochDay[]> {
+  const rows = await requireDb().getAllAsync<{ day: number }>(
+    'SELECT day FROM day_logs WHERE ovulation = 1 ORDER BY day',
+  );
+  return rows.map((r) => r.day);
 }
 
 /** Insert/update a day-log; if the log is empty, the row is removed (stays sparse). */
@@ -154,15 +211,18 @@ export async function upsertDayLog(log: DayLog): Promise<void> {
     return;
   }
   await requireDb().runAsync(
-    `INSERT INTO day_logs (day, flow, mood, symptoms, note)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO day_logs (day, flow, mood, symptoms, note, ovulation, temperature)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(day) DO UPDATE SET flow = excluded.flow, mood = excluded.mood,
-       symptoms = excluded.symptoms, note = excluded.note`,
+       symptoms = excluded.symptoms, note = excluded.note, ovulation = excluded.ovulation,
+       temperature = excluded.temperature`,
     log.day,
     log.flow,
     log.mood,
     log.symptoms.length > 0 ? JSON.stringify(log.symptoms) : null,
     log.note,
+    log.ovulation ? 1 : 0,
+    log.temperature,
   );
 }
 

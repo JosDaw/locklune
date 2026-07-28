@@ -3,7 +3,7 @@
  * prediction; nothing is registered with any push service and no network is used.
  */
 import * as Notifications from 'expo-notifications';
-import { fromEpochDay, type Prediction } from '@locklune/core';
+import { fromEpochDay, BRAND, type Prediction, type Settings } from '@locklune/core';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -21,32 +21,46 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return req.granted;
 }
 
-function reminderBody(daysBefore: number): string {
-  if (daysBefore <= 0) return 'Your period may start today.';
-  if (daysBefore === 1) return 'Your period may start tomorrow.';
-  return `Your period may start in ${daysBefore} days.`;
+function shortDate(epochDay: number): string {
+  return fromEpochDay(epochDay).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
+async function scheduleAt(epochDay: number, body: string): Promise<void> {
+  const when = fromEpochDay(epochDay);
+  when.setHours(9, 0, 0, 0);
+  if (when.getTime() <= Date.now()) return;
+  await Notifications.scheduleNotificationAsync({
+    content: { title: BRAND.name, body },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
+  });
 }
 
 /**
  * Re-schedule reminders to match the latest prediction. Cancels prior ones so
  * this is safe to call after every data change.
  */
-export async function syncReminders(
-  prediction: Prediction,
-  reminderDaysBefore: number[],
-): Promise<void> {
+export async function syncReminders(prediction: Prediction, settings: Settings): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
   const next = prediction.upcoming[0];
   if (!next) return;
 
-  for (const daysBefore of reminderDaysBefore) {
-    const when = fromEpochDay(next.periodStart - daysBefore);
-    when.setHours(9, 0, 0, 0); // 9am local
-    if (when.getTime() <= Date.now()) continue;
-    await Notifications.scheduleNotificationAsync({
-      content: { title: 'Locklune', body: reminderBody(daysBefore) },
-      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: when },
-    });
+  if (settings.notifyPeriodTomorrow) {
+    await scheduleAt(next.periodStart - 1, 'Your period may start tomorrow.');
+  }
+  if (settings.notifyPeriodToday) {
+    await scheduleAt(next.periodStart, 'Your period may start today.');
+  }
+
+  if (prediction.fertilityApplicable) {
+    if (settings.notifyFertileTomorrow) {
+      await scheduleAt(next.fertileWindow.start - 1, 'Your fertile window may start tomorrow.');
+    }
+    if (settings.notifyFertileStart) {
+      await scheduleAt(
+        next.fertileWindow.start,
+        `Your fertile window may be open until ${shortDate(next.fertileWindow.end)}.`,
+      );
+    }
   }
 }
 

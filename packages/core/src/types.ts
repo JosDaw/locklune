@@ -49,10 +49,18 @@ export interface DayLog {
   /** Free-form symptom tags, e.g. ['cramps', 'headache']. */
   symptoms: string[];
   note: string | null;
+  /**
+   * User-confirmed ovulation on this day (e.g. a positive ovulation test or BBT
+   * shift). Confirmed ovulations refine the luteal-phase estimate and anchor the
+   * next-period prediction. See {@link ./prediction.ts}.
+   */
+  ovulation: boolean;
+  /** Basal body temperature in °C, if logged. */
+  temperature: number | null;
 }
 
 /** How the app interprets cycles for the user's current life stage. */
-export type CycleMode = 'tracking' | 'trying' | 'contraception' | 'pregnant';
+export type CycleMode = 'tracking' | 'period_only' | 'trying' | 'contraception' | 'pregnant';
 
 /** Contraception method (only relevant in 'contraception' mode). */
 export type ContraceptionMethod =
@@ -93,14 +101,29 @@ export interface Settings {
   defaultPeriodLength: number;
   /** Minutes of inactivity before the app auto-locks. */
   autoLockMinutes: number;
-  /** Local reminders (days before predicted period) to notify on. */
-  reminderDaysBefore: number[];
+  /** Local notification: fire the morning before the predicted period start. */
+  notifyPeriodTomorrow: boolean;
+  /** Local notification: fire the morning the predicted period start day arrives. */
+  notifyPeriodToday: boolean;
+  /** Local notification: fire the morning before the predicted fertile window opens. */
+  notifyFertileTomorrow: boolean;
+  /** Local notification: fire the morning the fertile window opens. */
+  notifyFertileStart: boolean;
   /** Current life stage / tracking mode. */
   cycleMode: CycleMode;
   /** Contraception method (used when cycleMode === 'contraception'). */
   contraceptionMethod: ContraceptionMethod;
   /** Estimated due date (epoch-day) when cycleMode === 'pregnant'. */
   pregnancyDueDay: EpochDay | null;
+  /**
+   * Expected first post-partum period day, set automatically when the user switches
+   * away from 'pregnant' mode. Computed from gestational age at switch time so early
+   * losses resume sooner than full-term deliveries. Cleared once a real period is
+   * recorded after this date.
+   */
+  postPregnancyAnchorDay: EpochDay | null;
+  /** User-defined symptom tags added on top of the built-in categories. */
+  customSymptoms: string[];
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -108,10 +131,15 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultCycleLength: 28,
   defaultPeriodLength: 5,
   autoLockMinutes: 2,
-  reminderDaysBefore: [2],
+  notifyPeriodTomorrow: false,
+  notifyPeriodToday: false,
+  notifyFertileTomorrow: false,
+  notifyFertileStart: false,
   cycleMode: 'tracking',
   contraceptionMethod: 'none',
   pregnancyDueDay: null,
+  postPregnancyAnchorDay: null,
+  customSymptoms: [],
 };
 
 /** Confidence tier attached to a prediction. */

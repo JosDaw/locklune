@@ -1,8 +1,16 @@
-import { create } from 'zustand';
 import { MAX_PIN_ATTEMPTS } from '@locklune/core';
+import { create } from 'zustand';
 import { closeDb, deleteDb, openEncryptedDb } from '../lib/db';
 import { cancelAllReminders } from '../lib/notifications';
-import { changeVaultPin, hasVault, initVault, unlockWithPin, wipeVault } from '../lib/vault';
+import * as toast from '../lib/toast';
+import {
+    changeVaultPin,
+    checkDestructPin,
+    hasVault,
+    initVault,
+    unlockWithPin,
+    wipeVault,
+} from '../lib/vault';
 import { useDataStore } from './dataStore';
 
 type Status = 'loading' | 'onboarding' | 'locked' | 'unlocked';
@@ -35,25 +43,52 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   attemptsRemaining: MAX_PIN_ATTEMPTS,
 
   init: async () => {
-    const exists = await hasVault();
-    set({ status: exists ? 'locked' : 'onboarding' });
+    try {
+      const exists = await hasVault();
+      set({ status: exists ? 'locked' : 'onboarding' });
+    } catch {
+      // Keystore read failed - safest is to present the lock screen rather than
+      // wrongly offering onboarding (which could overwrite an existing vault).
+      toast.error('Could not read secure storage.');
+      set({ status: 'locked' });
+    }
   },
 
   createPin: async (pin) => {
-    const dekHex = await initVault(pin);
-    await afterUnlock(dekHex);
+    // Delete any stale DB from a previous failed onboarding so the new vault
+    // and DB are always encrypted with the same key.
+    await deleteDb().catch(() => undefined);
+    const dekHex = await initVault(pin).catch((err: unknown) => {
+      throw new Error(`vault:${err instanceof Error ? err.message : String(err)}`);
+    });
+    await afterUnlock(dekHex).catch((err: unknown) => {
+      throw new Error(`db:${err instanceof Error ? err.message : String(err)}`);
+    });
     set({ status: 'unlocked', dekHex, attemptsRemaining: MAX_PIN_ATTEMPTS, lockedForSeconds: 0 });
   },
 
   unlockPin: async (pin) => {
     const res = await unlockWithPin(pin);
     if (res.ok) {
-      await afterUnlock(res.dekHex);
+      try {
+        await afterUnlock(res.dekHex);
+      } catch {
+        // Correct PIN but DB is corrupt or key-mismatched — unrecoverable.
+        // Wipe everything so the user can start fresh rather than being locked out.
+        toast.error('Your data appears corrupted and has been reset. Sorry for the inconvenience.');
+        await get().wipe();
+        return false;
+      }
       set({ status: 'unlocked', dekHex: res.dekHex, lockedForSeconds: 0 });
       return true;
     }
     if (res.wiped) {
-      // Too many wrong PINs — erase everything and return to onboarding.
+      // Too many wrong PINs - erase everything and return to onboarding.
+      await get().wipe();
+      return false;
+    }
+    // Wrong PIN - check for the self-destruct PIN before recording the failed attempt.
+    if (await checkDestructPin(pin)) {
       await get().wipe();
       return false;
     }
@@ -70,9 +105,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   changePin: (oldPin, newPin) => changeVaultPin(oldPin, newPin),
 
   wipe: async () => {
-    await cancelAllReminders();
-    await deleteDb();
-    await wipeVault();
+    // Best-effort: attempt every step even if an earlier one fails, so we erase
+    // as much as possible and always return to a clean onboarding state.
+    let failed = false;
+    for (const step of [cancelAllReminders, deleteDb, wipeVault]) {
+      try {
+        await step();
+      } catch {
+        failed = true;
+      }
+    }
+    if (failed) toast.error('Some data could not be fully erased.');
     useDataStore.getState().reset();
     set({
       status: 'onboarding',

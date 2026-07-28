@@ -5,21 +5,23 @@
  * Slate / moonlight theme (matches the marketing site).
  */
 export const colors = {
-  ink: '#0F172A', // app background (night)
-  surface: '#1E293B', // cards
+  ink: '#000022', // app background (night)
+  ink2: '#000030', // secondary background (gradient toward this)
+  surface: '#162032', // cards
   surfaceMuted: '#273449', // inputs / chips / pressed
-  border: '#232A3B', // hairline (~rgba(255,255,255,0.08) over night)
-  primary: '#6EA8FE', // lock accent
+  border: 'rgba(255,255,255,0.08)', // hairline
+  primary: '#6EA8FE', // moon-blue accent
   primaryDark: '#4C86E8',
-  primarySoft: '#AFC8FF', // highlight
+  primarySoft: '#AFC8FF', // soft highlight
   accent: '#AFC8FF',
   moon: '#E2E8F0',
+  star: '#FFD166', // celestial accent (scattered stars)
   text: '#F8FAFC',
   textMuted: '#CBD5E1',
   textFaint: '#94A3B8',
   period: '#6EA8FE',
   fertile: '#AFC8FF',
-  ovulation: '#34D399',
+  ovulation: '#6EE7B7', // muted sage-leaning green
   danger: '#F87171',
   success: '#34D399',
 } as const;

@@ -1,7 +1,8 @@
 import { type ReactNode } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 import { VStack } from '../gs/vstack';
+import { Background } from './Background';
 
 export function Screen({
   children,
@@ -15,22 +16,26 @@ export function Screen({
   contentClassName?: string;
 }) {
   return (
-    <SafeAreaView className="flex-1 bg-ink" edges={edges}>
-      {scroll ? (
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ padding: 20 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <VStack space="lg" className={contentClassName}>
+    <View className="flex-1 bg-ink">
+      <Background />
+      <SafeAreaView className="flex-1" edges={edges}>
+        {scroll ? (
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ padding: 24, paddingBottom: 104 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <VStack space="lg" className={contentClassName}>
+              {children}
+            </VStack>
+          </ScrollView>
+        ) : (
+          <VStack space="lg" className={`flex-1 p-6 ${contentClassName}`}>
             {children}
           </VStack>
-        </ScrollView>
-      ) : (
-        <VStack space="lg" className={`flex-1 p-5 ${contentClassName}`}>
-          {children}
-        </VStack>
-      )}
-    </SafeAreaView>
+        )}
+      </SafeAreaView>
+    </View>
   );
 }

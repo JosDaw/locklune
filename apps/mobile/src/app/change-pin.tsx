@@ -6,6 +6,8 @@ import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
 import { colors } from '../theme/colors';
+import * as haptics from '../lib/haptics';
+import * as toast from '../lib/toast';
 import { useAuthStore } from '../stores/authStore';
 
 const PIN_LENGTH = 6;
@@ -44,18 +46,29 @@ export default function ChangePin() {
       setPhase('confirm');
     } else {
       if (pin !== newPin) {
+        haptics.error();
         setError('New PINs didn’t match. Start again.');
         reset();
         return;
       }
       setBusy(true);
-      const ok = await changePin(currentPin, pin);
+      let ok = false;
+      try {
+        ok = await changePin(currentPin, pin);
+      } catch {
+        setBusy(false);
+        toast.error('Could not change your PIN. Please try again.');
+        reset();
+        return;
+      }
       setBusy(false);
       if (!ok) {
+        haptics.error();
         setError('Your current PIN was incorrect. Start again.');
         reset();
         return;
       }
+      haptics.success();
       Alert.alert('PIN updated', 'Your new PIN is now active.');
       router.back();
     }
@@ -65,7 +78,10 @@ export default function ChangePin() {
     <Screen scroll={false} contentClassName="justify-between">
       <View className="flex-row items-center justify-between pt-2">
         <Txt variant="title">Change PIN</Txt>
-        <Pressable onPress={() => router.back()} className="h-9 w-9 items-center justify-center rounded-full bg-surfaceMuted">
+        <Pressable
+          onPress={() => router.back()}
+          className="h-9 w-9 items-center justify-center rounded-full bg-surfaceMuted"
+        >
           <Ionicons name="close" size={20} color={colors.text} />
         </Pressable>
       </View>

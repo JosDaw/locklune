@@ -15,7 +15,7 @@ import { bytesToHex, hexToBytes, randomBytes, utf8ToBytes } from '@noble/hashes/
  *  - Data is cryptographically bound to the PIN (no PIN ⇒ no DEK ⇒ no data).
  *  - A wrong PIN fails AES-GCM authentication, so it is detectable without ever
  *    comparing/storing the PIN itself.
- *  - Changing the PIN only re-wraps the DEK — the database is never re-encrypted.
+ *  - Changing the PIN only re-wraps the DEK - the database is never re-encrypted.
  *
  * This module is pure and has no device dependencies; randomness is injectable
  * so it is fully deterministic under test.
@@ -50,7 +50,7 @@ export interface VaultMeta {
   salt: string;
   /** AES-GCM nonce used to wrap the DEK. */
   nonce: string;
-  /** AES-256-GCM(KEK, DEK) — ciphertext with appended auth tag. */
+  /** AES-256-GCM(KEK, DEK) - ciphertext with appended auth tag. */
   wrappedDek: string;
 }
 
@@ -120,8 +120,8 @@ export function openVault(pin: string, meta: VaultMeta): Uint8Array {
 }
 
 /**
- * Re-wrap the existing DEK under a new PIN (fresh salt + nonce). The DEK — and
- * therefore the encrypted database — is unchanged, so no data is re-encrypted.
+ * Re-wrap the existing DEK under a new PIN (fresh salt + nonce). The DEK - and
+ * therefore the encrypted database - is unchanged, so no data is re-encrypted.
  * @throws {VaultAuthError} if `oldPin` is incorrect.
  */
 export function changePin(

@@ -1,13 +1,13 @@
+import { GithubIcon } from '@/components/icons';
+import { Logo, MoonMark } from '@/components/logo';
+import { site } from '@/lib/site';
+import { Coffee as CoffeeIcon, Heart as HeartIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Inter, Manrope } from 'next/font/google';
 import Link from 'next/link';
-import { Logo, MoonMark } from '@/components/logo';
-import { Coffee as CoffeeIcon, Heart as HeartIcon } from 'lucide-react';
-import { GithubIcon } from '@/components/icons';
-import { site } from '@/lib/site';
 import './globals.css';
 
-// Self-hosted at build time — zero runtime requests to Google.
+// Self-hosted at build time - zero runtime requests to Google.
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 const manrope = Manrope({ subsets: ['latin'], variable: '--font-manrope', display: 'swap' });
 
@@ -101,7 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <div className="mt-12 border-t border-line pt-6 text-xs text-fg-muted">
               <p className="text-center">
-                Locklune is for organisation only and is not medical or health advice.
+                Locklune is for record keeping purposes only and does not providemedical or health advice.
               </p>
               <div className="mt-4 flex items-center justify-between">
                 <p>© {new Date().getFullYear()} {site.name}</p>
@@ -111,15 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
                 <span className="flex items-center gap-1.5">
-                  Made with <HeartIcon className="h-4 w-4 text-lock" /> by
-                  <a
-                    href="https://constantlearning.org"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-medium text-fg-soft hover:text-fg"
-                  >
-                    Josie Daw
-                  </a>
+                  Made with <HeartIcon className="h-4 w-4 text-lock" />
                 </span>
                 <a
                   href="https://ko-fi.com/constantlearning"

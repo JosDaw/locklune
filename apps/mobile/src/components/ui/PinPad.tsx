@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
+import * as haptics from '../../lib/haptics';
 import { Txt } from './Text';
 
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫'];
@@ -43,6 +44,7 @@ export function PinPad({
 
   const press = (key: string) => {
     if (disabled) return;
+    haptics.tap();
     if (key === '⌫') {
       setValue((v) => v.slice(0, -1));
     } else if (key !== '') {

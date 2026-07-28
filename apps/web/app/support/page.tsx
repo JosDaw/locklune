@@ -50,8 +50,8 @@ export default function Support() {
       <section className="mt-14">
         <h2 className="font-display text-2xl font-semibold text-fg">Contact us</h2>
         <p className="mt-2 text-fg-muted">
-          Browsing this site collects nothing. When you send this form, your name, email and message
-          are emailed to our support inbox so we can reply, and used for nothing else.
+          Browsing this site collects nothing. When you send this form, your email (optional) and
+          message are emailed to our support inbox so we can reply, and used for nothing else.
         </p>
         <div className="mt-6">
           <ContactForm />
