@@ -30,7 +30,7 @@ export default function Onboarding() {
   const [agreedLegal, setAgreedLegal] = useState(false);
   const [agreedMedical, setAgreedMedical] = useState(false);
 
-  // Preferences collected during onboarding — applied after createPin succeeds.
+  // Preferences collected during onboarding - applied after createPin succeeds.
   const [selectedMode, setSelectedMode] = useState<CycleMode>('tracking');
   const [notifyPeriodTomorrow, setNotifyPeriodTomorrow] = useState(false);
   const [notifyPeriodToday, setNotifyPeriodToday] = useState(false);
@@ -65,7 +65,7 @@ export default function Onboarding() {
     setBusy(true);
     try {
       await createPin(confirmedPin);
-      // DB is now open — persist the onboarding choices before navigation fires.
+      // DB is now open - persist the onboarding choices before navigation fires.
       const patch: Partial<Settings> = {
         cycleMode: selectedMode,
         notifyPeriodTomorrow,
@@ -220,42 +220,52 @@ export default function Onboarding() {
   // ── Notifications ─────────────────────────────────────────────────────────────
   return (
     <Screen scroll={false} contentClassName="justify-between">
-      <View className="gap-2 pt-6">
-        <Txt variant="display">Stay informed</Txt>
-        <Txt variant="muted">
-          All reminders are delivered privately on your device — nothing leaves {BRAND.name}.
-        </Txt>
-      </View>
+      <View className="gap-6 pt-6">
+        {/* Icon + heading */}
+        <View className="items-center gap-4">
+          <View className="h-20 w-20 items-center justify-center rounded-full bg-surface border border-border">
+            <Ionicons name="notifications-outline" size={36} color={colors.primarySoft} />
+          </View>
+          <View className="items-center gap-2">
+            <Txt variant="display" className="text-center">Allow reminders</Txt>
+            <Txt variant="muted" className="text-center">
+              Enable any reminder below and {BRAND.name} will ask for notification permission.
+              All reminders are local to your device — nothing is sent anywhere.
+            </Txt>
+          </View>
+        </View>
 
-      <View className="gap-4">
-        <NotifRow
-          label="Period starting tomorrow"
-          hint="Morning before your predicted period start"
-          value={notifyPeriodTomorrow}
-          onValueChange={(v) => void toggleNotify(setNotifyPeriodTomorrow, v)}
-        />
-        <NotifRow
-          label="Period starting today"
-          hint="Morning of your predicted period start"
-          value={notifyPeriodToday}
-          onValueChange={(v) => void toggleNotify(setNotifyPeriodToday, v)}
-        />
-        {fertilityApplicable && (
-          <>
-            <NotifRow
-              label="Fertile window tomorrow"
-              hint="Morning before your fertile window opens"
-              value={notifyFertileTomorrow}
-              onValueChange={(v) => void toggleNotify(setNotifyFertileTomorrow, v)}
-            />
-            <NotifRow
-              label="Fertile window opens"
-              hint="Morning your fertile window begins"
-              value={notifyFertileStart}
-              onValueChange={(v) => void toggleNotify(setNotifyFertileStart, v)}
-            />
-          </>
-        )}
+        {/* Individual toggles */}
+        <View className="gap-3">
+          <NotifRow
+            label="Period starting tomorrow"
+            hint="Morning before your predicted period start"
+            value={notifyPeriodTomorrow}
+            onValueChange={(v) => void toggleNotify(setNotifyPeriodTomorrow, v)}
+          />
+          <NotifRow
+            label="Period starting today"
+            hint="Morning of your predicted period start"
+            value={notifyPeriodToday}
+            onValueChange={(v) => void toggleNotify(setNotifyPeriodToday, v)}
+          />
+          {fertilityApplicable && (
+            <>
+              <NotifRow
+                label="Fertile window tomorrow"
+                hint="Morning before your fertile window opens"
+                value={notifyFertileTomorrow}
+                onValueChange={(v) => void toggleNotify(setNotifyFertileTomorrow, v)}
+              />
+              <NotifRow
+                label="Fertile window opens"
+                hint="Morning your fertile window begins"
+                value={notifyFertileStart}
+                onValueChange={(v) => void toggleNotify(setNotifyFertileStart, v)}
+              />
+            </>
+          )}
+        </View>
       </View>
 
       <Button title="Get started" disabled={busy} onPress={() => void handleFinish()} />
