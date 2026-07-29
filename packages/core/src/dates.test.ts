@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  addDays,
-  daysBetween,
-  formatISO,
-  fromEpochDay,
-  parseISO,
-  toEpochDay,
-} from './dates.js';
+import { addDays, daysBetween, formatISO, fromEpochDay, parseISO, toEpochDay } from './dates.js';
 
 describe('dates', () => {
   it('round-trips a date through epoch-day', () => {

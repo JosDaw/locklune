@@ -36,7 +36,9 @@ export default function Home() {
             </h1>
             <div className="mt-6 max-w-md space-y-1.5 text-lg leading-relaxed text-fg-soft">
               <p>Your cycle data never leaves your device.</p>
-              <p className="text-fg-muted">Protected with your PIN. No cloud. No account. No digital record.</p>
+              <p className="text-fg-muted">
+                Protected with your PIN. No cloud. No account. No digital record.
+              </p>
             </div>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -84,11 +86,16 @@ export default function Home() {
       </Section>
 
       {/* ---------- Beautiful tracking ---------- */}
-      <Section id="tracking" eyebrow="Beautiful tracking" title="Calm, minimal, and quietly powerful">
+      <Section
+        id="tracking"
+        eyebrow="Beautiful tracking"
+        title="Calm, minimal, and quietly powerful"
+      >
         <p className="-mt-6 mb-10 max-w-xl text-fg-soft">
-          A timeline, an elegant calendar, mood tracking, and adaptive predictions, all in a peaceful dark
-          interface designed to disappear into the background. Whether you are tracking your cycle,
-          trying to conceive, on contraception, or pregnant, Locklune adapts to you.
+          A timeline, an elegant calendar, mood tracking, and adaptive predictions, all in a
+          peaceful dark interface designed to disappear into the background. Whether you are
+          tracking your cycle, trying to conceive, on contraception, or pregnant, Locklune adapts to
+          you.
         </p>
         <div className="grid gap-5 md:grid-cols-3">
           <TrackCard icon={<CalendarIcon className="h-5 w-5" />} title="Elegant calendar">
@@ -114,13 +121,19 @@ export default function Home() {
               <div className="flex gap-2">
                 {[35, 60, 45, 80, 55, 70, 90].map((h, i) => (
                   <div key={i} className="flex flex-1 items-end">
-                    <div className="w-full rounded-full bg-gradient-to-t from-lock/30 to-highlight" style={{ height: `${h}%`, minHeight: 8 }} />
+                    <div
+                      className="w-full rounded-full bg-gradient-to-t from-lock/30 to-highlight"
+                      style={{ height: `${h}%`, minHeight: 8 }}
+                    />
                   </div>
                 ))}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {['cramps', 'calm', 'tired', 'focused'].map((t) => (
-                  <span key={t} className="rounded-full border border-line px-2.5 py-1 text-[11px] text-fg-soft">
+                  <span
+                    key={t}
+                    className="rounded-full border border-line px-2.5 py-1 text-[11px] text-fg-soft"
+                  >
                     {t}
                   </span>
                 ))}
@@ -167,7 +180,10 @@ export default function Home() {
           <div className="relative flex items-center justify-center py-8">
             <div
               className="absolute h-64 w-64 rounded-full blur-3xl"
-              style={{ background: 'radial-gradient(closest-side, rgba(138,162,255,0.3), rgba(138,162,255,0))' }}
+              style={{
+                background:
+                  'radial-gradient(closest-side, rgba(138,162,255,0.3), rgba(138,162,255,0))',
+              }}
             />
             <MoonMark className="relative h-56 w-56 drop-shadow-[0_20px_60px_rgba(138,162,255,0.35)]" />
           </div>
@@ -175,7 +191,10 @@ export default function Home() {
             {security.map((s, i) => {
               const Icon = securityIcons[i % securityIcons.length]!;
               return (
-                <li key={s.title} className="flex gap-4 rounded-2xl border border-line bg-card/40 p-4">
+                <li
+                  key={s.title}
+                  className="flex gap-4 rounded-2xl border border-line bg-card/40 p-4"
+                >
                   <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-lock/10 text-lock">
                     <Icon className="h-5 w-5" />
                   </span>
@@ -195,7 +214,10 @@ export default function Home() {
         <div className="surface relative overflow-hidden px-8 py-16 text-center">
           <div
             className="absolute inset-x-0 top-0 h-40"
-            style={{ background: 'radial-gradient(60% 100% at 50% 0%, rgba(138,162,255,0.18), transparent)' }}
+            style={{
+              background:
+                'radial-gradient(60% 100% at 50% 0%, rgba(138,162,255,0.18), transparent)',
+            }}
           />
           <MoonMark className="mx-auto h-12 w-12" />
           <h2 className="mx-auto mt-6 max-w-2xl font-display text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
@@ -245,7 +267,15 @@ function Section({
   );
 }
 
-function FeatureCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+function FeatureCard({
+  icon,
+  title,
+  body,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) {
   return (
     <div className="surface group p-6 transition-colors hover:border-white/15">
       <span className="flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-lock/10 text-lock">
@@ -257,7 +287,15 @@ function FeatureCard({ icon, title, body }: { icon: React.ReactNode; title: stri
   );
 }
 
-function TrackCard({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
+function TrackCard({
+  icon,
+  title,
+  children,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="surface p-5">
       <div className="mb-4 flex items-center gap-2 text-fg-soft">

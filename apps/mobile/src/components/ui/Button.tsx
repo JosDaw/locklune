@@ -1,8 +1,4 @@
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Button as GSButton, ButtonSpinner, ButtonText } from '../gs/button';
 

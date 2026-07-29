@@ -1,7 +1,15 @@
 import { PressScale } from './ui/PressScale';
 import { Txt } from './ui/Text';
 
-export function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+export function Chip({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
   return (
     <PressScale
       onPress={onPress}

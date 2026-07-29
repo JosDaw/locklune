@@ -54,7 +54,7 @@ export default function Onboarding() {
     }
     if (pin !== firstPin) {
       haptics.error();
-      setError("Those PINs didn’t match. Let’s try again.");
+      setError('Those PINs didn’t match. Let’s try again.');
       setFirstPin('');
       setPhase('create');
       return;
@@ -92,10 +92,7 @@ export default function Onboarding() {
     }
   };
 
-  const toggleNotify = async (
-    setter: (v: boolean) => void,
-    value: boolean,
-  ) => {
+  const toggleNotify = async (setter: (v: boolean) => void, value: boolean) => {
     if (value) {
       const granted = await requestNotificationPermission();
       if (!granted) return;
@@ -139,8 +136,8 @@ export default function Onboarding() {
 
           <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((v) => !v)}>
             <RNText className="text-base leading-6 text-text">
-              I understand that {BRAND.name} is for record keeping purposes only and is not intended to be used for medical or
-              health advice.
+              I understand that {BRAND.name} is for record keeping purposes only and is not intended
+              to be used for medical or health advice.
             </RNText>
           </CheckboxRow>
 
@@ -179,7 +176,11 @@ export default function Onboarding() {
         </View>
 
         <View className="gap-3">
-          {error ? <Txt className="text-center text-danger">{error}</Txt> : <View className="h-5" />}
+          {error ? (
+            <Txt className="text-center text-danger">{error}</Txt>
+          ) : (
+            <View className="h-5" />
+          )}
           <PinPad length={PIN_LENGTH} disabled={busy} onComplete={handlePinEntry} />
         </View>
 
@@ -238,7 +239,14 @@ export default function Onboarding() {
   // ── Finishing (createPin in progress) ────────────────────────────────────────
   if (busy) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: colors.ink,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
         <MoonLoader size={64} />
       </View>
     );
@@ -254,10 +262,12 @@ export default function Onboarding() {
             <Ionicons name="notifications-outline" size={36} color={colors.primarySoft} />
           </View>
           <View className="items-center gap-2">
-            <Txt variant="display" className="text-center">Allow reminders</Txt>
+            <Txt variant="display" className="text-center">
+              Allow reminders
+            </Txt>
             <Txt variant="muted" className="text-center">
-              Enable any reminder below and {BRAND.name} will ask for notification permission.
-              All reminders are local to your device - nothing is sent anywhere.
+              Enable any reminder below and {BRAND.name} will ask for notification permission. All
+              reminders are local to your device - nothing is sent anywhere.
             </Txt>
           </View>
         </View>

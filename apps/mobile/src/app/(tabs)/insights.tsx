@@ -147,18 +147,20 @@ export default function Insights() {
             </View>
           ) : (
             <View className="gap-3">
-              {prediction.upcoming.filter((u) => u.periodStart <= today + 183).map((u, i) => (
-                <View
-                  key={i}
-                  className="flex-row items-center justify-between py-1"
-                  style={i > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}
-                >
-                  <Txt variant="body">
-                    {formatDay(u.periodStart, { month: 'long', day: 'numeric' })}
-                  </Txt>
-                  <Txt variant="faint">{relativeDays(u.periodStart)}</Txt>
-                </View>
-              ))}
+              {prediction.upcoming
+                .filter((u) => u.periodStart <= today + 183)
+                .map((u, i) => (
+                  <View
+                    key={i}
+                    className="flex-row items-center justify-between py-1"
+                    style={i > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}
+                  >
+                    <Txt variant="body">
+                      {formatDay(u.periodStart, { month: 'long', day: 'numeric' })}
+                    </Txt>
+                    <Txt variant="faint">{relativeDays(u.periodStart)}</Txt>
+                  </View>
+                ))}
             </View>
           )}
         </Card>

@@ -21,8 +21,9 @@ export default function Privacy() {
       <p className="mt-3 text-sm text-fg-muted">Last updated: {site.lastUpdated}</p>
 
       <P>
-        {site.name} is designed so that your data never leaves your device. This policy explains what
-        that means in practice. The short version: <strong className="text-fg">we collect nothing.</strong>
+        {site.name} is designed so that your data never leaves your device. This policy explains
+        what that means in practice. The short version:{' '}
+        <strong className="text-fg">we collect nothing.</strong>
       </P>
 
       <H2>Data we collect</H2>
@@ -36,15 +37,15 @@ export default function Privacy() {
       <P>
         All information you enter (period dates, flow, mood, symptoms and notes) is stored only on
         your device, inside a database encrypted with AES-256 (SQLCipher). The encryption key is
-        derived from your PIN and is held in your device&apos;s secure hardware keystore. Without your
-        PIN, the data is unreadable.
+        derived from your PIN and is held in your device&apos;s secure hardware keystore. Without
+        your PIN, the data is unreadable.
       </P>
 
       <H2>No network, no third parties</H2>
       <P>
-        The app contains no networking code and no third-party SDKs, advertising, or analytics. There
-        are no cookies and no trackers. Your data is never transmitted, sold, or shared, because it is
-        never sent anywhere in the first place.
+        The app contains no networking code and no third-party SDKs, advertising, or analytics.
+        There are no cookies and no trackers. Your data is never transmitted, sold, or shared,
+        because it is never sent anywhere in the first place.
       </P>
 
       <H2>Legal requests</H2>
@@ -58,9 +59,9 @@ export default function Privacy() {
       <H2>Device security</H2>
       <P>
         The security of your data depends on the security of your device. If your device is lost,
-        stolen, compromised, or accessed by another person, {site.name} and its developers accept
-        no responsibility for any resulting loss or exposure. We recommend keeping your device
-        secured with a screen lock in addition to the {site.name} PIN.
+        stolen, compromised, or accessed by another person, {site.name} and its developers accept no
+        responsibility for any resulting loss or exposure. We recommend keeping your device secured
+        with a screen lock in addition to the {site.name} PIN.
       </P>
 
       <H2>Notifications</H2>
@@ -71,23 +72,24 @@ export default function Privacy() {
 
       <H2>Recovery</H2>
       <P>
-        Because your data is encrypted with your PIN and we hold no copy of anything, a forgotten PIN
-        means the data cannot be recovered, by you or by us. This is a deliberate security trade-off.
+        Because your data is encrypted with your PIN and we hold no copy of anything, a forgotten
+        PIN means the data cannot be recovered, by you or by us. This is a deliberate security
+        trade-off.
       </P>
 
       <H2>Deleting your data</H2>
       <P>
-        You can erase everything instantly from within the app (Settings, then Erase all data), or by
-        deleting the app. If you are locked out, choosing Reset and start over on the lock screen
+        You can erase everything instantly from within the app (Settings, then Erase all data), or
+        by deleting the app. If you are locked out, choosing Reset and start over on the lock screen
         erases everything too. There is nothing stored elsewhere to delete.
       </P>
 
       <H2>This website</H2>
       <P>
         The pages of this site are served without cookies, analytics, or third-party scripts. Fonts
-        are self-hosted, so loading a page makes no third-party requests. Standard server access logs
-        may be kept briefly by the hosting provider for security, but this site sets no identifiers
-        and runs no tracking of its own.
+        are self-hosted, so loading a page makes no third-party requests. Standard server access
+        logs may be kept briefly by the hosting provider for security, but this site sets no
+        identifiers and runs no tracking of its own.
       </P>
       <P>
         If you use the contact form, only your email address (optional) and message are sent to our
@@ -121,8 +123,8 @@ export default function Privacy() {
 
       <H2>Changes</H2>
       <P>
-        If this policy changes, the “last updated” date above will change with it. Since we collect no
-        contact information, please check back here for updates.
+        If this policy changes, the “last updated” date above will change with it. Since we collect
+        no contact information, please check back here for updates.
       </P>
 
       <H2>Contact</H2>

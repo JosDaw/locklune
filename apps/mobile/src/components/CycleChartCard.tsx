@@ -28,8 +28,7 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
   const gap = 4;
   const barW = (availW - gap * (recent.length - 1)) / recent.length;
 
-  const barH = (len: number) =>
-    Math.max(4, ((len - minLen) / range) * (chartH - 12) + 4);
+  const barH = (len: number) => Math.max(4, ((len - minLen) / range) * (chartH - 12) + 4);
   const avgBarH = barH(avg);
   const avgY = chartH - avgBarH;
 
@@ -47,7 +46,9 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
         ...CARD_SHADOW,
       }}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}>
+      <View
+        style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
+      >
         <Txt variant="label">Cycle lengths</Txt>
         <Txt variant="faint">avg {Math.round(avg)} days</Txt>
       </View>
@@ -82,9 +83,7 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
       </Svg>
       {hasIrregular && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-          <View
-            style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }}
-          />
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }} />
           <Txt variant="faint">outside usual range (±15%)</Txt>
         </View>
       )}

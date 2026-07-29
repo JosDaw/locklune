@@ -21,7 +21,10 @@ export default function Terms() {
       <p className="mt-3 text-sm text-fg-muted">Last updated: {site.lastUpdated}</p>
 
       <H2>Acceptance</H2>
-      <P>By using {site.name}, you agree to these terms. If you do not agree, please do not use the app.</P>
+      <P>
+        By using {site.name}, you agree to these terms. If you do not agree, please do not use the
+        app.
+      </P>
 
       <H2>Eligibility</H2>
       <P>
@@ -40,10 +43,10 @@ export default function Terms() {
 
       <H2>Not medical advice</H2>
       <P>
-        {site.name} is an informational tool. Its predictions and insights are estimates only and are
-        not medical advice, a diagnosis, or a contraceptive method. Do not rely on them for preventing
-        or achieving pregnancy or for any medical decision. Consult a qualified healthcare provider for
-        medical concerns.
+        {site.name} is an informational tool. Its predictions and insights are estimates only and
+        are not medical advice, a diagnosis, or a contraceptive method. Do not rely on them for
+        preventing or achieving pregnancy or for any medical decision. Consult a qualified
+        healthcare provider for medical concerns.
       </P>
 
       <H2>Your data and PIN</H2>
@@ -103,10 +106,10 @@ export default function Terms() {
 
       <H2>App store terms</H2>
       <P>
-        {site.name} is distributed via the Apple App Store and Google Play. Your download and use
-        of the app is also subject to the terms and conditions of the relevant app store. In the
-        event of a conflict between those terms and these terms, the app store terms will prevail
-        to the extent of the conflict.
+        {site.name} is distributed via the Apple App Store and Google Play. Your download and use of
+        the app is also subject to the terms and conditions of the relevant app store. In the event
+        of a conflict between those terms and these terms, the app store terms will prevail to the
+        extent of the conflict.
       </P>
 
       <H2>Governing law</H2>

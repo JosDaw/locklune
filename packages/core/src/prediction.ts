@@ -1,14 +1,14 @@
 import { addDays } from './dates.js';
 import {
-    DEFAULT_SETTINGS,
-    isHormonalContraception,
-    type Confidence,
-    type Cycle,
-    type CycleMode,
-    type CyclePrediction,
-    type EpochDay,
-    type Prediction,
-    type Settings,
+  DEFAULT_SETTINGS,
+  isHormonalContraception,
+  type Confidence,
+  type Cycle,
+  type CycleMode,
+  type CyclePrediction,
+  type EpochDay,
+  type Prediction,
+  type Settings,
 } from './types.js';
 
 /**

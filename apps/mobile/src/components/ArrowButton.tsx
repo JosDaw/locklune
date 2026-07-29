@@ -20,8 +20,12 @@ export function ArrowButton({
     <Animated.View style={[styles.arrow, anim]}>
       <Pressable
         onPress={onPress}
-        onPressIn={() => { scale.value = withSpring(0.9, ARROW_SPRING); }}
-        onPressOut={() => { scale.value = withSpring(1, ARROW_SPRING); }}
+        onPressIn={() => {
+          scale.value = withSpring(0.9, ARROW_SPRING);
+        }}
+        onPressOut={() => {
+          scale.value = withSpring(1, ARROW_SPRING);
+        }}
         accessibilityRole="button"
         accessibilityLabel={label}
         className="h-11 w-11 items-center justify-center rounded-full border border-border bg-surface"

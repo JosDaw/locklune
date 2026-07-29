@@ -46,7 +46,10 @@ export const useDataStore = create<DataState>((set, get) => {
       db.getCycles(),
       db.getConfirmedOvulations(),
     ]);
-    const prediction = predict(cycles, get().settings, { confirmedOvulations: ovulationDays, count: 6 });
+    const prediction = predict(cycles, get().settings, {
+      confirmedOvulations: ovulationDays,
+      count: 6,
+    });
     set({ cycles, ovulationDays, prediction });
     void syncReminders(prediction, get().settings).catch(() => undefined);
   }
@@ -76,7 +79,10 @@ export const useDataStore = create<DataState>((set, get) => {
           db.getSettings(),
           db.getConfirmedOvulations(),
         ]);
-        const prediction = predict(cycles, settings, { confirmedOvulations: ovulationDays, count: 6 });
+        const prediction = predict(cycles, settings, {
+          confirmedOvulations: ovulationDays,
+          count: 6,
+        });
         set({ cycles, settings, ovulationDays, prediction, loaded: true });
         void syncReminders(prediction, settings).catch(() => undefined);
       } catch {
@@ -144,8 +150,20 @@ export const useDataStore = create<DataState>((set, get) => {
         await db.deleteDayLog(day);
         await refreshAll();
       }, 'Could not delete the log.'),
-    getDayLog: async (day) => { try { return await db.getDayLog(day); } catch { return null; } },
-    getDayLogsInRange: async (from, to) => { try { return await db.getDayLogsInRange(from, to); } catch { return []; } },
+    getDayLog: async (day) => {
+      try {
+        return await db.getDayLog(day);
+      } catch {
+        return null;
+      }
+    },
+    getDayLogsInRange: async (from, to) => {
+      try {
+        return await db.getDayLogsInRange(from, to);
+      } catch {
+        return [];
+      }
+    },
 
     updateSettings: (patch) =>
       mutate(async () => {

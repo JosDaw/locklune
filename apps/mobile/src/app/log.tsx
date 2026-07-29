@@ -1,5 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { cycleForDay, Flow, Mood, pregnancyProgress, todayEpochDay, type EpochDay } from '@locklune/core';
+import {
+  cycleForDay,
+  Flow,
+  Mood,
+  pregnancyProgress,
+  todayEpochDay,
+  type EpochDay,
+} from '@locklune/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -27,7 +34,14 @@ import { useDataStore } from '../stores/dataStore';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 
-type OrigLog = { flow: Flow | null; mood: Mood | null; syms: string[]; note: string; ov: boolean; temp: string };
+type OrigLog = {
+  flow: Flow | null;
+  mood: Mood | null;
+  syms: string[];
+  note: string;
+  ov: boolean;
+  temp: string;
+};
 
 export default function LogModal() {
   const router = useRouter();
@@ -44,7 +58,8 @@ export default function LogModal() {
   const settings = useDataStore((s) => s.settings);
 
   const pregnant = settings.cycleMode === 'pregnant';
-  const fertilityTracking = settings.cycleMode !== 'pregnant' && settings.cycleMode !== 'period_only';
+  const fertilityTracking =
+    settings.cycleMode !== 'pregnant' && settings.cycleMode !== 'period_only';
   const preg =
     pregnant && settings.pregnancyDueDay != null
       ? pregnancyProgress(settings.pregnancyDueDay, day)
@@ -175,9 +190,18 @@ export default function LogModal() {
   const save = async () => {
     const parsedTemp = temp.trim() ? parseFloat(temp.trim()) : null;
     const temperature = parsedTemp !== null && isFinite(parsedTemp) ? parsedTemp : null;
-    if (await logDay({ day, flow, mood, symptoms, note: note.trim() || null, ovulation, temperature })) {
+    if (
+      await logDay({ day, flow, mood, symptoms, note: note.trim() || null, ovulation, temperature })
+    ) {
       haptics.success();
-      setOrigLog({ flow, mood, syms: symptoms, note: note.trim(), ov: ovulation, temp: temp.trim() });
+      setOrigLog({
+        flow,
+        mood,
+        syms: symptoms,
+        note: note.trim(),
+        ov: ovulation,
+        temp: temp.trim(),
+      });
       setJustSaved(true);
       setTimeout(() => router.back(), 700);
     }
@@ -330,7 +354,10 @@ export default function LogModal() {
           {!pregnant && (
             <View style={{ gap: 12 }}>
               <Txt variant="label">Flow</Txt>
-              <FlowPicker value={flow} onChange={(f) => setFlow((prev) => (prev === f ? null : f))} />
+              <FlowPicker
+                value={flow}
+                onChange={(f) => setFlow((prev) => (prev === f ? null : f))}
+              />
             </View>
           )}
 

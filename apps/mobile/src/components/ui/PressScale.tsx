@@ -1,8 +1,4 @@
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 
 const SPRING = { damping: 18, stiffness: 350, mass: 0.5 } as const;

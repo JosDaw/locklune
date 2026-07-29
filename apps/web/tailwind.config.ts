@@ -30,7 +30,13 @@ const config: Config = {
           'Roboto',
           'sans-serif',
         ],
-        display: ['var(--font-manrope)', 'var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: [
+          'var(--font-manrope)',
+          'var(--font-inter)',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif',
+        ],
       },
       borderRadius: {
         '2xl': '16px',

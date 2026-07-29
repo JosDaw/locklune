@@ -42,9 +42,7 @@ export function PillButton({
         }}
       >
         {icon && <Ionicons name={icon} size={18} color={colors.ink} />}
-        <Text style={{ fontFamily: fonts.semibold, fontSize: 13, color: colors.ink }}>
-          {label}
-        </Text>
+        <Text style={{ fontFamily: fonts.semibold, fontSize: 13, color: colors.ink }}>{label}</Text>
       </Pressable>
     </Animated.View>
   );

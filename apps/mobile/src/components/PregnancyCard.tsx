@@ -42,8 +42,7 @@ export function PregnancyCard({ preg }: { preg: ReturnType<typeof pregnancyProgr
           : `${-preg.daysRemaining} days over`}
       </Txt>
       <Txt variant="faint">
-        Estimated due{' '}
-        {formatDay(preg.dueDay, { weekday: 'short', month: 'long', day: 'numeric' })}
+        Estimated due {formatDay(preg.dueDay, { weekday: 'short', month: 'long', day: 'numeric' })}
       </Txt>
     </View>
   );

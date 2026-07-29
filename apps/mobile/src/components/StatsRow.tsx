@@ -18,7 +18,11 @@ function computeStats(logs: DayLog[]): { topMood: number | null; topSymptoms: st
       : null;
 
   const symCounts: Record<string, number> = {};
-  logs.forEach((l) => l.symptoms.forEach((s) => { symCounts[s] = (symCounts[s] ?? 0) + 1; }));
+  logs.forEach((l) =>
+    l.symptoms.forEach((s) => {
+      symCounts[s] = (symCounts[s] ?? 0) + 1;
+    }),
+  );
   const topSymptoms = Object.entries(symCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
@@ -49,7 +53,9 @@ export function StatsRow({
     logs.forEach((log) => {
       const phase = phaseForLog(log.day, cycles, avgLen, avgPeriodLen);
       if (phase === currentPhase.label) {
-        log.symptoms.forEach((s) => { symCounts[s] = (symCounts[s] ?? 0) + 1; });
+        log.symptoms.forEach((s) => {
+          symCounts[s] = (symCounts[s] ?? 0) + 1;
+        });
       }
     });
     return Object.entries(symCounts)
@@ -58,8 +64,7 @@ export function StatsRow({
       .map(([s]) => s.charAt(0).toUpperCase() + s.slice(1));
   }, [logs, cycles, currentPhase, avgLen, avgPeriodLen]);
 
-  const shownSymptoms =
-    phaseSymptoms.length > 0 && currentPhase ? phaseSymptoms : topSymptoms;
+  const shownSymptoms = phaseSymptoms.length > 0 && currentPhase ? phaseSymptoms : topSymptoms;
 
   if (topMood === null && shownSymptoms.length === 0) return null;
 
@@ -110,7 +115,12 @@ export function StatsRow({
           }}
         >
           <Text
-            style={{ fontFamily: fonts.medium, fontSize: 11, color: colors.textFaint, letterSpacing: 0.4 }}
+            style={{
+              fontFamily: fonts.medium,
+              fontSize: 11,
+              color: colors.textFaint,
+              letterSpacing: 0.4,
+            }}
           >
             Frequent symptoms
           </Text>
@@ -125,9 +135,7 @@ export function StatsRow({
                   paddingVertical: 3,
                 }}
               >
-                <Text
-                  style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}
-                >
+                <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}>
                   {s}
                 </Text>
               </View>

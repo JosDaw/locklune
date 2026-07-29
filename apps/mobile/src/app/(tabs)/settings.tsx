@@ -56,7 +56,10 @@ export default function Settings() {
 
   const addSymptom = () => {
     const trimmed = newSymptom.trim().toLowerCase();
-    if (!trimmed || settings.customSymptoms.includes(trimmed)) { setNewSymptom(''); return; }
+    if (!trimmed || settings.customSymptoms.includes(trimmed)) {
+      setNewSymptom('');
+      return;
+    }
     void updateSettings({ customSymptoms: [...settings.customSymptoms, trimmed] });
     setNewSymptom('');
   };
@@ -90,7 +93,11 @@ export default function Settings() {
     }
   };
 
-  const toggleNotification = async (key: 'notifyPeriodTomorrow' | 'notifyPeriodToday' | 'notifyFertileTomorrow' | 'notifyFertileStart', value: boolean) => {
+  const toggleNotification = async (
+    key:
+      'notifyPeriodTomorrow' | 'notifyPeriodToday' | 'notifyFertileTomorrow' | 'notifyFertileStart',
+    value: boolean,
+  ) => {
     if (value) {
       const granted = await requestNotificationPermission();
       if (!granted) {
@@ -213,27 +220,29 @@ export default function Settings() {
       </Card>
 
       {/* Cycle - not relevant when pregnant */}
-      {settings.cycleMode !== 'pregnant' && <Card>
-        <SectionLabel icon="sync-outline" label="Cycle" />
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1 pr-4">
-            <Txt variant="body">Luteal phase length</Txt>
-            <Txt variant="faint">Used to estimate ovulation ({luteal} days)</Txt>
+      {settings.cycleMode !== 'pregnant' && (
+        <Card>
+          <SectionLabel icon="sync-outline" label="Cycle" />
+          <View className="flex-row items-center justify-between">
+            <View className="flex-1 pr-4">
+              <Txt variant="body">Luteal phase length</Txt>
+              <Txt variant="faint">Used to estimate ovulation ({luteal} days)</Txt>
+            </View>
+            <Stepper
+              value={luteal}
+              min={10}
+              max={16}
+              onChange={(v) => void updateSettings({ lutealPhaseDays: v })}
+            />
           </View>
-          <Stepper
-            value={luteal}
-            min={10}
-            max={16}
-            onChange={(v) => void updateSettings({ lutealPhaseDays: v })}
-          />
-        </View>
-        <Txt variant="faint" className="mt-3">
-          The luteal phase is the time from ovulation to your next period - usually 12–14 days and
-          fairly steady between cycles. Locklune uses it to estimate ovulation and your fertile
-          window. If you confirm ovulation when logging a day, your own luteal length is learned and
-          used instead.
-        </Txt>
-      </Card>}
+          <Txt variant="faint" className="mt-3">
+            The luteal phase is the time from ovulation to your next period - usually 12–14 days and
+            fairly steady between cycles. Locklune uses it to estimate ovulation and your fertile
+            window. If you confirm ovulation when logging a day, your own luteal length is learned
+            and used instead.
+          </Txt>
+        </Card>
+      )}
 
       {/* Reminders */}
       <Card>
@@ -250,20 +259,22 @@ export default function Settings() {
           value={settings.notifyPeriodToday}
           onValueChange={(v) => void toggleNotification('notifyPeriodToday', v)}
         />
-        {prediction.fertilityApplicable && <>
-          <SwitchRow
-            label="Fertile window tomorrow"
-            hint="Morning before your fertile window opens"
-            value={settings.notifyFertileTomorrow}
-            onValueChange={(v) => void toggleNotification('notifyFertileTomorrow', v)}
-          />
-          <SwitchRow
-            label="Fertile window opens"
-            hint="Morning your fertile window begins"
-            value={settings.notifyFertileStart}
-            onValueChange={(v) => void toggleNotification('notifyFertileStart', v)}
-          />
-        </>}
+        {prediction.fertilityApplicable && (
+          <>
+            <SwitchRow
+              label="Fertile window tomorrow"
+              hint="Morning before your fertile window opens"
+              value={settings.notifyFertileTomorrow}
+              onValueChange={(v) => void toggleNotification('notifyFertileTomorrow', v)}
+            />
+            <SwitchRow
+              label="Fertile window opens"
+              hint="Morning your fertile window begins"
+              value={settings.notifyFertileStart}
+              onValueChange={(v) => void toggleNotification('notifyFertileStart', v)}
+            />
+          </>
+        )}
       </Card>
 
       {/* Custom symptoms */}
@@ -372,7 +383,9 @@ export default function Settings() {
       <Card>
         <SectionLabel icon="information-circle-outline" label="About" />
         <RNText className="text-base leading-5 text-text-muted">
-          Locklune is designed for record keeping purposes only. It is not a replacement for professional medical advice. If you have any health concerns, please consult a qualified healthcare provider.
+          Locklune is designed for record keeping purposes only. It is not a replacement for
+          professional medical advice. If you have any health concerns, please consult a qualified
+          healthcare provider.
         </RNText>
         <View className="mt-4">
           <AboutRow icon="star-outline" label="Rate Locklune" onPress={() => openLink(RATE_URL)} />

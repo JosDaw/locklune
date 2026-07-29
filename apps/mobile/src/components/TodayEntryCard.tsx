@@ -52,7 +52,12 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
       {shownSyms.length > 0 && (
         <View style={{ gap: 6 }}>
           <Text
-            style={{ fontFamily: fonts.medium, fontSize: 11, color: colors.textFaint, letterSpacing: 0.4 }}
+            style={{
+              fontFamily: fonts.medium,
+              fontSize: 11,
+              color: colors.textFaint,
+              letterSpacing: 0.4,
+            }}
           >
             Symptoms
           </Text>
@@ -93,13 +98,23 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
       {log.note && (
         <View style={{ gap: 4 }}>
           <Text
-            style={{ fontFamily: fonts.medium, fontSize: 11, color: colors.textFaint, letterSpacing: 0.4 }}
+            style={{
+              fontFamily: fonts.medium,
+              fontSize: 11,
+              color: colors.textFaint,
+              letterSpacing: 0.4,
+            }}
           >
             Notes
           </Text>
           <Text
             numberOfLines={2}
-            style={{ fontFamily: fonts.regular, fontSize: 14, color: colors.textMuted, fontStyle: 'italic' }}
+            style={{
+              fontFamily: fonts.regular,
+              fontSize: 14,
+              color: colors.textMuted,
+              fontStyle: 'italic',
+            }}
           >
             {log.note}
           </Text>

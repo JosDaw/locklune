@@ -7,8 +7,8 @@ import { fonts } from '../theme/fonts';
 
 // Trimester day boundaries from LMP (= dueDay − 280).
 const PREGNANCY_DAYS = 280;
-const T1_END_DAY = 83;   // weeks 1–12
-const T2_END_DAY = 188;  // weeks 13–26, T3 is 189–279
+const T1_END_DAY = 83; // weeks 1–12
+const T2_END_DAY = 188; // weeks 13–26, T3 is 189–279
 
 const T1_COLOR = 'rgba(52, 211, 153, 0.18)';
 const T2_COLOR = 'rgba(251, 191, 36, 0.18)';
@@ -64,7 +64,9 @@ export function DayCell({
 
   if (trimesterBg !== null) {
     bgColor = trimesterBg;
-    if (isDueDay) { textColor = '#FFFFFF'; }
+    if (isDueDay) {
+      textColor = '#FFFFFF';
+    }
   } else {
     if (isPeriod) {
       bgColor = colors.period;
@@ -95,7 +97,11 @@ export function DayCell({
     hasLog && 'has a log',
   ].filter(Boolean);
   const label = [
-    fromEpochDay(day).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }),
+    fromEpochDay(day).toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+    }),
     ...states,
   ].join(', ');
 
@@ -127,12 +133,8 @@ export function DayCell({
         </Text>
         {(hasLog || isOvulation || isFertile) && (
           <View style={styles.indicators}>
-            {isOvulation && (
-              <Ionicons name="leaf" size={8} color={colors.ovulation} />
-            )}
-            {isFertile && !isOvulation && (
-              <Ionicons name="star" size={7} color={colors.fertile} />
-            )}
+            {isOvulation && <Ionicons name="leaf" size={8} color={colors.ovulation} />}
+            {isFertile && !isOvulation && <Ionicons name="star" size={7} color={colors.fertile} />}
             {hasLog && (
               <Ionicons
                 name="moon"

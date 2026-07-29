@@ -4,12 +4,12 @@ import { closeDb, deleteDb, openEncryptedDb } from '../lib/db';
 import { cancelAllReminders } from '../lib/notifications';
 import * as toast from '../lib/toast';
 import {
-    changeVaultPin,
-    clearLegacyDestructPin,
-    hasVault,
-    initVault,
-    unlockWithPin,
-    wipeVault,
+  changeVaultPin,
+  clearLegacyDestructPin,
+  hasVault,
+  initVault,
+  unlockWithPin,
+  wipeVault,
 } from '../lib/vault';
 import { useDataStore } from './dataStore';
 

@@ -2,9 +2,18 @@ import Image from 'next/image';
 import { type SVGProps } from 'react';
 
 /** The Locklune mark: a crescent moon with a small keyhole and a gold star. */
-export function MoonMark({ title = 'Locklune', ...props }: SVGProps<SVGSVGElement> & { title?: string }) {
+export function MoonMark({
+  title = 'Locklune',
+  ...props
+}: SVGProps<SVGSVGElement> & { title?: string }) {
   return (
-    <svg viewBox="0 0 48 48" role="img" aria-label={title} xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg
+      viewBox="0 0 48 48"
+      role="img"
+      aria-label={title}
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
       <defs>
         <linearGradient id="ll-moon" x1="0.2" y1="0.1" x2="0.8" y2="0.95">
           <stop offset="0" stopColor="#F8FAFC" />
@@ -31,7 +40,12 @@ export function MoonMark({ title = 'Locklune', ...props }: SVGProps<SVGSVGElemen
         fill="#FFD166"
       />
       {/* padlock */}
-      <path d="M21.5 25.5 v-2.1 a2.5 2.5 0 0 1 5 0 v2.1" fill="none" stroke="#AFC8FF" strokeWidth="1.7" />
+      <path
+        d="M21.5 25.5 v-2.1 a2.5 2.5 0 0 1 5 0 v2.1"
+        fill="none"
+        stroke="#AFC8FF"
+        strokeWidth="1.7"
+      />
       <rect x="19" y="25.2" width="10" height="8.4" rx="2.1" fill="url(#ll-lock)" />
       <circle cx="24" cy="28.6" r="1.1" fill="#0F172A" />
       <rect x="23.45" y="29" width="1.1" height="2.5" rx="0.55" fill="#0F172A" />

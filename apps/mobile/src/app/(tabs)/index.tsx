@@ -1,10 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import {
-  BRAND,
-  pregnancyProgress,
-  todayEpochDay,
-  type DayLog,
-} from '@locklune/core';
+import { BRAND, pregnancyProgress, todayEpochDay, type DayLog } from '@locklune/core';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
@@ -191,7 +186,8 @@ export default function Today() {
                 </View>
                 <PillButton label="Log period started today" large onPress={onStart} />
                 <Txt variant="faint" className="text-center">
-                  To add entries for previous days, go to the calendar and select the date you want to update.
+                  To add entries for previous days, go to the calendar and select the date you want
+                  to update.
                 </Txt>
               </View>
             ) : onPeriod ? (
@@ -237,13 +233,23 @@ export default function Today() {
                     {settings.cycleMode === 'contraception' ? 'Next expected bleed' : 'Next period'}
                   </Txt>
                   <Text
-                    style={{ fontFamily: fonts.display, fontSize: 64, color: colors.moon, lineHeight: 68 }}
+                    style={{
+                      fontFamily: fonts.display,
+                      fontSize: 64,
+                      color: colors.moon,
+                      lineHeight: 68,
+                    }}
                   >
                     {Math.max(0, daysAway)}
                   </Text>
                   <Txt variant="muted">{daysAway === 1 ? 'day away' : 'days away'}</Txt>
                   <Text
-                    style={{ fontFamily: fonts.displaySemibold, fontSize: 20, color: colors.text, marginTop: 4 }}
+                    style={{
+                      fontFamily: fonts.displaySemibold,
+                      fontSize: 20,
+                      color: colors.text,
+                      marginTop: 4,
+                    }}
                   >
                     {formatDay(next!.periodStart)}
                   </Text>
@@ -263,57 +269,81 @@ export default function Today() {
           </View>
 
           {/* Trying-to-conceive fertility cards - shown during period so user keeps sight of their window */}
-          {trying && onPeriod && next && fertility && (() => {
-            const daysToFertile = next.fertileWindow.start - today;
-            const daysToOvulation = next.ovulationDay - today;
-            if (daysToFertile <= 0) return null;
-            return (
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <View
-                  style={{
-                    flex: 1,
-                    borderRadius: 20,
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.fertile + '55',
-                    padding: 16,
-                    gap: 6,
-                    ...CARD_SHADOW,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Ionicons name="star-outline" size={14} color={colors.fertile} />
-                    <Txt variant="label">Fertile window</Txt>
+          {trying &&
+            onPeriod &&
+            next &&
+            fertility &&
+            (() => {
+              const daysToFertile = next.fertileWindow.start - today;
+              const daysToOvulation = next.ovulationDay - today;
+              if (daysToFertile <= 0) return null;
+              return (
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      borderRadius: 20,
+                      backgroundColor: colors.surface,
+                      borderWidth: 1,
+                      borderColor: colors.fertile + '55',
+                      padding: 16,
+                      gap: 6,
+                      ...CARD_SHADOW,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Ionicons name="star-outline" size={14} color={colors.fertile} />
+                      <Txt variant="label">Fertile window</Txt>
+                    </View>
+                    <Text
+                      style={{
+                        fontFamily: fonts.display,
+                        fontSize: 32,
+                        color: colors.fertile,
+                        lineHeight: 36,
+                      }}
+                    >
+                      {daysToFertile === 1 ? '1 day' : `${daysToFertile} days`}
+                    </Text>
+                    <Txt variant="faint">
+                      {formatRange(next.fertileWindow.start, next.fertileWindow.end)}
+                    </Txt>
                   </View>
-                  <Text style={{ fontFamily: fonts.display, fontSize: 32, color: colors.fertile, lineHeight: 36 }}>
-                    {daysToFertile === 1 ? '1 day' : `${daysToFertile} days`}
-                  </Text>
-                  <Txt variant="faint">{formatRange(next.fertileWindow.start, next.fertileWindow.end)}</Txt>
-                </View>
-                <View
-                  style={{
-                    flex: 1,
-                    borderRadius: 20,
-                    backgroundColor: colors.surface,
-                    borderWidth: 1,
-                    borderColor: colors.ovulation + '55',
-                    padding: 16,
-                    gap: 6,
-                    ...CARD_SHADOW,
-                  }}
-                >
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <Ionicons name="leaf-outline" size={14} color={colors.ovulation} />
-                    <Txt variant="label">Ovulation</Txt>
+                  <View
+                    style={{
+                      flex: 1,
+                      borderRadius: 20,
+                      backgroundColor: colors.surface,
+                      borderWidth: 1,
+                      borderColor: colors.ovulation + '55',
+                      padding: 16,
+                      gap: 6,
+                      ...CARD_SHADOW,
+                    }}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                      <Ionicons name="leaf-outline" size={14} color={colors.ovulation} />
+                      <Txt variant="label">Ovulation</Txt>
+                    </View>
+                    <Text
+                      style={{
+                        fontFamily: fonts.display,
+                        fontSize: 32,
+                        color: colors.ovulation,
+                        lineHeight: 36,
+                      }}
+                    >
+                      {daysToOvulation <= 0
+                        ? 'Today'
+                        : daysToOvulation === 1
+                          ? '1 day'
+                          : `${daysToOvulation} days`}
+                    </Text>
+                    <Txt variant="faint">{formatDay(next.ovulationDay)}</Txt>
                   </View>
-                  <Text style={{ fontFamily: fonts.display, fontSize: 32, color: colors.ovulation, lineHeight: 36 }}>
-                    {daysToOvulation <= 0 ? 'Today' : daysToOvulation === 1 ? '1 day' : `${daysToOvulation} days`}
-                  </Text>
-                  <Txt variant="faint">{formatDay(next.ovulationDay)}</Txt>
                 </View>
-              </View>
-            );
-          })()}
+              );
+            })()}
 
           {/* Outlook chips - hidden in trying mode since TryingCard already shows this */}
           {next && fertility && !trying && (
@@ -373,9 +403,7 @@ export default function Today() {
       )}
 
       {/* Cycle chart */}
-      {!pregnant && cycles.length >= 3 && (
-        <CycleChartCard cycles={cycles} />
-      )}
+      {!pregnant && cycles.length >= 3 && <CycleChartCard cycles={cycles} />}
 
       {/* Insight */}
       <InsightCard cycles={cycles} prediction={prediction} settings={settings} today={today} />

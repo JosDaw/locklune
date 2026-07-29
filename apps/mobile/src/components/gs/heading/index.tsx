@@ -32,7 +32,7 @@ const MappedHeading = memo(
         highlight,
         ...props
       },
-      ref
+      ref,
     ) => {
       switch (size) {
         case '5xl':
@@ -172,22 +172,14 @@ const MappedHeading = memo(
             />
           );
       }
-    }
-  )
+    },
+  ),
 );
 
 const Heading = memo(
   forwardRef<React.ElementRef<typeof H1>, IHeadingProps>(
     ({ className, size = 'lg', as: AsComp, ...props }, ref) => {
-      const {
-        isTruncated,
-        bold,
-        underline,
-        strikeThrough,
-        sub,
-        italic,
-        highlight,
-      } = props;
+      const { isTruncated, bold, underline, strikeThrough, sub, italic, highlight } = props;
 
       if (AsComp) {
         return (
@@ -208,11 +200,9 @@ const Heading = memo(
         );
       }
 
-      return (
-        <MappedHeading className={className} size={size} ref={ref} {...props} />
-      );
-    }
-  )
+      return <MappedHeading className={className} size={size} ref={ref} {...props} />;
+    },
+  ),
 );
 
 Heading.displayName = 'Heading';

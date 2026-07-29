@@ -44,9 +44,8 @@ function TomorrowCardBody({
   tomorrowCycleDay,
 }: TomorrowCardProps & { last: Cycle; tomorrowCycleDay: number }) {
   // Is tomorrow still within an ongoing period?
-  const ongoingPeriodEnd = last.endDay === null
-    ? last.startDay + Math.max(1, Math.round(avgPeriodLen)) - 1
-    : null;
+  const ongoingPeriodEnd =
+    last.endDay === null ? last.startDay + Math.max(1, Math.round(avgPeriodLen)) - 1 : null;
   const ongoingPeriodTomorrow = ongoingPeriodEnd !== null && tomorrow <= ongoingPeriodEnd;
   const isLastOngoingDay = ongoingPeriodEnd !== null && tomorrow === ongoingPeriodEnd;
 
@@ -59,8 +58,7 @@ function TomorrowCardBody({
   const isPeriod = ongoingPeriodTomorrow || predictedUpcoming != null;
   const isPeriodEnding = isPeriod && (isLastOngoingDay || isLastPredictedDay);
 
-  const isOvulation =
-    fertility && prediction.upcoming.some((u) => u.ovulationDay === tomorrow);
+  const isOvulation = fertility && prediction.upcoming.some((u) => u.ovulationDay === tomorrow);
   const isFertile =
     fertility &&
     !isOvulation &&
@@ -92,9 +90,7 @@ function TomorrowCardBody({
         : null;
     const moodEntries = Object.entries(moodCounts);
     const mood =
-      moodEntries.length > 0
-        ? Number(moodEntries.sort((a, b) => b[1] - a[1])[0]![0])
-        : null;
+      moodEntries.length > 0 ? Number(moodEntries.sort((a, b) => b[1] - a[1])[0]![0]) : null;
     return { expectedFlow: flow, expectedMood: mood };
   }, [isPeriod, recentLogs, cycles, tomorrowCycleDay]);
 
@@ -103,7 +99,9 @@ function TomorrowCardBody({
     const counts: Record<string, number> = {};
     recentLogs.forEach((log) => {
       if (phaseForLog(log.day, cycles, avgLen, avgPeriodLen) === tomorrowPhase.label) {
-        log.symptoms.forEach((s) => { counts[s] = (counts[s] ?? 0) + 1; });
+        log.symptoms.forEach((s) => {
+          counts[s] = (counts[s] ?? 0) + 1;
+        });
       }
     });
     return Object.entries(counts)
@@ -196,7 +194,12 @@ function TomorrowCardBody({
       {phaseSymptoms.length > 0 && (
         <View style={{ gap: 6 }}>
           <Text
-            style={{ fontFamily: fonts.medium, fontSize: 11, color: colors.textFaint, letterSpacing: 0.4 }}
+            style={{
+              fontFamily: fonts.medium,
+              fontSize: 11,
+              color: colors.textFaint,
+              letterSpacing: 0.4,
+            }}
           >
             Often logged on days like this
           </Text>
@@ -211,9 +214,7 @@ function TomorrowCardBody({
                   paddingVertical: 3,
                 }}
               >
-                <Text
-                  style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}
-                >
+                <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}>
                   {s}
                 </Text>
               </View>

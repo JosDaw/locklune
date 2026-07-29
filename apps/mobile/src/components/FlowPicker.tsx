@@ -5,7 +5,13 @@ import { Txt } from './ui/Text';
 import { FLOW_OPTIONS } from '../lib/logging';
 import { colors } from '../theme/colors';
 
-export function FlowPicker({ value, onChange }: { value: Flow | null; onChange: (f: Flow) => void }) {
+export function FlowPicker({
+  value,
+  onChange,
+}: {
+  value: Flow | null;
+  onChange: (f: Flow) => void;
+}) {
   return (
     <View style={{ flexDirection: 'row', gap: 8 }}>
       {FLOW_OPTIONS.map((o) => {
@@ -47,10 +53,7 @@ export function FlowPicker({ value, onChange }: { value: Flow | null; onChange: 
                 />
               ))}
             </View>
-            <Txt
-              className={selected ? 'text-primary-soft' : 'text-text-muted'}
-              variant="faint"
-            >
+            <Txt className={selected ? 'text-primary-soft' : 'text-text-muted'} variant="faint">
               {o.label}
             </Txt>
           </Pressable>

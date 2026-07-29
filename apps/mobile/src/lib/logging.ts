@@ -49,10 +49,30 @@ export const FLOW_OPTIONS: { label: string; value: Flow; drops: number }[] = [
 
 /** Built-in symptom groups shown in the log screen's symptom picker. */
 export const SYMPTOM_CATEGORIES: { name: string; icon: IonIcon; items: string[] }[] = [
-  { name: 'Common', icon: 'star-outline', items: ['cramps', 'headache', 'fatigue', 'bloating', 'nausea'] },
-  { name: 'Pain', icon: 'bandage-outline', items: ['back pain', 'tender breasts', 'hot flashes', 'dizziness', 'swelling'] },
+  {
+    name: 'Common',
+    icon: 'star-outline',
+    items: ['cramps', 'headache', 'fatigue', 'bloating', 'nausea'],
+  },
+  {
+    name: 'Pain',
+    icon: 'bandage-outline',
+    items: ['back pain', 'tender breasts', 'hot flashes', 'dizziness', 'swelling'],
+  },
   { name: 'Sleep', icon: 'moon-outline', items: ['insomnia', 'night sweats', 'low energy'] },
-  { name: 'Mind', icon: 'bulb-outline', items: ['mood swings', 'anxiety', 'irritability', 'brain fog'] },
-  { name: 'Gut', icon: 'nutrition-outline', items: ['heartburn', 'constipation', 'diarrhea', 'nausea', 'bloating'] },
-  { name: 'Skin', icon: 'sparkles-outline', items: ['acne', 'spotting', 'discharge', 'skin changes', 'hair changes'] },
+  {
+    name: 'Mind',
+    icon: 'bulb-outline',
+    items: ['mood swings', 'anxiety', 'irritability', 'brain fog'],
+  },
+  {
+    name: 'Gut',
+    icon: 'nutrition-outline',
+    items: ['heartburn', 'constipation', 'diarrhea', 'nausea', 'bloating'],
+  },
+  {
+    name: 'Skin',
+    icon: 'sparkles-outline',
+    items: ['acne', 'spotting', 'discharge', 'skin changes', 'hair changes'],
+  },
 ];

@@ -18,7 +18,11 @@ export function SymptomPicker({
     if (customSymptoms.length === 0) return SYMPTOM_CATEGORIES;
     return [
       ...SYMPTOM_CATEGORIES,
-      { name: 'Custom', icon: 'pricetag-outline' as keyof typeof Ionicons.glyphMap, items: customSymptoms },
+      {
+        name: 'Custom',
+        icon: 'pricetag-outline' as keyof typeof Ionicons.glyphMap,
+        items: customSymptoms,
+      },
     ];
   }, [customSymptoms]);
 

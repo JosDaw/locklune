@@ -67,14 +67,31 @@ export function TryingCard({
   return (
     <View style={{ flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}>
       <View style={{ flex: 1, gap: 4 }}>
-        <Text style={{ fontFamily: fonts.semibold, fontSize: 12, color: accentColor, letterSpacing: 0.5, textTransform: 'uppercase' }}>
+        <Text
+          style={{
+            fontFamily: fonts.semibold,
+            fontSize: 12,
+            color: accentColor,
+            letterSpacing: 0.5,
+            textTransform: 'uppercase',
+          }}
+        >
           {label}
         </Text>
-        <Text style={{ fontFamily: fonts.display, fontSize: 64, color: accentColor, lineHeight: 68 }}>
+        <Text
+          style={{ fontFamily: fonts.display, fontSize: 64, color: accentColor, lineHeight: 68 }}
+        >
           {Math.max(0, bigNumber)}
         </Text>
         <Txt variant="muted">{sublabel}</Txt>
-        <Text style={{ fontFamily: fonts.displaySemibold, fontSize: 18, color: colors.text, marginTop: 4 }}>
+        <Text
+          style={{
+            fontFamily: fonts.displaySemibold,
+            fontSize: 18,
+            color: colors.text,
+            marginTop: 4,
+          }}
+        >
           {detail}
         </Text>
         {detail2 && <Txt variant="faint">{detail2}</Txt>}

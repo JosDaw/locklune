@@ -48,7 +48,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </Link>
               <div className="hidden items-center gap-8 md:flex">
                 {nav.map((n) => (
-                  <Link key={n.href} href={n.href} className="text-sm text-fg-soft transition-colors hover:text-fg">
+                  <Link
+                    key={n.href}
+                    href={n.href}
+                    className="text-sm text-fg-soft transition-colors hover:text-fg"
+                  >
                     {n.label}
                   </Link>
                 ))}
@@ -77,14 +81,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="flex flex-wrap gap-x-16 gap-y-8 text-sm">
                 <div className="flex flex-col gap-3">
                   <span className="text-xs uppercase tracking-widest text-fg-muted">Product</span>
-                  <Link href="/#privacy" className="text-fg-soft hover:text-fg">Privacy first</Link>
-                  <Link href="/#security" className="text-fg-soft hover:text-fg">Security</Link>
-                  <Link href="/support" className="text-fg-soft hover:text-fg">Support</Link>
+                  <Link href="/#privacy" className="text-fg-soft hover:text-fg">
+                    Privacy first
+                  </Link>
+                  <Link href="/#security" className="text-fg-soft hover:text-fg">
+                    Security
+                  </Link>
+                  <Link href="/support" className="text-fg-soft hover:text-fg">
+                    Support
+                  </Link>
                 </div>
                 <div className="flex flex-col gap-3">
                   <span className="text-xs uppercase tracking-widest text-fg-muted">Legal</span>
-                  <Link href="/privacy" className="text-fg-soft hover:text-fg">Privacy Policy</Link>
-                  <Link href="/terms" className="text-fg-soft hover:text-fg">Terms</Link>
+                  <Link href="/privacy" className="text-fg-soft hover:text-fg">
+                    Privacy Policy
+                  </Link>
+                  <Link href="/terms" className="text-fg-soft hover:text-fg">
+                    Terms
+                  </Link>
                 </div>
                 <div className="flex flex-col gap-3">
                   <span className="text-xs uppercase tracking-widest text-fg-muted">Elsewhere</span>
@@ -101,10 +115,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <div className="mt-12 border-t border-line pt-6 text-xs text-fg-muted">
               <p className="text-center">
-                Locklune is for record keeping purposes only and does not provide medical or health advice.
+                Locklune is for record keeping purposes only and does not provide medical or health
+                advice.
               </p>
               <div className="mt-4 flex items-center justify-between">
-                <p>© {new Date().getFullYear()} {site.name}</p>
+                <p>
+                  © {new Date().getFullYear()} {site.name}
+                </p>
                 <p className="flex items-center gap-1.5">
                   <MoonMark className="h-4 w-4" /> No cookies. No tracking. No servers.
                 </p>

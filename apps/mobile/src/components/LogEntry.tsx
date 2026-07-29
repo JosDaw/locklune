@@ -92,9 +92,7 @@ export function LogEntry({
         )}
 
         {/* Note indicator */}
-        {log.note && (
-          <Ionicons name="document-text-outline" size={14} color={colors.textFaint} />
-        )}
+        {log.note && <Ionicons name="document-text-outline" size={14} color={colors.textFaint} />}
       </Pressable>
     </Swipeable>
   );

@@ -101,7 +101,10 @@ export default function RootLayout() {
   if (!ready) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.ink }} onLayout={onLayoutRootView}>
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: colors.ink }}
+      onLayout={onLayoutRootView}
+    >
       <GluestackUIProvider mode="dark">
         <SafeAreaProvider>
           <StatusBar style="light" />

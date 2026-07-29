@@ -16,7 +16,8 @@ type Body = {
 function validate(b: Body): string | null {
   const email = (b.email ?? '').trim();
   const message = (b.message ?? '').trim();
-  if (email && (!EMAIL_RE.test(email) || email.length > 200)) return "That email address doesn't look right.";
+  if (email && (!EMAIL_RE.test(email) || email.length > 200))
+    return "That email address doesn't look right.";
   if (message.length < 10 || message.length > 5000) return 'Please enter a longer message.';
   return null;
 }

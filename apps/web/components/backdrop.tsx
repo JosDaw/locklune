@@ -28,20 +28,31 @@ const CONSTELLATION = [
 
 export function Backdrop() {
   return (
-    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden noise" aria-hidden="true">
+    <div
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden noise"
+      aria-hidden="true"
+    >
       {/* blurred moon glow */}
       <div
         className="absolute left-1/2 top-[-14rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full blur-[120px]"
-        style={{ background: 'radial-gradient(closest-side, rgba(138,162,255,0.28), rgba(138,162,255,0))' }}
+        style={{
+          background: 'radial-gradient(closest-side, rgba(138,162,255,0.28), rgba(138,162,255,0))',
+        }}
       />
       <div
         className="absolute right-[-10rem] top-[6rem] h-[28rem] w-[28rem] rounded-full blur-[130px]"
-        style={{ background: 'radial-gradient(closest-side, rgba(175,200,255,0.14), rgba(175,200,255,0))' }}
+        style={{
+          background: 'radial-gradient(closest-side, rgba(175,200,255,0.14), rgba(175,200,255,0))',
+        }}
       />
       {/* fade to background at the bottom of the hero */}
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-night" />
 
-      <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 70">
+      <svg
+        className="absolute inset-0 h-full w-full"
+        preserveAspectRatio="none"
+        viewBox="0 0 100 70"
+      >
         {CONSTELLATION.map((p, i) =>
           i === 0 ? null : (
             <line

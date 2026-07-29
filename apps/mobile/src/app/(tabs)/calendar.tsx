@@ -52,7 +52,9 @@ export default function Calendar() {
   const pregnantDueDay = pregnant ? settings.pregnancyDueDay : null;
 
   const todayDate = fromEpochDay(today);
-  const [anchor, setAnchor] = useState(() => new Date(todayDate.getFullYear(), todayDate.getMonth(), 1));
+  const [anchor, setAnchor] = useState(
+    () => new Date(todayDate.getFullYear(), todayDate.getMonth(), 1),
+  );
   const cells = useMonthGrid(anchor);
   const [monthLogs, setMonthLogs] = useState<DayLog[]>([]);
   const [logsExpanded, setLogsExpanded] = useState(false);
@@ -74,8 +76,7 @@ export default function Calendar() {
   }, [monthsAhead, prediction, cycles, settings, ovulationDays]);
 
   const isCurrentMonth =
-    anchor.getFullYear() === todayDate.getFullYear() &&
-    anchor.getMonth() === todayDate.getMonth();
+    anchor.getFullYear() === todayDate.getFullYear() && anchor.getMonth() === todayDate.getMonth();
 
   const goToToday = () => {
     setLogsExpanded(false);
@@ -91,7 +92,9 @@ export default function Calendar() {
     void getDayLogsInRange(from, to).then((logs) => {
       if (alive) setMonthLogs(logs);
     });
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [cells, getDayLogsInRange]);
 
   useEffect(fetchMonthLogs, [fetchMonthLogs]);
@@ -122,7 +125,12 @@ export default function Calendar() {
         current.startDay + Math.max(1, Math.round(activePrediction.averagePeriodLength)) - 1;
       for (let d = today + 1; d <= expectedEnd; d++) predicted.add(d);
     }
-    return { periodSet: period, predictedSet: predicted, fertileSet: fertile, ovulationSet: ovulation };
+    return {
+      periodSet: period,
+      predictedSet: predicted,
+      fertileSet: fertile,
+      ovulationSet: ovulation,
+    };
   }, [cycles, activePrediction, today]);
 
   const weeks: (EpochDay | null)[][] = [];
@@ -236,9 +244,7 @@ export default function Calendar() {
               <LogEntry
                 key={log.day}
                 log={log}
-                onPress={() =>
-                  router.push({ pathname: '/log', params: { day: String(log.day) } })
-                }
+                onPress={() => router.push({ pathname: '/log', params: { day: String(log.day) } })}
                 onDelete={() => {
                   Alert.alert(
                     'Delete this log?',

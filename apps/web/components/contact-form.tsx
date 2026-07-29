@@ -57,7 +57,9 @@ export function ContactForm() {
       <div className="surface p-6 text-center">
         <p className="font-display text-lg font-semibold text-fg">Thanks, your message was sent.</p>
         <p className="mt-2 text-fg-muted">
-          {email.trim() ? 'We will get back to you by email.' : 'Your message was received anonymously.'}
+          {email.trim()
+            ? 'We will get back to you by email.'
+            : 'Your message was received anonymously.'}
         </p>
       </div>
     );
@@ -66,7 +68,10 @@ export function ContactForm() {
   return (
     <form onSubmit={submit} className="surface space-y-4 p-6" noValidate>
       {/* Honeypot: hidden from real users; bots that fill it are dropped server-side. */}
-      <div aria-hidden="true" className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden"
+      >
         <label>
           Company
           <input
@@ -79,8 +84,8 @@ export function ContactForm() {
       </div>
 
       <div className="rounded-2xl border border-star/30 bg-star/[0.06] p-4 text-sm text-fg-soft">
-        Please do <strong className="text-fg">not</strong> include any personal information about your
-        fertility or menstrual cycle in this form.
+        Please do <strong className="text-fg">not</strong> include any personal information about
+        your fertility or menstrual cycle in this form.
       </div>
 
       <div>
