@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Platform, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ColorValue } from 'react-native';
 import { colors } from '../../theme/colors';
 
@@ -36,6 +37,11 @@ const icon = (outline: IoniconName, filled: IoniconName) => {
 };
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  // Android draws the pill behind the system nav bar, so clear the full inset.
+  // On iOS we only need a small nudge so the rounded border/shadow isn't
+  // clipped near the home indicator — the full inset would raise it too far.
+  const bottomInset = Platform.OS === 'android' ? insets.bottom : Math.min(insets.bottom, 8);
   return (
     <Tabs
       screenOptions={{
@@ -73,7 +79,7 @@ export default function TabsLayout() {
           position: 'absolute',
           left: 16,
           right: 16,
-          bottom: 14,
+          bottom: 14 + bottomInset,
           height: 66,
           paddingTop: 8,
           paddingBottom: 8,

@@ -33,6 +33,15 @@
     "plugins": [
       "expo-router",
       [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#000022",
@@ -45,9 +54,25 @@
           }
         }
       ],
-      ["expo-sqlite", { "useSQLCipher": true }],
-      ["expo-secure-store", { "configureAndroidBackup": false }],
-      ["expo-notifications", { "color": "#8AA2FF" }]
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#8AA2FF"
+        }
+      ],
+      "expo-build-properties"
     ],
     "experiments": {
       "typedRoutes": true,
