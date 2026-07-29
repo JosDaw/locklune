@@ -2,6 +2,8 @@
   "name": "locklune",
   "version": "0.1.0",
   "private": true,
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "Josie Daw",
   "description": "Locklune - a 100% on-device, encrypted, zero-tracking period tracker (Expo) + its privacy-policy site (Next.js).",
   "packageManager": "npm@10.8.3",
   "workspaces": [

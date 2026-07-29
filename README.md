@@ -31,6 +31,36 @@ Envelope encryption bound to the PIN, with hardware-backed storage:
 
 The pure crypto + prediction logic lives in `packages/core` and is unit-tested (`packages/core/src/*.test.ts`).
 
+## Verifying the security claims
+
+This repository is public specifically so the claims above can be checked, not
+taken on trust. A few ways to audit them:
+
+- **No network / no tracking.** The mobile app ships zero networking or analytics
+  code. Confirm it yourself:
+
+  ```bash
+  # returns nothing: no HTTP client, sockets, or analytics SDKs in the app
+  git grep -nE "fetch\(|XMLHttpRequest|new WebSocket|\baxios\b|Amplitude|Sentry|mixpanel|sendBeacon|firebase|googleapis" -- apps/mobile/src
+  ```
+
+  There is no account, sync, or backend for the app. The only outbound URL in the
+  app is a user-tapped "support the developer" link opened in the system browser
+  (`apps/mobile/src/lib/links.ts`) - the app itself never sends your data anywhere.
+
+- **Encryption model.** Read the envelope implementation and its tests:
+  `packages/core/src/crypto/envelope.ts` (scrypt → AES-256-GCM key wrapping) and
+  `packages/core/src/crypto/*.test.ts`. Run them locally:
+
+  ```bash
+  npm run test
+  ```
+
+- **Build and run it.** Nothing is minified or hidden - build the app from this
+  source (see below) and observe the behaviour on-device.
+
+Found something concerning? See [`SECURITY.md`](SECURITY.md).
+
 ## Prerequisites
 
 - Node ≥ 22.11
@@ -76,13 +106,24 @@ Vendored gluestack files are marked `// @ts-nocheck` (generated code, not writte
 
 ## Prod builds
 
-From apps/mobile/:
+From `apps/mobile/`:
 
-Android:
+```bash
+# Android
 eas build --platform android --profile production
 
-iOS:
+# iOS
 eas build --platform ios --profile production
 
-Both at once:
+# both at once
 eas build --platform all --profile production
+```
+
+## License
+
+Locklune is **source-available, not open source**. The code is published so the
+privacy and security claims can be independently verified - see
+[Verifying the security claims](#verifying-the-security-claims). Viewing and
+auditing is permitted; use, copying, modification, and redistribution are not.
+See [`LICENSE`](LICENSE) for the full terms, and [`SECURITY.md`](SECURITY.md) to
+report a vulnerability.

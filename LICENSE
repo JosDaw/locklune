@@ -1,0 +1,35 @@
+Locklune Source-Available License (View & Audit Only)
+
+Copyright (c) 2026 Josie Daw. All rights reserved.
+
+This source code is made publicly available for one purpose only: to allow
+anyone to read and audit it in order to independently verify Locklune's privacy
+and security claims - for example, that the mobile app performs no network
+communication and that user data is encrypted on-device.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this source code to view, read, and audit the code for the sole purpose stated
+above, including building and running it locally solely to verify its behaviour.
+
+The following are NOT permitted without the prior written permission of the
+copyright holder:
+
+- using the software, or any part of it, in any product or service;
+- copying, reproducing, or republishing the code or any substantial portion
+  of it;
+- modifying, adapting, translating, or creating derivative works;
+- distributing, sublicensing, renting, selling, or otherwise transferring the
+  code or any derivative of it;
+- removing or altering this notice or the copyright notices in the code.
+
+"Locklune", together with its associated names, logos, and brand assets, is a
+trademark of the copyright holder and is not licensed for any use.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN
+AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Third-party dependencies remain under their own respective licenses.
