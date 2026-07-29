@@ -10,7 +10,10 @@ export const site = {
   supportEmail: 'locklune@constantlearning.org',
   url: 'https://locklune.com',
   github: 'https://github.com/JosDaw/locklune',
-  lastUpdated: 'July 29, 2026',
+  lastUpdated: 'July 30, 2026',
+  // Store availability. iOS is not published yet; leave `appStore` null until it is.
+  playStore: 'https://play.google.com/store/apps/details?id=app.locklune',
+  appStore: null as string | null,
 };
 
 export const comparison: { label: string; locklune: string; others: string }[] = [

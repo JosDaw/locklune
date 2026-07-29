@@ -55,7 +55,7 @@ export default function Home() {
                 Learn how your privacy is protected
               </Link>
             </div>
-            <p className="mt-4 text-xs text-fg-muted">Coming soon to iOS &amp; Android.</p>
+            <p className="mt-4 text-xs text-fg-muted">Now on Android. iOS coming soon.</p>
           </div>
 
           <div className="relative">
@@ -227,9 +227,14 @@ export default function Home() {
             No account, no cloud, no tracking. Just a calm, private place to understand your body.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <span className="cursor-default rounded-full bg-fg px-6 py-3 text-sm font-semibold text-night">
-              Download Free · iOS &amp; Android soon
-            </span>
+            <a
+              href={site.playStore}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 text-sm font-semibold text-night transition-transform hover:scale-[1.03]"
+            >
+              Get it on Google Play
+            </a>
             <Link
               href="/privacy"
               className="rounded-full border border-line px-6 py-3 text-sm font-medium text-fg-soft transition-colors hover:text-fg"
@@ -237,6 +242,7 @@ export default function Home() {
               Read the privacy policy
             </Link>
           </div>
+          <p className="mt-4 text-xs text-fg-muted">Free on Android. iOS coming soon.</p>
         </div>
       </section>
     </>
