@@ -74,6 +74,15 @@ Vendored gluestack files are marked `// @ts-nocheck` (generated code, not writte
 
 **Adding more gluestack components:** the gluestack CLI can't run inside an npm workspace / headless shell, so copy the component folder from the gluestack repo (branch `feat/nativewind-4.1-support`, path `example/storybook-nativewind/src/core-components/nativewind/<component>`) into `src/components/gs/<component>`, prepend `// @ts-nocheck`, and add its dependency listed in that folder's `dependencies.json`.
 
-## License
+## Prod builds
 
-Private / all rights reserved (update as needed).
+From apps/mobile/:
+
+Android:
+eas build --platform android --profile production
+
+iOS:
+eas build --platform ios --profile production
+
+Both at once:
+eas build --platform all --profile production
