@@ -26,7 +26,7 @@ export function SymptomPicker({
     ];
   }, [customSymptoms]);
 
-  const [cat, setCat] = useState(0);
+  const [cat, setCat] = useState<number>(0);
   const safecat = cat < allCategories.length ? cat : 0;
   const items = allCategories[safecat]!.items;
 

@@ -7,6 +7,7 @@ import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
 import * as haptics from '../lib/haptics';
+import { ROUTES } from '../lib/routes';
 import * as toast from '../lib/toast';
 import { useAuthStore } from '../stores/authStore';
 import { currentLockSeconds } from '../lib/vault';
@@ -72,7 +73,7 @@ export default function Lock() {
       'This permanently erases your PIN and all data on this device. It can’t be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Continue', style: 'destructive', onPress: () => router.push('/reset') },
+        { text: 'Continue', style: 'destructive', onPress: () => router.push(ROUTES.reset) },
       ],
     );
   };

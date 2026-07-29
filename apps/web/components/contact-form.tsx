@@ -7,9 +7,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
 export function ContactForm() {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [company, setCompany] = useState(''); // honeypot
+  const [email, setEmail] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
+  const [company, setCompany] = useState<string>(''); // honeypot
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState<string | null>(null);
 

@@ -72,13 +72,13 @@ export default function LogModal() {
   const [flow, setFlow] = useState<Flow | null>(null);
   const [mood, setMood] = useState<Mood | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
-  const [note, setNote] = useState('');
-  const [ovulation, setOvulation] = useState(false);
-  const [temp, setTemp] = useState('');
-  const [loaded, setLoaded] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [note, setNote] = useState<string>('');
+  const [ovulation, setOvulation] = useState<boolean>(false);
+  const [temp, setTemp] = useState<string>('');
+  const [loaded, setLoaded] = useState<boolean>(false);
+  const [expanded, setExpanded] = useState<boolean>(false);
   const [origLog, setOrigLog] = useState<OrigLog | null>(null);
-  const [justSaved, setJustSaved] = useState(false);
+  const [justSaved, setJustSaved] = useState<boolean>(false);
 
   useEffect(() => {
     if (Platform.OS === 'android') {

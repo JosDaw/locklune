@@ -31,7 +31,7 @@ export function PinPad({
   disabled?: boolean;
   onComplete: (pin: string) => void;
 }) {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState<string>('');
 
   useEffect(() => {
     if (value.length === length) {

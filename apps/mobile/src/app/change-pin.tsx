@@ -24,10 +24,10 @@ export default function ChangePin() {
   const changePin = useAuthStore((store) => store.changePin);
 
   const [phase, setPhase] = useState<Phase>('current');
-  const [currentPin, setCurrentPin] = useState('');
-  const [newPin, setNewPin] = useState('');
+  const [currentPin, setCurrentPin] = useState<string>('');
+  const [newPin, setNewPin] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<boolean>(false);
 
   const reset = () => {
     setPhase('current');

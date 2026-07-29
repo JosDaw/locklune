@@ -18,6 +18,7 @@ import { LogEntry } from '../../components/LogEntry';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
+import { ROUTES } from '../../lib/routes';
 import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
 
@@ -54,12 +55,12 @@ export default function Calendar() {
   const pregnantDueDay = pregnant ? settings.pregnancyDueDay : null;
 
   const todayDate = fromEpochDay(today);
-  const [anchor, setAnchor] = useState(
+  const [anchor, setAnchor] = useState<Date>(
     () => new Date(todayDate.getFullYear(), todayDate.getMonth(), 1),
   );
   const cells = useMonthGrid(anchor);
   const [monthLogs, setMonthLogs] = useState<DayLog[]>([]);
-  const [logsExpanded, setLogsExpanded] = useState(false);
+  const [logsExpanded, setLogsExpanded] = useState<boolean>(false);
 
   // How many months ahead is the current view from today?
   const monthsAhead = useMemo(
@@ -198,7 +199,8 @@ export default function Calendar() {
                 hasLog={day !== null && loggedDays.has(day)}
                 pregnantDueDay={pregnantDueDay}
                 onPress={() =>
-                  day !== null && router.push({ pathname: '/log', params: { day: String(day) } })
+                  day !== null &&
+                  router.push({ pathname: ROUTES.log, params: { day: String(day) } })
                 }
               />
             ))}
@@ -248,7 +250,9 @@ export default function Calendar() {
               <LogEntry
                 key={log.day}
                 log={log}
-                onPress={() => router.push({ pathname: '/log', params: { day: String(log.day) } })}
+                onPress={() =>
+                  router.push({ pathname: ROUTES.log, params: { day: String(log.day) } })
+                }
                 onDelete={() => {
                   Alert.alert(
                     'Delete this log?',

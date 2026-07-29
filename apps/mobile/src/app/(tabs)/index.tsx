@@ -20,6 +20,7 @@ import { Txt } from '../../components/ui/Text';
 import { formatDay, formatRange } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
 import { computePhase } from '../../lib/phases';
+import { ROUTES } from '../../lib/routes';
 import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/fonts';
@@ -37,7 +38,7 @@ export default function Today() {
   const getDayLogsInRange = useDataStore((store) => store.getDayLogsInRange);
 
   const [todayLog, setTodayLog] = useState<DayLog | null>(null);
-  const [logLoaded, setLogLoaded] = useState(false);
+  const [logLoaded, setLogLoaded] = useState<boolean>(false);
   const [recentLogs, setRecentLogs] = useState<DayLog[]>([]);
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export default function Today() {
       if (await startPeriod(today)) {
         haptics.success();
         // Take the user straight into today's logger to record flow/symptoms.
-        router.push({ pathname: '/log', params: { day: String(today) } });
+        router.push({ pathname: ROUTES.log, params: { day: String(today) } });
       }
     })();
   const onEnd = () => void (async () => (await setCurrentPeriodEnd(today)) && haptics.success())();
@@ -382,12 +383,12 @@ export default function Today() {
       {logLoaded && todayLog && (
         <TodayEntryCard
           log={todayLog}
-          onEdit={() => router.push({ pathname: '/log', params: { day: String(today) } })}
+          onEdit={() => router.push({ pathname: ROUTES.log, params: { day: String(today) } })}
         />
       )}
       {logLoaded && !todayLog && (
         <LogTodayButton
-          onPress={() => router.push({ pathname: '/log', params: { day: String(today) } })}
+          onPress={() => router.push({ pathname: ROUTES.log, params: { day: String(today) } })}
         />
       )}
 

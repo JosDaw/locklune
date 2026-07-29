@@ -30,6 +30,7 @@ import * as haptics from '../../lib/haptics';
 import { FEEDBACK_URL, KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
+import { ROUTES } from '../../lib/routes';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
@@ -53,7 +54,7 @@ export default function Settings() {
   const lock = useAuthStore((store) => store.lock);
   const wipe = useAuthStore((store) => store.wipe);
 
-  const [newSymptom, setNewSymptom] = useState('');
+  const [newSymptom, setNewSymptom] = useState<string>('');
 
   const addSymptom = () => {
     const trimmed = newSymptom.trim().toLowerCase();
@@ -365,7 +366,7 @@ export default function Settings() {
       <Card>
         <SectionLabel icon="shield-checkmark-outline" label="Security" />
         <PressScale
-          onPress={() => router.push('/change-pin')}
+          onPress={() => router.push(ROUTES.changePin)}
           className="flex-row items-center justify-between py-3"
         >
           <Txt variant="body">Change PIN</Txt>

@@ -13,6 +13,7 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { GluestackUIProvider } from '../components/gs/gluestack-ui-provider';
 import { ToastProvider } from '../components/ui/Toast';
 import '../global.css';
+import { ROUTES, SEGMENT } from '../lib/routes';
 import { AUTH_STATUS, useAuthStore } from '../stores/authStore';
 import { useDataStore } from '../stores/dataStore';
 import { colors } from '../theme/colors';
@@ -29,16 +30,16 @@ function useAuthRouting() {
   useEffect(() => {
     if (status === AUTH_STATUS.Loading) return;
     const root = segments[0];
-    if (status === AUTH_STATUS.Onboarding && root !== 'onboarding') {
-      router.replace('/onboarding');
-    } else if (status === AUTH_STATUS.Locked && root !== 'lock' && root !== 'reset') {
+    if (status === AUTH_STATUS.Onboarding && root !== SEGMENT.onboarding) {
+      router.replace(ROUTES.onboarding);
+    } else if (status === AUTH_STATUS.Locked && root !== SEGMENT.lock && root !== SEGMENT.reset) {
       // Allow the lock screen's "reset & start over" route while locked.
-      router.replace('/lock');
+      router.replace(ROUTES.lock);
     } else if (
       status === AUTH_STATUS.Unlocked &&
-      (root === 'lock' || root === 'onboarding' || root === undefined)
+      (root === SEGMENT.lock || root === SEGMENT.onboarding || root === undefined)
     ) {
-      router.replace('/(tabs)');
+      router.replace(ROUTES.tabs);
     }
   }, [status, segments, router]);
 }

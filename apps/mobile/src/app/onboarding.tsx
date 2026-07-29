@@ -25,20 +25,20 @@ type Phase = 'consent' | 'create' | 'confirm' | 'mode' | 'notifications';
 
 export default function Onboarding() {
   const [phase, setPhase] = useState<Phase>('consent');
-  const [firstPin, setFirstPin] = useState('');
-  const [confirmedPin, setConfirmedPin] = useState('');
+  const [firstPin, setFirstPin] = useState<string>('');
+  const [confirmedPin, setConfirmedPin] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [agreedLegal, setAgreedLegal] = useState(false);
-  const [agreedMedical, setAgreedMedical] = useState(false);
+  const [busy, setBusy] = useState<boolean>(false);
+  const [agreedLegal, setAgreedLegal] = useState<boolean>(false);
+  const [agreedMedical, setAgreedMedical] = useState<boolean>(false);
   const [agreedResponsibility, setAgreedResponsibility] = useState<boolean>(false);
 
   // Preferences collected during onboarding - applied after createPin succeeds.
   const [selectedMode, setSelectedMode] = useState<CycleMode>('tracking');
-  const [notifyPeriodTomorrow, setNotifyPeriodTomorrow] = useState(false);
-  const [notifyPeriodToday, setNotifyPeriodToday] = useState(false);
-  const [notifyFertileTomorrow, setNotifyFertileTomorrow] = useState(false);
-  const [notifyFertileStart, setNotifyFertileStart] = useState(false);
+  const [notifyPeriodTomorrow, setNotifyPeriodTomorrow] = useState<boolean>(false);
+  const [notifyPeriodToday, setNotifyPeriodToday] = useState<boolean>(false);
+  const [notifyFertileTomorrow, setNotifyFertileTomorrow] = useState<boolean>(false);
+  const [notifyFertileStart, setNotifyFertileStart] = useState<boolean>(false);
 
   const createPin = useAuthStore((store) => store.createPin);
   const wipe = useAuthStore((store) => store.wipe);
