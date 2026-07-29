@@ -61,22 +61,3 @@ export const security: { title: string; body: string }[] = [
     body: 'After 5 incorrect PIN attempts, everything on the device is wiped, so a lost or stolen phone reveals nothing.',
   },
 ];
-
-export const testimonials: { quote: string; name: string; role: string }[] = [
-  {
-    quote: 'The first tracker I actually trust. It feels calm, and nothing ever leaves my phone.',
-    name: 'Maya',
-    role: 'Designer',
-  },
-  {
-    quote:
-      'No account, no email, no cloud. Just my cycle, locked to my device. Exactly what I wanted.',
-    name: 'Priya',
-    role: 'Software engineer',
-  },
-  {
-    quote: 'Beautiful, quiet, and private. It disappears into the background and just works.',
-    name: 'Elena',
-    role: 'Researcher',
-  },
-];

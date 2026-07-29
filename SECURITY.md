@@ -10,7 +10,7 @@ the README for how to audit the code yourself.
 If you believe you have found a security or privacy issue, please report it
 **privately** rather than opening a public issue:
 
-- Email: **<locklune@constatnlearning.org>**
+- Email: **<locklune@constantlearning.org>**
 
 Please include a description, steps to reproduce, and the affected version
 (`apps/mobile/app.json` → `expo.version`). We aim to acknowledge reports

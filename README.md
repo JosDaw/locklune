@@ -1,6 +1,6 @@
 # Locklune
 
-**A 100% on-device, encrypted, zero-tracking period tracker** - plus a basic webpage, in one monorepo.
+**A 100% on-device, encrypted, zero-tracking period tracker** - plus its basic landing website, in one monorepo.
 
 _"lock" (privacy/security) + "lune" (moon/cycle)._
 
@@ -14,7 +14,7 @@ Locklune keeps everything on your phone: no account, no cloud, no analytics, no 
 locklune/
 ├─ packages/core   # Pure TS: prediction engine + crypto envelope + types (Vitest-tested)
 ├─ apps/mobile     # Expo (SDK 57) app: expo-router, gluestack-ui/NativeWind, SQLCipher, secure-store
-└─ apps/web        # Next.js basic static webpage (no tracking)
+└─ apps/web        # Next.js static site: landing + privacy policy (no tracking)
 ```
 
 Tooling: npm workspaces + Turborepo, shared `tsconfig.base.json`, Prettier.
@@ -46,7 +46,12 @@ taken on trust. A few ways to audit them:
 
   There is no account, sync, or backend for the app. The only outbound URL in the
   app is a user-tapped "support the developer" link opened in the system browser
-  (`apps/mobile/src/lib/links.ts`) - the app itself never sends your data anywhere.
+  (`apps/mobile/src/lib/links.ts`) - the app itself never sends your data anywhere. All other links go to <https://locklune.com>, which is static and contains no tracking.
+
+  This covers the app's own code. Locklune relies on a small set of audited native
+  modules (`expo-secure-store`, `expo-sqlite`/SQLCipher, `expo-notifications`), each
+  open source and independently reviewable; notifications are scheduled locally by
+  the OS with no push service.
 
 - **Encryption model.** Read the envelope implementation and its tests:
   `packages/core/src/crypto/envelope.ts` (scrypt → AES-256-GCM key wrapping) and
@@ -60,6 +65,26 @@ taken on trust. A few ways to audit them:
   source (see below) and observe the behaviour on-device.
 
 Found something concerning? See [`SECURITY.md`](SECURITY.md).
+
+## License
+
+Locklune is **source-available, not open source**. The code is published so the
+privacy and security claims can be independently verified - see
+[Verifying the security claims](#verifying-the-security-claims). Viewing and
+auditing is permitted; use, copying, modification, and redistribution are not.
+See [`LICENSE`](LICENSE) for the full terms, and [`SECURITY.md`](SECURITY.md) to
+report a vulnerability.
+
+## Contributing
+
+This is a source-available project published for audit, not open source, so
+external code contributions (pull requests, forks for reuse) are **not accepted**
+and cannot be merged under the license. What is welcome:
+
+- **Security or privacy findings** - report them privately per [`SECURITY.md`](SECURITY.md).
+- **Correctness/audit observations** - open a GitHub issue describing what you found.
+
+Forking is permitted only to build and run the code locally to verify its behaviour.
 
 ## Prerequisites
 
@@ -118,12 +143,3 @@ eas build --platform ios --profile production
 # both at once
 eas build --platform all --profile production
 ```
-
-## License
-
-Locklune is **source-available, not open source**. The code is published so the
-privacy and security claims can be independently verified - see
-[Verifying the security claims](#verifying-the-security-claims). Viewing and
-auditing is permitted; use, copying, modification, and redistribution are not.
-See [`LICENSE`](LICENSE) for the full terms, and [`SECURITY.md`](SECURITY.md) to
-report a vulnerability.

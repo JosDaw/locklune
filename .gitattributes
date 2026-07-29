@@ -1,0 +1,13 @@
+# Normalize line endings to LF in the repo so Prettier / CI behave identically
+# on every platform (Windows checkouts otherwise show CRLF and fail format:check).
+* text=auto eol=lf
+
+# Binary assets: never touch.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.p8 binary
+*.p12 binary
+*.keystore binary

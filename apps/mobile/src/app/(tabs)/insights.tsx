@@ -183,7 +183,7 @@ export default function Insights() {
       )}
 
       <Txt variant="faint" className="text-center">
-        For record keeping purposes only. Locklune does not providemedical or health advice.
+        For record keeping purposes only. Locklune does not provide medical or health advice.
       </Txt>
     </Screen>
   );
