@@ -13,7 +13,7 @@ export function MoonMark({ title = 'Locklune', ...props }: SVGProps<SVGSVGElemen
         </linearGradient>
         <linearGradient id="ll-lock" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#8FC0FF" />
-          <stop offset="1" stopColor="#4C86E8" />
+          <stop offset="1" stopColor="#6B82E6" />
         </linearGradient>
         <mask id="ll-crescent">
           <rect width="48" height="48" fill="black" />

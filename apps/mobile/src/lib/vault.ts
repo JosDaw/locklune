@@ -133,21 +133,12 @@ export async function changeVaultPin(oldPin: string, newPin: string): Promise<bo
   }
 }
 
-export async function setDestructPin(pin: string): Promise<void> {
-  await SecureStore.setItemAsync(DESTRUCT_KEY, pin, secureOpts);
-}
-
-export async function clearDestructPin(): Promise<void> {
+/**
+ * Purge any self-destruct/duress PIN left over from an older build. The feature
+ * was removed; this ensures no stale secret lingers in the keystore on upgrade.
+ */
+export async function clearLegacyDestructPin(): Promise<void> {
   await SecureStore.deleteItemAsync(DESTRUCT_KEY, secureOpts);
-}
-
-export async function hasDestructPin(): Promise<boolean> {
-  return (await SecureStore.getItemAsync(DESTRUCT_KEY, secureOpts)) !== null;
-}
-
-export async function checkDestructPin(pin: string): Promise<boolean> {
-  const stored = await SecureStore.getItemAsync(DESTRUCT_KEY, secureOpts);
-  return stored !== null && stored === pin;
 }
 
 /** Irreversibly delete the vault and all key material. The DB file is removed separately. */

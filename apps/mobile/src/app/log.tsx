@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { cycleForDay, Flow, Mood, pregnancyProgress, todayEpochDay, type EpochDay } from '@locklune/core';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -7,54 +7,25 @@ import {
   LayoutAnimation,
   Platform,
   Pressable,
-  ScrollView,
   Text,
   TextInput,
   UIManager,
   View,
 } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { FlowPicker } from '../components/FlowPicker';
 import { Switch } from '../components/gs/switch';
 import { Textarea, TextareaInput } from '../components/gs/textarea';
+import { MoodButton } from '../components/MoodButton';
+import { SymptomPicker } from '../components/SymptomPicker';
 import { Button } from '../components/ui/Button';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
 import { formatDay } from '../lib/format';
 import * as haptics from '../lib/haptics';
+import { MOOD_OPTIONS } from '../lib/logging';
 import { useDataStore } from '../stores/dataStore';
 import { colors } from '../theme/colors';
-
-const MOOD_OPTIONS: { icon: keyof typeof MaterialCommunityIcons.glyphMap; value: Mood }[] = [
-  { icon: 'emoticon-cry-outline', value: Mood.Awful },
-  { icon: 'emoticon-sad-outline', value: Mood.Low },
-  { icon: 'emoticon-neutral-outline', value: Mood.Okay },
-  { icon: 'emoticon-happy-outline', value: Mood.Good },
-  { icon: 'emoticon-excited-outline', value: Mood.Great },
-];
-
-const MOOD_COLOR_MAP: Record<number, string> = {
-  1: '#94A3B8',
-  2: '#7DD3FC',
-  3: '#86EFAC',
-  4: '#FDE68A',
-  5: '#FCA5A5',
-};
-
-const FLOW_OPTIONS: { label: string; value: Flow; drops: number }[] = [
-  { label: 'Spotting', value: Flow.Spotting, drops: 1 },
-  { label: 'Light', value: Flow.Light, drops: 2 },
-  { label: 'Medium', value: Flow.Medium, drops: 3 },
-  { label: 'Heavy', value: Flow.Heavy, drops: 4 },
-];
-
-const SYMPTOM_CATEGORIES: { name: string; icon: keyof typeof Ionicons.glyphMap; items: string[] }[] = [
-  { name: 'Common',  icon: 'star-outline',        items: ['cramps', 'headache', 'fatigue', 'bloating', 'nausea'] },
-  { name: 'Pain',     icon: 'bandage-outline',      items: ['back pain', 'tender breasts', 'hot flashes', 'dizziness', 'swelling'] },
-  { name: 'Sleep',    icon: 'moon-outline',         items: ['insomnia', 'night sweats', 'low energy'] },
-  { name: 'Mind',     icon: 'bulb-outline',         items: ['mood swings', 'anxiety', 'irritability', 'brain fog'] },
-  { name: 'Gut',      icon: 'nutrition-outline',    items: ['heartburn', 'constipation', 'diarrhea', 'nausea', 'bloating'] },
-  { name: 'Skin',     icon: 'sparkles-outline',     items: ['acne', 'spotting', 'discharge', 'skin changes', 'hair changes'] },
-];
+import { fonts } from '../theme/fonts';
 
 type OrigLog = { flow: Flow | null; mood: Mood | null; syms: string[]; note: string; ov: boolean; temp: string };
 
@@ -220,7 +191,7 @@ export default function LogModal() {
       <View style={{ paddingTop: 8, paddingBottom: 20 }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={{ fontFamily: 'Manrope_700Bold', fontSize: 32, color: colors.moon }}>
+            <Text style={{ fontFamily: fonts.display, fontSize: 32, color: colors.moon }}>
               {formatDay(day, { weekday: 'long' })}
             </Text>
             <Txt variant="heading">{formatDay(day, { month: 'long', day: 'numeric' })}</Txt>
@@ -280,7 +251,7 @@ export default function LogModal() {
         {expanded ? (
           <Txt variant="label">Mood</Txt>
         ) : (
-          <Text style={{ fontFamily: 'Manrope_600SemiBold', fontSize: 22, color: colors.text }}>
+          <Text style={{ fontFamily: fonts.displaySemibold, fontSize: 22, color: colors.text }}>
             {day === today
               ? 'How are you feeling today?'
               : `How did you feel on ${formatDay(day, { weekday: 'long', month: 'long', day: 'numeric' })}?`}
@@ -425,7 +396,7 @@ export default function LogModal() {
                     paddingHorizontal: 14,
                     paddingVertical: 10,
                     color: colors.text,
-                    fontFamily: 'Inter_400Regular',
+                    fontFamily: fonts.regular,
                     fontSize: 15,
                   }}
                 />
@@ -442,227 +413,5 @@ export default function LogModal() {
 
       <Button title={saveLabel} loading={!loaded} onPress={() => void save()} />
     </Screen>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-
-const MOOD_SPRING = { damping: 15, stiffness: 320, mass: 0.5 } as const;
-
-function MoodButton({
-  option,
-  selected,
-  onPress,
-  expanded,
-}: {
-  option: { icon: keyof typeof MaterialCommunityIcons.glyphMap; value: Mood };
-  selected: boolean;
-  onPress: () => void;
-  expanded: boolean;
-}) {
-  const scale = useSharedValue(1);
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
-  const size = expanded ? 52 : 60;
-  const color = MOOD_COLOR_MAP[option.value];
-
-  return (
-    <Animated.View style={anim}>
-      <Pressable
-        onPress={onPress}
-        onPressIn={() => {
-          scale.value = withSpring(0.9, MOOD_SPRING);
-        }}
-        onPressOut={() => {
-          scale.value = withSpring(1, MOOD_SPRING);
-        }}
-        accessibilityRole="button"
-        style={{
-          width: size,
-          height: size,
-          borderRadius: 999,
-          alignItems: 'center',
-          justifyContent: 'center',
-          ...(selected
-            ? {
-                backgroundColor: 'rgba(110,168,254,0.12)',
-                borderWidth: 1.5,
-                borderColor: colors.primary,
-                // elevation on circular Android views creates a hexagonal shadow
-                ...(Platform.OS !== 'android' && {
-                  shadowColor: color,
-                  shadowOpacity: 0.4,
-                  shadowRadius: 10,
-                  shadowOffset: { width: 0, height: 0 },
-                }),
-              }
-            : { backgroundColor: colors.surfaceMuted }),
-        }}
-      >
-        <MaterialCommunityIcons
-          name={option.icon}
-          size={expanded ? 26 : 32}
-          color={selected ? color : colors.textMuted}
-        />
-      </Pressable>
-    </Animated.View>
-  );
-}
-
-function FlowPicker({ value, onChange }: { value: Flow | null; onChange: (f: Flow) => void }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 8 }}>
-      {FLOW_OPTIONS.map((o) => {
-        const selected = value === o.value;
-        return (
-          <Pressable
-            key={o.value}
-            onPress={() => onChange(o.value)}
-            accessibilityRole="button"
-            accessibilityLabel={o.label}
-            style={{
-              flex: 1,
-              borderRadius: 16,
-              paddingVertical: 12,
-              gap: 8,
-              alignItems: 'center',
-              ...(selected
-                ? {
-                    borderWidth: 1,
-                    borderColor: colors.primary,
-                    backgroundColor: 'rgba(110,168,254,0.12)',
-                  }
-                : { backgroundColor: colors.surfaceMuted }),
-            }}
-          >
-            <View style={{ flexDirection: 'row', gap: 1 }}>
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Ionicons
-                  key={i}
-                  name={i < o.drops ? 'water' : 'water-outline'}
-                  size={13}
-                  color={
-                    i < o.drops
-                      ? selected
-                        ? colors.primary
-                        : colors.textMuted
-                      : 'rgba(255,255,255,0.12)'
-                  }
-                />
-              ))}
-            </View>
-            <Txt
-              className={selected ? 'text-primary-soft' : 'text-text-muted'}
-              variant="faint"
-            >
-              {o.label}
-            </Txt>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-function SymptomPicker({
-  symptoms,
-  onToggle,
-  customSymptoms = [],
-}: {
-  symptoms: string[];
-  onToggle: (s: string) => void;
-  customSymptoms?: string[];
-}) {
-  const allCategories = useMemo(() => {
-    if (customSymptoms.length === 0) return SYMPTOM_CATEGORIES;
-    return [
-      ...SYMPTOM_CATEGORIES,
-      { name: 'Custom', icon: 'pricetag-outline' as keyof typeof Ionicons.glyphMap, items: customSymptoms },
-    ];
-  }, [customSymptoms]);
-
-  const [cat, setCat] = useState(0);
-  const safecat = cat < allCategories.length ? cat : 0;
-  const items = allCategories[safecat]!.items;
-
-  return (
-    <View style={{ gap: 12 }}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8 }}
-      >
-        {allCategories.map((category, i) => {
-          const active = safecat === i;
-          return (
-            <Pressable
-              key={category.name}
-              onPress={() => setCat(i)}
-              style={{
-                borderRadius: 99,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                backgroundColor: active ? colors.primary : colors.surfaceMuted,
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-                <Ionicons
-                  name={category.icon}
-                  size={12}
-                  color={active ? colors.ink : colors.textMuted}
-                />
-                <Text
-                  style={{
-                    fontFamily: 'Inter_500Medium',
-                    fontSize: 12,
-                    color: active ? colors.ink : colors.textMuted,
-                  }}
-                >
-                  {category.name}
-                </Text>
-              </View>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
-
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-        {items.map((s) => {
-          const active = symptoms.includes(s);
-          return (
-            <Pressable
-              key={s}
-              onPress={() => onToggle(s)}
-              style={{
-                borderRadius: 99,
-                paddingHorizontal: 14,
-                paddingVertical: 8,
-                backgroundColor: active ? colors.primary : colors.surfaceMuted,
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: 'Inter_500Medium',
-                  fontSize: 13,
-                  color: active ? colors.ink : colors.textMuted,
-                }}
-              >
-                {s}
-              </Text>
-            </Pressable>
-          );
-        })}
-        {items.length === 0 && (
-          <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 13, color: colors.textFaint }}>
-            No custom symptoms yet. Add them in Settings.
-          </Text>
-        )}
-      </View>
-
-      {symptoms.length > 0 && (
-        <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 11, color: colors.textFaint }}>
-          Selected: {symptoms.join(', ')}
-        </Text>
-      )}
-    </View>
   );
 }

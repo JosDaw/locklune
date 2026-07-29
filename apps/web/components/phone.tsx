@@ -35,7 +35,7 @@ export function PhoneMockup() {
       {/* moonlight glow behind the phone */}
       <div
         className="absolute -inset-10 -z-10 rounded-[3rem] blur-3xl"
-        style={{ background: 'radial-gradient(closest-side, rgba(110,168,254,0.35), rgba(110,168,254,0))' }}
+        style={{ background: 'radial-gradient(closest-side, rgba(138,162,255,0.35), rgba(138,162,255,0))' }}
       />
       <div className="animate-floaty rounded-[2.6rem] border border-line bg-night2 p-3 shadow-[0_50px_120px_-30px_rgba(0,0,0,0.85)]">
         <div className="relative overflow-hidden rounded-[2rem] border border-line bg-night">

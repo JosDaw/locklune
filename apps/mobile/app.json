@@ -2,12 +2,12 @@
   "expo": {
     "name": "Locklune",
     "slug": "locklune",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "locklune",
     "userInterfaceStyle": "dark",
-    "backgroundColor": "#0F172A",
+    "backgroundColor": "#000022",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.locklune",
@@ -35,7 +35,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#040E25",
+          "backgroundColor": "#000022",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
@@ -47,7 +47,7 @@
       ],
       ["expo-sqlite", { "useSQLCipher": true }],
       ["expo-secure-store", { "configureAndroidBackup": false }],
-      ["expo-notifications", { "color": "#6EA8FE" }]
+      ["expo-notifications", { "color": "#8AA2FF" }]
     ],
     "experiments": {
       "typedRoutes": true,

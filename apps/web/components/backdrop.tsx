@@ -32,7 +32,7 @@ export function Backdrop() {
       {/* blurred moon glow */}
       <div
         className="absolute left-1/2 top-[-14rem] h-[36rem] w-[36rem] -translate-x-1/2 rounded-full blur-[120px]"
-        style={{ background: 'radial-gradient(closest-side, rgba(110,168,254,0.28), rgba(110,168,254,0))' }}
+        style={{ background: 'radial-gradient(closest-side, rgba(138,162,255,0.28), rgba(138,162,255,0))' }}
       />
       <div
         className="absolute right-[-10rem] top-[6rem] h-[28rem] w-[28rem] rounded-full blur-[130px]"

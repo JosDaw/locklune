@@ -78,7 +78,8 @@ export default function Privacy() {
       <H2>Deleting your data</H2>
       <P>
         You can erase everything instantly from within the app (Settings, then Erase all data), or by
-        deleting the app. There is nothing stored elsewhere to delete.
+        deleting the app. If you are locked out, choosing Reset and start over on the lock screen
+        erases everything too. There is nothing stored elsewhere to delete.
       </P>
 
       <H2>This website</H2>

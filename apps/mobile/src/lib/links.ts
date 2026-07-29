@@ -1,9 +1,6 @@
 import { BRAND } from '@locklune/core';
 import { Linking, Share } from 'react-native';
 
-/** Personal site of Locklune's sole maker. */
-export const MAKER_URL = 'https://constantlearning.org';
-
 /** Ko-fi page for supporting the maker. */
 export const KOFI_URL = 'https://ko-fi.com/constantlearning';
 

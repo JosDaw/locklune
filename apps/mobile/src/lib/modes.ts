@@ -29,7 +29,3 @@ export const CONTRACEPTION_METHODS: { value: ContraceptionMethod; label: string 
   { value: 'condoms', label: 'Condoms' },
   { value: 'other', label: 'Other' },
 ];
-
-export function modeLabel(mode: CycleMode): string {
-  return CYCLE_MODES.find((m) => m.value === mode)?.label ?? 'Tracking my cycle';
-}

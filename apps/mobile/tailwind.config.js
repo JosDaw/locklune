@@ -21,8 +21,8 @@ module.exports = {
         primary: {
           ...scale('primary'),
           // Locklune brand accents (used by app classNames like bg-primary).
-          DEFAULT: '#6EA8FE',
-          dark: '#4C86E8',
+          DEFAULT: '#8AA2FF',
+          dark: '#6B82E6',
           soft: '#AFC8FF',
         },
         secondary: scale('secondary'),
@@ -76,7 +76,7 @@ module.exports = {
         moon: '#E2E8F0',
         star: '#FFD166',
         text: { DEFAULT: '#F8FAFC', muted: '#CBD5E1', faint: '#94A3B8' },
-        period: '#6EA8FE',
+        period: '#8AA2FF',
         fertile: '#AFC8FF',
         ovulation: '#6EE7B7',
         danger: '#F87171',

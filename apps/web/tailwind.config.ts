@@ -15,7 +15,7 @@ const config: Config = {
           muted: '#94A3B8', // muted text
         },
         moon: '#E2E8F0',
-        lock: '#6EA8FE', // accent
+        lock: '#8AA2FF', // accent
         highlight: '#AFC8FF',
         star: '#FFD166',
         success: '#34D399',
@@ -40,7 +40,7 @@ const config: Config = {
         container: '1120px',
       },
       boxShadow: {
-        glow: '0 40px 120px -20px rgba(110,168,254,0.35)',
+        glow: '0 40px 120px -20px rgba(138,162,255,0.35)',
         card: '0 1px 0 0 rgba(255,255,255,0.04) inset, 0 20px 40px -24px rgba(0,0,0,0.6)',
       },
       keyframes: {

@@ -23,10 +23,25 @@ config.resolver.nodeModulesPaths = [
 // modules, and the workspace symlink resolves first (then fails on the missing dist).
 const coreSrc = path.resolve(monorepoRoot, 'packages/core/src');
 const coreSrcEntry = path.join(coreSrc, 'index.ts');
+
+// @noble/hashes@1.8 self-references "@noble/hashes/crypto" (no extension) from its
+// utils.js. Metro then probes the "./crypto.js" subpath, which the package's exports
+// map omits (it lists only "./crypto"), emitting a spurious "not listed in exports"
+// warning before falling back. Pin both spellings to the browser/RN `crypto.js`
+// (the WebCrypto `globalThis.crypto` variant) - NOT `cryptoNode.js`, which the
+// package's "node" export condition would otherwise select and which needs Node's
+// built-in crypto module (absent in React Native).
+const nobleHashesDir = path.dirname(
+  require.resolve('@noble/hashes/utils', { paths: [projectRoot, monorepoRoot] }),
+);
+const nobleCryptoBrowser = path.join(nobleHashesDir, 'crypto.js');
 const defaultResolveRequest = config.resolver.resolveRequest;
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (moduleName === '@locklune/core') {
     return { type: 'sourceFile', filePath: coreSrcEntry };
+  }
+  if (moduleName === '@noble/hashes/crypto' || moduleName === '@noble/hashes/crypto.js') {
+    return { type: 'sourceFile', filePath: nobleCryptoBrowser };
   }
   // core is authored as NodeNext ESM with explicit `.js` specifiers (for its dist
   // build); when bundling its .ts source directly, rewrite ./foo.js -> ./foo.ts.

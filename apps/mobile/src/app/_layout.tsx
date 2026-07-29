@@ -1,16 +1,16 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useRef } from 'react';
-import { AppState, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { GluestackUIProvider } from '../components/gs/gluestack-ui-provider';
-import { MoonLoader } from '../components/ui/MoonLoader';
 import { ToastProvider } from '../components/ui/Toast';
 import '../global.css';
 import { useAuthStore } from '../stores/authStore';
@@ -31,7 +31,8 @@ function useAuthRouting() {
     const root = segments[0];
     if (status === 'onboarding' && root !== 'onboarding') {
       router.replace('/onboarding');
-    } else if (status === 'locked' && root !== 'lock') {
+    } else if (status === 'locked' && root !== 'lock' && root !== 'reset') {
+      // Allow the lock screen's "reset & start over" route while locked.
       router.replace('/lock');
     } else if (
       status === 'unlocked' &&
@@ -73,33 +74,34 @@ export default function RootLayout() {
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
+    // Preload the icon glyph fonts too, so the very first screens (loading /
+    // "Unlocking…") render their Ionicons moon instead of a blank glyph before the
+    // icon font has finished loading on its own.
+    ...Ionicons.font,
+    ...MaterialCommunityIcons.font,
   });
 
   useEffect(() => {
     void init();
   }, [init]);
 
-  // Dismiss the native splash only once both fonts and vault init are done.
-  // While loading we return null - the native splash stays on top (no black frame).
-  useEffect(() => {
-    if (fontsLoaded && authStatus !== 'loading') {
-      void SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded, authStatus]);
-
   useAuthRouting();
   useAutoLock();
 
-  if (!fontsLoaded || authStatus === 'loading') {
-    return (
-      <View style={{ flex: 1, backgroundColor: colors.ink, alignItems: 'center', justifyContent: 'center' }}>
-        <MoonLoader size={64} />
-      </View>
-    );
-  }
+  const ready = fontsLoaded && authStatus !== 'loading';
+
+  // Keep the native splash up (by rendering null) until fonts + vault init are
+  // done, then dismiss it only after the first real frame has laid out. Hiding it
+  // in a bare effect can reveal a blank frame before content paints; onLayout
+  // guarantees the first screen is on-screen first, so there is no black gap.
+  const onLayoutRootView = useCallback(() => {
+    if (ready) void SplashScreen.hideAsync();
+  }, [ready]);
+
+  if (!ready) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.ink }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.ink }} onLayout={onLayoutRootView}>
       <GluestackUIProvider mode="dark">
         <SafeAreaProvider>
           <StatusBar style="light" />

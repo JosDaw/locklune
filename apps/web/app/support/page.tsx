@@ -1,6 +1,6 @@
-import type { Metadata } from 'next';
 import { ContactForm } from '@/components/contact-form';
 import { site } from '@/lib/site';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Support',
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: 'I forgot my PIN. Can you reset it?',
-    a: 'No, and neither can we. Your PIN is the encryption key to your data, and we never receive or store it. A forgotten PIN means the data cannot be recovered. This is the price of true privacy.',
+    a: 'No, and neither can we. Your PIN is the encryption key to your data, and we never receive or store it. A forgotten PIN means the data cannot be recovered - this is the price of true privacy. If you are locked out, you can choose Reset and start over on the lock screen: this erases everything on the device and lets you set up again with a new PIN.',
   },
   {
     q: 'Is my data backed up to the cloud?',

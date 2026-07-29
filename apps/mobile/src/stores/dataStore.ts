@@ -149,12 +149,18 @@ export const useDataStore = create<DataState>((set, get) => {
 
     updateSettings: (patch) =>
       mutate(async () => {
-        const next: Settings = { ...get().settings, ...patch };
-        await db.saveSettings(next);
+        let next: Settings = { ...get().settings, ...patch };
         const prediction = predict(get().cycles, next, {
           confirmedOvulations: get().ovulationDays,
           count: 6,
         });
+        // If fertility no longer applies (e.g. period-only, pregnant, or hormonal
+        // contraception), switch off fertility reminders so none stay enabled or
+        // scheduled. syncReminders below then clears any already on the device.
+        if (!prediction.fertilityApplicable) {
+          next = { ...next, notifyFertileTomorrow: false, notifyFertileStart: false };
+        }
+        await db.saveSettings(next);
         set({ settings: next, prediction });
         void syncReminders(prediction, next).catch(() => undefined);
       }, 'Could not save your settings.'),

@@ -8,9 +8,16 @@ import { colors } from '../../theme/colors';
 type IoniconName = keyof typeof Ionicons.glyphMap;
 
 /** Tab icon that swaps to a filled glyph and gains a soft blue glow when active. */
-const icon =
-  (outline: IoniconName, filled: IoniconName) =>
-  ({ color, size, focused }: { color: ColorValue; size: number; focused: boolean }) => (
+const icon = (outline: IoniconName, filled: IoniconName) => {
+  const TabBarIcon = ({
+    color,
+    size,
+    focused,
+  }: {
+    color: ColorValue;
+    size: number;
+    focused: boolean;
+  }) => (
     <View
       style={{
         width: 52,
@@ -18,12 +25,15 @@ const icon =
         borderRadius: 17,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: focused ? 'rgba(110,168,254,0.14)' : 'transparent',
+        backgroundColor: focused ? 'rgba(138,162,255,0.14)' : 'transparent',
       }}
     >
       <Ionicons name={focused ? filled : outline} color={color as string} size={size || 22} />
     </View>
   );
+  TabBarIcon.displayName = 'TabBarIcon';
+  return TabBarIcon;
+};
 
 export default function TabsLayout() {
   return (
@@ -92,7 +102,7 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="settings"
-        options={{ title: 'Settings', tabBarIcon: icon('settings-outline', 'settings') }}
+        options={{ title: 'Preferences', tabBarIcon: icon('settings-outline', 'settings') }}
       />
     </Tabs>
   );

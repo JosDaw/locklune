@@ -1,6 +1,6 @@
-# Encryption Compliance Document — Locklune
+# Encryption Compliance Document - Locklune
 
-**Product:** Locklune — Private Period Tracker  
+**Product:** Locklune - Private Period Tracker  
 **Platform:** iOS, Android  
 **Developer:** Josie Daw  
 **Contact:** locklune@constantlearning.org  
@@ -18,49 +18,49 @@ Encryption is used solely to protect user data at rest on the device. It is not 
 
 ## 2. Encryption Used
 
-### 2.1 Database Encryption — SQLCipher (AES-256-CBC)
+### 2.1 Database Encryption - SQLCipher (AES-256-CBC)
 
-| Property | Detail |
-|---|---|
-| Library | SQLCipher (open-source, Zetetic LLC) |
-| Algorithm | AES-256-CBC |
-| Key length | 256 bits |
-| Purpose | Encrypts the entire on-device SQLite database containing the user's cycle data |
-| Key derivation | PBKDF2-HMAC-SHA512, 256,000 iterations, random 32-byte salt |
-| Key source | Derived from a user-chosen numeric PIN; never transmitted or stored in recoverable form |
-| IV / Nonce | Per-page random IV managed by SQLCipher |
-| Data in scope | Period dates, flow, mood, symptoms, notes, cycle history |
+| Property       | Detail                                                                                  |
+| -------------- | --------------------------------------------------------------------------------------- |
+| Library        | SQLCipher (open-source, Zetetic LLC)                                                    |
+| Algorithm      | AES-256-CBC                                                                             |
+| Key length     | 256 bits                                                                                |
+| Purpose        | Encrypts the entire on-device SQLite database containing the user's cycle data          |
+| Key derivation | PBKDF2-HMAC-SHA512, 256,000 iterations, random 32-byte salt                             |
+| Key source     | Derived from a user-chosen numeric PIN; never transmitted or stored in recoverable form |
+| IV / Nonce     | Per-page random IV managed by SQLCipher                                                 |
+| Data in scope  | Period dates, flow, mood, symptoms, notes, cycle history                                |
 
-### 2.2 Secure Storage — iOS Keychain / Android Keystore
+### 2.2 Secure Storage - iOS Keychain / Android Keystore
 
-| Property | Detail |
-|---|---|
-| Mechanism | expo-secure-store, backed by iOS Keychain (iOS) and Android Keystore (Android) |
-| Purpose | Stores the encrypted data envelope key (DEK) and lockout state |
+| Property   | Detail                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| Mechanism  | expo-secure-store, backed by iOS Keychain (iOS) and Android Keystore (Android)                   |
+| Purpose    | Stores the encrypted data envelope key (DEK) and lockout state                                   |
 | Encryption | Managed by the OS hardware security module; developer does not implement the encryption directly |
 
 ### 2.3 Key Envelope
 
-| Property | Detail |
-|---|---|
-| Implemented in | `packages/core/src/crypto/envelope.ts` |
-| Algorithm | AES-256-GCM |
-| Key length | 256 bits |
-| Purpose | Wraps the database DEK for storage; the envelope is sealed with the PIN-derived key |
-| Authentication tag | 128-bit GCM authentication tag provides integrity verification |
+| Property           | Detail                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| Implemented in     | `packages/core/src/crypto/envelope.ts`                                              |
+| Algorithm          | AES-256-GCM                                                                         |
+| Key length         | 256 bits                                                                            |
+| Purpose            | Wraps the database DEK for storage; the envelope is sealed with the PIN-derived key |
+| Authentication tag | 128-bit GCM authentication tag provides integrity verification                      |
 
 ---
 
 ## 3. Encryption Classification
 
-| Classification | Value |
-|---|---|
-| **ECCN** | 5D992.c (mass-market software with encryption) |
-| **Exemption basis** | EAR 740.17(b)(1) — retail / mass-market encryption product |
-| **Key length** | 256-bit symmetric (AES) |
-| **Use case** | Data protection at rest only; no communications encryption |
-| **Source code** | Publicly available (open-source, GitHub: https://github.com/JosDaw/locklune) |
-| **Export restrictions** | None beyond standard EAR mass-market encryption requirements |
+| Classification          | Value                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| **ECCN**                | 5D992.c (mass-market software with encryption)                               |
+| **Exemption basis**     | EAR 740.17(b)(1) - retail / mass-market encryption product                   |
+| **Key length**          | 256-bit symmetric (AES)                                                      |
+| **Use case**            | Data protection at rest only; no communications encryption                   |
+| **Source code**         | Publicly available (open-source, GitHub: https://github.com/JosDaw/locklune) |
+| **Export restrictions** | None beyond standard EAR mass-market encryption requirements                 |
 
 ---
 
@@ -116,15 +116,15 @@ Locklune qualifies for annual self-classification under EAR 740.17(b)(1) as a ma
 
 **Required fields for SNAP-R submission:**
 
-| Field | Value |
-|---|---|
-| Product name | Locklune |
-| Product version | See current `apps/mobile/app.json` → `version` |
-| ECCN | 5D992.c |
-| Encryption algorithms | AES-256-CBC (SQLCipher), AES-256-GCM (key envelope), PBKDF2-HMAC-SHA512 (key derivation) |
-| Maximum key length | 256 bits |
-| Publicly available source | Yes |
-| Distributor | Apple App Store, Google Play |
+| Field                     | Value                                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| Product name              | Locklune                                                                                 |
+| Product version           | See current `apps/mobile/app.json` → `version`                                           |
+| ECCN                      | 5D992.c                                                                                  |
+| Encryption algorithms     | AES-256-CBC (SQLCipher), AES-256-GCM (key envelope), PBKDF2-HMAC-SHA512 (key derivation) |
+| Maximum key length        | 256 bits                                                                                 |
+| Publicly available source | Yes                                                                                      |
+| Distributor               | Apple App Store, Google Play                                                             |
 
 ---
 

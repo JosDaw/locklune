@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BRAND, type CycleMode, type Settings } from '@locklune/core';
-import { type ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { Image, Linking, Pressable, Text as RNText, View } from 'react-native';
-import { Switch } from '../components/gs/switch';
+import { CheckboxRow } from '../components/CheckboxRow';
+import { NotifRow } from '../components/NotifRow';
 import { Button } from '../components/ui/Button';
 import { MoonLoader } from '../components/ui/MoonLoader';
 import { PinPad } from '../components/ui/PinPad';
@@ -30,6 +31,7 @@ export default function Onboarding() {
   const [busy, setBusy] = useState(false);
   const [agreedLegal, setAgreedLegal] = useState(false);
   const [agreedMedical, setAgreedMedical] = useState(false);
+  const [agreedResponsibility, setAgreedResponsibility] = useState<boolean>(false);
 
   // Preferences collected during onboarding - applied after createPin succeeds.
   const [selectedMode, setSelectedMode] = useState<CycleMode>('tracking');
@@ -106,7 +108,7 @@ export default function Onboarding() {
   // ── Consent ──────────────────────────────────────────────────────────────────
   if (phase === 'consent') {
     return (
-      <Screen scroll={false} >
+      <Screen>
         <Image
           source={require('../../assets/images/locklune_logo.png')}
           style={{ width: '100%', height: 500 }}
@@ -137,15 +139,26 @@ export default function Onboarding() {
 
           <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((v) => !v)}>
             <RNText className="text-base leading-6 text-text">
-              I understand {BRAND.name} is for record keeping purposes only and is not intended to be used for medical or
+              I understand that {BRAND.name} is for record keeping purposes only and is not intended to be used for medical or
               health advice.
+            </RNText>
+          </CheckboxRow>
+
+          <CheckboxRow
+            checked={agreedResponsibility}
+            onToggle={() => setAgreedResponsibility((v) => !v)}
+          >
+            <RNText className="text-base leading-6 text-text">
+              I acknowledge that I am solely responsible for my PIN and the encrypted data it
+              protects, and understand that the developers of {BRAND.name} have no access to this
+              data and cannot recover it if my PIN is lost.
             </RNText>
           </CheckboxRow>
         </View>
 
         <Button
           title="Continue"
-          disabled={!(agreedLegal && agreedMedical)}
+          disabled={!(agreedLegal && agreedMedical && agreedResponsibility)}
           onPress={() => setPhase('create')}
         />
       </Screen>
@@ -173,7 +186,7 @@ export default function Onboarding() {
         <View className="rounded-2xl border border-border bg-surface p-4">
           <Txt variant="faint" className="text-center leading-5">
             Your PIN encrypts everything on this device and is never stored or sent anywhere. If you
-            forget it, your data can't be recovered, and after 5 incorrect attempts, all data is
+            forget it, your data can’t be recovered, and after 5 incorrect attempts, all data is
             erased.
           </Txt>
         </View>
@@ -186,7 +199,7 @@ export default function Onboarding() {
     return (
       <Screen contentClassName="justify-between">
         <View className="gap-2 pt-6">
-          <Txt variant="display">How you'll use {BRAND.name}</Txt>
+          <Txt variant="display">How you’ll use {BRAND.name}</Txt>
           <Txt variant="muted">You can change this any time in settings.</Txt>
         </View>
 
@@ -284,52 +297,5 @@ export default function Onboarding() {
 
       <Button title="Get started" disabled={busy} onPress={() => void handleFinish()} />
     </Screen>
-  );
-}
-
-function CheckboxRow({
-  checked,
-  onToggle,
-  children,
-}: {
-  checked: boolean;
-  onToggle: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <View className="flex-row items-start gap-3">
-      <Pressable
-        onPress={onToggle}
-        hitSlop={8}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked }}
-        className={`mt-0.5 h-6 w-6 items-center justify-center rounded-md border-2 ${checked ? 'border-primary bg-primary' : 'border-surfaceMuted'}`}
-      >
-        {checked && <Ionicons name="checkmark" size={16} color={colors.ink} />}
-      </Pressable>
-      <View className="flex-1">{children}</View>
-    </View>
-  );
-}
-
-function NotifRow({
-  label,
-  hint,
-  value,
-  onValueChange,
-}: {
-  label: string;
-  hint: string;
-  value: boolean;
-  onValueChange: (v: boolean) => void;
-}) {
-  return (
-    <View className="flex-row items-center justify-between gap-4 rounded-2xl border border-border bg-surface px-4 py-3">
-      <View className="flex-1">
-        <Txt variant="body">{label}</Txt>
-        <Txt variant="faint">{hint}</Txt>
-      </View>
-      <Switch value={value} onValueChange={onValueChange} />
-    </View>
   );
 }

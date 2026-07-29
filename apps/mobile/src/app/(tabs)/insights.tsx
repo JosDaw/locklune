@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { pregnancyProgress, todayEpochDay, type Cycle } from '@locklune/core';
 import { useMemo } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Alert, View } from 'react-native';
+import { CycleRow } from '../../components/CycleRow';
+import { StatTile } from '../../components/StatTile';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
@@ -184,49 +186,5 @@ export default function Insights() {
         For record keeping purposes only. Locklune does not providemedical or health advice.
       </Txt>
     </Screen>
-  );
-}
-
-function StatTile({ label, value }: { label: string; value: string }) {
-  return (
-    <View
-      className="flex-1 items-center gap-2 rounded-2xl py-4"
-      style={{
-        backgroundColor: 'rgba(110,168,254,0.06)',
-        borderWidth: 1,
-        borderColor: 'rgba(110,168,254,0.18)',
-      }}
-    >
-      <Txt variant="heading" className="text-primary-soft">
-        {value}
-      </Txt>
-      <Txt variant="faint">{label}</Txt>
-    </View>
-  );
-}
-
-function CycleRow({ cycle, onDelete }: { cycle: Cycle; onDelete: () => void }) {
-  const end = cycle.endDay;
-  const length = end != null ? end - cycle.startDay + 1 : null;
-  const opts: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-  return (
-    <View className="flex-row items-center justify-between">
-      <View className="flex-1 pr-3">
-        <Txt variant="body">
-          {formatDay(cycle.startDay, opts)}
-          {end != null ? ` – ${formatDay(end, opts)}` : ''}
-        </Txt>
-        <Txt variant="faint">{length != null ? `${length}-day period` : 'Ongoing'}</Txt>
-      </View>
-      <Pressable
-        onPress={onDelete}
-        accessibilityRole="button"
-        accessibilityLabel={`Delete period starting ${formatDay(cycle.startDay)}`}
-        hitSlop={8}
-        className="h-9 w-9 items-center justify-center rounded-full active:bg-surfaceMuted"
-      >
-        <Ionicons name="trash-outline" size={18} color={colors.textMuted} />
-      </Pressable>
-    </View>
   );
 }

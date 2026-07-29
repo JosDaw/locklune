@@ -5,7 +5,7 @@ import { cancelAllReminders } from '../lib/notifications';
 import * as toast from '../lib/toast';
 import {
     changeVaultPin,
-    checkDestructPin,
+    clearLegacyDestructPin,
     hasVault,
     initVault,
     unlockWithPin,
@@ -43,6 +43,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   attemptsRemaining: MAX_PIN_ATTEMPTS,
 
   init: async () => {
+    // One-time cleanup of any self-destruct PIN from an older build (feature removed).
+    void clearLegacyDestructPin().catch(() => undefined);
     try {
       const exists = await hasVault();
       set({ status: exists ? 'locked' : 'onboarding' });
@@ -84,11 +86,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
     if (res.wiped) {
       // Too many wrong PINs - erase everything and return to onboarding.
-      await get().wipe();
-      return false;
-    }
-    // Wrong PIN - check for the self-destruct PIN before recording the failed attempt.
-    if (await checkDestructPin(pin)) {
       await get().wipe();
       return false;
     }

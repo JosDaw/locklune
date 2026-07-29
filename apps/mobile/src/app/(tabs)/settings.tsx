@@ -9,10 +9,16 @@ import {
   type CycleMode,
 } from '@locklune/core';
 import Constants from 'expo-constants';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Alert, Pressable, Text as RNText, TextInput, View } from 'react-native';
-import { Switch } from '../../components/gs/switch';
+import { AboutRow } from '../../components/AboutRow';
+import { Chip } from '../../components/Chip';
+import { ModeRow } from '../../components/ModeRow';
+import { SectionLabel } from '../../components/SectionLabel';
+import { Segmented } from '../../components/Segmented';
+import { Stepper } from '../../components/Stepper';
+import { SwitchRow } from '../../components/SwitchRow';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { PressScale } from '../../components/ui/PressScale';
@@ -23,10 +29,10 @@ import * as haptics from '../../lib/haptics';
 import { FEEDBACK_URL, KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
-import { clearDestructPin, hasDestructPin } from '../../lib/vault';
 import { useAuthStore } from '../../stores/authStore';
 import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
+import { fonts } from '../../theme/fonts';
 
 const AUTO_LOCK_OPTIONS = [
   { label: 'Instant', value: 0 },
@@ -46,13 +52,7 @@ export default function Settings() {
   const lock = useAuthStore((s) => s.lock);
   const wipe = useAuthStore((s) => s.wipe);
 
-  const [hasDestruct, setHasDestruct] = useState(false);
   const [newSymptom, setNewSymptom] = useState('');
-  useFocusEffect(
-    useCallback(() => {
-      void hasDestructPin().then(setHasDestruct);
-    }, []),
-  );
 
   const addSymptom = () => {
     const trimmed = newSymptom.trim().toLowerCase();
@@ -270,7 +270,7 @@ export default function Settings() {
       <Card>
         <SectionLabel icon="pricetag-outline" label="Custom symptoms" />
         <Txt variant="faint" className="mb-3">
-          Add your own symptom tags - they appear in the log screen.
+          Add your own symptom tags - they appear in the log screen under “custom”.
         </Txt>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
           <TextInput
@@ -289,7 +289,7 @@ export default function Settings() {
               paddingHorizontal: 12,
               paddingVertical: 10,
               color: colors.text,
-              fontFamily: 'Inter_400Regular',
+              fontFamily: fonts.regular,
               fontSize: 14,
             }}
           />
@@ -333,7 +333,7 @@ export default function Settings() {
               >
                 <RNText
                   style={{
-                    fontFamily: 'Inter_500Medium',
+                    fontFamily: fonts.medium,
                     fontSize: 13,
                     color: colors.textMuted,
                   }}
@@ -357,44 +357,6 @@ export default function Settings() {
           <Txt variant="body">Change PIN</Txt>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </PressScale>
-
-        <SwitchRow
-          label="Self-destruct PIN"
-          hint={
-            hasDestruct
-              ? 'Entering it at the lock screen wipes all data instantly'
-              : 'Set a separate PIN that triggers an instant, silent data wipe'
-          }
-          value={hasDestruct}
-          onValueChange={(v) => {
-            if (v) {
-              router.push('/set-destruct-pin');
-            } else {
-              haptics.warn();
-              Alert.alert(
-                'Remove self-destruct PIN?',
-                'The PIN will be cleared and the feature will be disabled.',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  {
-                    text: 'Remove',
-                    style: 'destructive',
-                    onPress: () => void clearDestructPin().then(() => setHasDestruct(false)),
-                  },
-                ],
-              );
-            }
-          }}
-        />
-        {hasDestruct && (
-          <PressScale
-            onPress={() => router.push('/set-destruct-pin')}
-            className="flex-row items-center justify-between py-2"
-          >
-            <Txt variant="faint">Change self-destruct PIN</Txt>
-            <Ionicons name="chevron-forward" size={16} color={colors.textFaint} />
-          </PressScale>
-        )}
 
         <Txt variant="faint" className="mb-2 mt-4">
           Auto-lock after inactivity
@@ -450,201 +412,5 @@ export default function Settings() {
         </Txt>
       </View>
     </Screen>
-  );
-}
-
-function SectionLabel({
-  icon,
-  label,
-  labelClass,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  labelClass?: string;
-}) {
-  return (
-    <View className="mb-3 flex-row items-center gap-2">
-      <Ionicons name={icon} size={14} color={colors.textFaint} />
-      <Txt variant="label" className={labelClass}>
-        {label}
-      </Txt>
-    </View>
-  );
-}
-
-function SwitchRow({
-  label,
-  hint,
-  value,
-  onValueChange,
-}: {
-  label: string;
-  hint?: string;
-  value: boolean;
-  onValueChange: (v: boolean) => void;
-}) {
-  return (
-    <View className="flex-row items-center justify-between py-2">
-      <View className="flex-1 pr-4">
-        <Txt variant="body">{label}</Txt>
-        {hint && <Txt variant="faint">{hint}</Txt>}
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ false: colors.surfaceMuted, true: colors.primary }}
-        thumbColor={colors.moon}
-      />
-    </View>
-  );
-}
-
-function Segmented({
-  options,
-  value,
-  onChange,
-}: {
-  options: { label: string; value: number }[];
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <View className="flex-row gap-2">
-      {options.map((o) => {
-        const active = o.value === value;
-        return (
-          <PressScale
-            key={o.value}
-            containerStyle={{ flex: 1 }}
-            onPress={() => onChange(o.value)}
-            accessibilityRole="button"
-            accessibilityState={{ selected: active }}
-            accessibilityLabel={o.label}
-            className={`items-center rounded-xl py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
-          >
-            <Txt className={active ? 'text-ink' : 'text-text-muted'}>{o.label}</Txt>
-          </PressScale>
-        );
-      })}
-    </View>
-  );
-}
-
-function ModeRow({
-  label,
-  hint,
-  active,
-  onPress,
-}: {
-  label: string;
-  hint: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <PressScale
-      onPress={onPress}
-      accessibilityRole="radio"
-      accessibilityState={{ checked: active }}
-      accessibilityLabel={label}
-      accessibilityHint={hint}
-      className="flex-row items-center gap-3 py-2.5"
-    >
-      <View
-        className={`h-5 w-5 items-center justify-center rounded-full border ${active ? 'border-primary bg-primary' : 'border-border'}`}
-        style={
-          active
-            ? {
-                shadowColor: colors.primary,
-                shadowOpacity: 0.4,
-                shadowRadius: 6,
-                shadowOffset: { width: 0, height: 0 },
-              }
-            : undefined
-        }
-      >
-        {active && <Ionicons name="checkmark" size={13} color={colors.ink} />}
-      </View>
-      <View className="flex-1">
-        <Txt variant="body">{label}</Txt>
-        <Txt variant="faint">{hint}</Txt>
-      </View>
-    </PressScale>
-  );
-}
-
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <PressScale
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected: active }}
-      accessibilityLabel={label}
-      className={`rounded-full px-3.5 py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
-    >
-      <Txt className={active ? 'text-ink' : 'text-text-muted'}>{label}</Txt>
-    </PressScale>
-  );
-}
-
-function AboutRow({
-  icon,
-  label,
-  onPress,
-  last,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  onPress: () => void;
-  last?: boolean;
-}) {
-  return (
-    <PressScale
-      onPress={onPress}
-      accessibilityRole="button"
-      className={`flex-row items-center gap-3 py-3 ${last ? '' : 'border-b border-border'}`}
-    >
-      <Ionicons name={icon} size={18} color={colors.primarySoft} />
-      <Txt variant="body" className="flex-1">
-        {label}
-      </Txt>
-      <Ionicons name="open-outline" size={16} color={colors.textMuted} />
-    </PressScale>
-  );
-}
-
-function Stepper({
-  value,
-  min,
-  max,
-  onChange,
-}: {
-  value: number;
-  min: number;
-  max: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <View className="flex-row items-center gap-3">
-      <PressScale
-        onPress={() => onChange(Math.max(min, value - 1))}
-        accessibilityRole="button"
-        accessibilityLabel="Decrease"
-        className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
-      >
-        <Ionicons name="remove" size={20} color={colors.text} />
-      </PressScale>
-      <Txt variant="title" className="w-6 text-center">
-        {value}
-      </Txt>
-      <PressScale
-        onPress={() => onChange(Math.min(max, value + 1))}
-        accessibilityRole="button"
-        accessibilityLabel="Increase"
-        className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
-      >
-        <Ionicons name="add" size={20} color={colors.text} />
-      </PressScale>
-    </View>
   );
 }

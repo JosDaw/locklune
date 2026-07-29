@@ -36,6 +36,8 @@ export function PinPad({
   useEffect(() => {
     if (value.length === length) {
       const entered = value;
+      // Intentional: clear the buffer so the pad can be reused (e.g. confirm step).
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue('');
       onComplete(entered);
     }

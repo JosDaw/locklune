@@ -1,5 +1,6 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { BRAND } from '@locklune/core';
 import { MoonLoader } from '../components/ui/MoonLoader';
 import { PinPad } from '../components/ui/PinPad';
@@ -13,8 +14,9 @@ import { currentLockSeconds } from '../lib/vault';
 const PIN_LENGTH = 6;
 
 export default function Lock() {
-  const [remaining, setRemaining] = useState(0);
-  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+  const [remaining, setRemaining] = useState<number>(0);
+  const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   const unlockPin = useAuthStore((s) => s.unlockPin);
@@ -60,6 +62,18 @@ export default function Lock() {
     }
   };
 
+  const confirmReset = () => {
+    haptics.warn();
+    Alert.alert(
+      'Reset & start over?',
+      'This permanently erases your PIN and all data on this device. It can’t be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Continue', style: 'destructive', onPress: () => router.push('/reset') },
+      ],
+    );
+  };
+
   return (
     <Screen scroll={false} contentClassName="justify-between">
       <View className="items-center pt-6">
@@ -84,7 +98,25 @@ export default function Lock() {
         </View>
       )}
 
-      <View className="h-10" />
+      <View className="items-center pb-4">
+        {!busy && (
+          <Pressable
+            onPress={confirmReset}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Reset and start over"
+            style={({ pressed }) => ({
+              opacity: pressed ? 0.5 : 1,
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+            })}
+          >
+            <Txt variant="faint" className="text-center underline">
+              Locked out? Erase &amp; start over
+            </Txt>
+          </Pressable>
+        )}
+      </View>
     </Screen>
   );
 }

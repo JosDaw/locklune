@@ -167,9 +167,9 @@ export default function Home() {
           <div className="relative flex items-center justify-center py-8">
             <div
               className="absolute h-64 w-64 rounded-full blur-3xl"
-              style={{ background: 'radial-gradient(closest-side, rgba(110,168,254,0.3), rgba(110,168,254,0))' }}
+              style={{ background: 'radial-gradient(closest-side, rgba(138,162,255,0.3), rgba(138,162,255,0))' }}
             />
-            <MoonMark className="relative h-56 w-56 drop-shadow-[0_20px_60px_rgba(110,168,254,0.35)]" />
+            <MoonMark className="relative h-56 w-56 drop-shadow-[0_20px_60px_rgba(138,162,255,0.35)]" />
           </div>
           <ul className="space-y-3">
             {security.map((s, i) => {
@@ -195,7 +195,7 @@ export default function Home() {
         <div className="surface relative overflow-hidden px-8 py-16 text-center">
           <div
             className="absolute inset-x-0 top-0 h-40"
-            style={{ background: 'radial-gradient(60% 100% at 50% 0%, rgba(110,168,254,0.18), transparent)' }}
+            style={{ background: 'radial-gradient(60% 100% at 50% 0%, rgba(138,162,255,0.18), transparent)' }}
           />
           <MoonMark className="mx-auto h-12 w-12" />
           <h2 className="mx-auto mt-6 max-w-2xl font-display text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
