@@ -9,24 +9,24 @@ import { fonts } from '../theme/fonts';
 
 function computeStats(logs: DayLog[]): { topMood: number | null; topSymptoms: string[] } {
   const moodCounts: Record<number, number> = {};
-  logs.forEach((l) => {
-    if (l.mood != null) moodCounts[l.mood] = (moodCounts[l.mood] ?? 0) + 1;
+  logs.forEach((log) => {
+    if (log.mood != null) moodCounts[log.mood] = (moodCounts[log.mood] ?? 0) + 1;
   });
   const topMood =
     Object.keys(moodCounts).length >= 3
-      ? Number(Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]![0])
+      ? Number(Object.entries(moodCounts).sort((first, second) => second[1] - first[1])[0]![0])
       : null;
 
   const symCounts: Record<string, number> = {};
-  logs.forEach((l) =>
-    l.symptoms.forEach((s) => {
-      symCounts[s] = (symCounts[s] ?? 0) + 1;
+  logs.forEach((log) =>
+    log.symptoms.forEach((symptom) => {
+      symCounts[symptom] = (symCounts[symptom] ?? 0) + 1;
     }),
   );
   const topSymptoms = Object.entries(symCounts)
-    .sort((a, b) => b[1] - a[1])
+    .sort((first, second) => second[1] - first[1])
     .slice(0, 3)
-    .map(([s]) => s.charAt(0).toUpperCase() + s.slice(1));
+    .map(([symptom]) => symptom.charAt(0).toUpperCase() + symptom.slice(1));
 
   return { topMood, topSymptoms };
 }
@@ -53,15 +53,15 @@ export function StatsRow({
     logs.forEach((log) => {
       const phase = phaseForLog(log.day, cycles, avgLen, avgPeriodLen);
       if (phase === currentPhase.label) {
-        log.symptoms.forEach((s) => {
-          symCounts[s] = (symCounts[s] ?? 0) + 1;
+        log.symptoms.forEach((symptom) => {
+          symCounts[symptom] = (symCounts[symptom] ?? 0) + 1;
         });
       }
     });
     return Object.entries(symCounts)
-      .sort((a, b) => b[1] - a[1])
+      .sort((first, second) => second[1] - first[1])
       .slice(0, 3)
-      .map(([s]) => s.charAt(0).toUpperCase() + s.slice(1));
+      .map(([symptom]) => symptom.charAt(0).toUpperCase() + symptom.slice(1));
   }, [logs, cycles, currentPhase, avgLen, avgPeriodLen]);
 
   const shownSymptoms = phaseSymptoms.length > 0 && currentPhase ? phaseSymptoms : topSymptoms;
@@ -125,9 +125,9 @@ export function StatsRow({
             Frequent symptoms
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-            {shownSymptoms.map((s) => (
+            {shownSymptoms.map((symptom) => (
               <View
-                key={s}
+                key={symptom}
                 style={{
                   borderRadius: 99,
                   backgroundColor: colors.surfaceMuted,
@@ -136,7 +136,7 @@ export function StatsRow({
                 }}
               >
                 <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}>
-                  {s}
+                  {symptom}
                 </Text>
               </View>
             ))}

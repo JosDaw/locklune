@@ -60,31 +60,42 @@ export interface DayLog {
 }
 
 /** How the app interprets cycles for the user's current life stage. */
-export type CycleMode = 'tracking' | 'period_only' | 'trying' | 'contraception' | 'pregnant';
+export const CYCLE_MODE = {
+  Tracking: 'tracking',
+  PeriodOnly: 'period_only',
+  Trying: 'trying',
+  Contraception: 'contraception',
+  Pregnant: 'pregnant',
+} as const;
+
+export type CycleMode = (typeof CYCLE_MODE)[keyof typeof CYCLE_MODE];
 
 /** Contraception method (only relevant in 'contraception' mode). */
-export type ContraceptionMethod =
-  | 'none'
-  | 'pill'
-  | 'mini_pill'
-  | 'patch'
-  | 'ring'
-  | 'injection'
-  | 'implant'
-  | 'hormonal_iud'
-  | 'copper_iud'
-  | 'condoms'
-  | 'other';
+export const CONTRACEPTION_METHOD = {
+  None: 'none',
+  Pill: 'pill',
+  MiniPill: 'mini_pill',
+  Patch: 'patch',
+  Ring: 'ring',
+  Injection: 'injection',
+  Implant: 'implant',
+  HormonalIud: 'hormonal_iud',
+  CopperIud: 'copper_iud',
+  Condoms: 'condoms',
+  Other: 'other',
+} as const;
+
+export type ContraceptionMethod = (typeof CONTRACEPTION_METHOD)[keyof typeof CONTRACEPTION_METHOD];
 
 /** Methods that suppress ovulation, making fertility estimates unreliable. */
 export const HORMONAL_METHODS: readonly ContraceptionMethod[] = [
-  'pill',
-  'mini_pill',
-  'patch',
-  'ring',
-  'injection',
-  'implant',
-  'hormonal_iud',
+  CONTRACEPTION_METHOD.Pill,
+  CONTRACEPTION_METHOD.MiniPill,
+  CONTRACEPTION_METHOD.Patch,
+  CONTRACEPTION_METHOD.Ring,
+  CONTRACEPTION_METHOD.Injection,
+  CONTRACEPTION_METHOD.Implant,
+  CONTRACEPTION_METHOD.HormonalIud,
 ];
 
 export function isHormonalContraception(method: ContraceptionMethod): boolean {
@@ -135,8 +146,8 @@ export const DEFAULT_SETTINGS: Settings = {
   notifyPeriodToday: false,
   notifyFertileTomorrow: false,
   notifyFertileStart: false,
-  cycleMode: 'tracking',
-  contraceptionMethod: 'none',
+  cycleMode: CYCLE_MODE.Tracking,
+  contraceptionMethod: CONTRACEPTION_METHOD.None,
   pregnancyDueDay: null,
   postPregnancyAnchorDay: null,
   customSymptoms: [],

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { BRAND, pregnancyProgress, todayEpochDay, type DayLog } from '@locklune/core';
+import { BRAND, CYCLE_MODE, pregnancyProgress, todayEpochDay, type DayLog } from '@locklune/core';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform, Text, View } from 'react-native';
@@ -28,13 +28,13 @@ import { CARD_SHADOW } from '../../theme/shadows';
 export default function Today() {
   const router = useRouter();
   const today = todayEpochDay();
-  const cycles = useDataStore((s) => s.cycles);
-  const prediction = useDataStore((s) => s.prediction);
-  const settings = useDataStore((s) => s.settings);
-  const startPeriod = useDataStore((s) => s.startPeriod);
-  const setCurrentPeriodEnd = useDataStore((s) => s.setCurrentPeriodEnd);
-  const getDayLog = useDataStore((s) => s.getDayLog);
-  const getDayLogsInRange = useDataStore((s) => s.getDayLogsInRange);
+  const cycles = useDataStore((store) => store.cycles);
+  const prediction = useDataStore((store) => store.prediction);
+  const settings = useDataStore((store) => store.settings);
+  const startPeriod = useDataStore((store) => store.startPeriod);
+  const setCurrentPeriodEnd = useDataStore((store) => store.setCurrentPeriodEnd);
+  const getDayLog = useDataStore((store) => store.getDayLog);
+  const getDayLogsInRange = useDataStore((store) => store.getDayLogsInRange);
 
   const [todayLog, setTodayLog] = useState<DayLog | null>(null);
   const [logLoaded, setLogLoaded] = useState(false);
@@ -79,8 +79,8 @@ export default function Today() {
 
   const next = prediction.upcoming[0];
   const fertility = prediction.fertilityApplicable;
-  const pregnant = settings.cycleMode === 'pregnant';
-  const trying = settings.cycleMode === 'trying';
+  const pregnant = settings.cycleMode === CYCLE_MODE.Pregnant;
+  const trying = settings.cycleMode === CYCLE_MODE.Trying;
   const preg =
     pregnant && settings.pregnancyDueDay != null
       ? pregnancyProgress(settings.pregnancyDueDay, today)
@@ -230,7 +230,9 @@ export default function Today() {
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}>
                 <View style={{ flex: 1, gap: 4 }}>
                   <Txt variant="label">
-                    {settings.cycleMode === 'contraception' ? 'Next expected bleed' : 'Next period'}
+                    {settings.cycleMode === CYCLE_MODE.Contraception
+                      ? 'Next expected bleed'
+                      : 'Next period'}
                   </Txt>
                   <Text
                     style={{

@@ -3,10 +3,18 @@ name: CI
 # Public checks for a source-available, audit-first project: anyone can see
 # that the code type-checks, the crypto/prediction tests pass, and both apps
 # build - without trusting a screenshot. No secrets are used.
+#
+# The pipeline also auto-formats: it runs Prettier (and `eslint --fix`) and
+# commits any changes back to the branch, so everything that ships is formatted
+# and lint-clean without the author having to remember `npm run format`.
 on:
   push:
     branches: [main]
   pull_request:
+
+# Needed so the auto-format step can push its commit back to the branch.
+permissions:
+  contents: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -19,6 +27,10 @@ jobs:
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Check out the PR's head branch (not the merge ref) so the
+          # auto-format commit lands on the right branch.
+          ref: ${{ github.head_ref }}
 
       - uses: actions/setup-node@v4
         with:
@@ -28,14 +40,32 @@ jobs:
       - name: Install
         run: npm ci
 
+      # --- Auto-format: fix, then commit any changes back to the branch ---
+      - name: Prettier (write)
+        run: npm run format
+
+      - name: ESLint (--fix, best effort)
+        run: npm run lint -- --fix
+        continue-on-error: true
+
+      - name: Commit formatting
+        # Skips cleanly when there is nothing to commit. On PRs from forks the
+        # push is read-only and this is a no-op - this repo takes no external PRs.
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'style: apply prettier & eslint --fix [skip ci]'
+          commit_user_name: locklune-ci
+          commit_options: '--no-verify'
+
+      # --- Gates: run against the (now formatted) tree ---
+      - name: Lint
+        run: npm run lint
+
       - name: Format check
         run: npm run format:check
 
       - name: Typecheck
         run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
 
       - name: Test
         run: npm run test

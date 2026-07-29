@@ -62,9 +62,9 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
             Symptoms
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-            {shownSyms.map((s) => (
+            {shownSyms.map((symptom) => (
               <View
-                key={s}
+                key={symptom}
                 style={{
                   borderRadius: 99,
                   backgroundColor: colors.surfaceMuted,
@@ -73,7 +73,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
                 }}
               >
                 <Text style={{ fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted }}>
-                  {s}
+                  {symptom}
                 </Text>
               </View>
             ))}

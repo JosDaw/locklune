@@ -21,6 +21,8 @@ export function relativeDays(day: EpochDay, from: EpochDay = todayEpochDay()): s
   return `${-diff} days ago`;
 }
 
-export function confidenceLabel(c: Confidence): string {
-  return { low: 'Low confidence', medium: 'Building confidence', high: 'High confidence' }[c];
+export function confidenceLabel(confidence: Confidence): string {
+  return { low: 'Low confidence', medium: 'Building confidence', high: 'High confidence' }[
+    confidence
+  ];
 }

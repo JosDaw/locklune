@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { pregnancyProgress, todayEpochDay, type Cycle } from '@locklune/core';
+import { CYCLE_MODE, pregnancyProgress, todayEpochDay, type Cycle } from '@locklune/core';
 import { useMemo } from 'react';
 import { Alert, View } from 'react-native';
 import { CycleRow } from '../../components/CycleRow';
@@ -13,36 +13,37 @@ import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
 
 export default function Insights() {
-  const cycles = useDataStore((s) => s.cycles);
-  const prediction = useDataStore((s) => s.prediction);
-  const settings = useDataStore((s) => s.settings);
-  const deleteCycle = useDataStore((s) => s.deleteCycle);
+  const cycles = useDataStore((store) => store.cycles);
+  const prediction = useDataStore((store) => store.prediction);
+  const settings = useDataStore((store) => store.settings);
+  const deleteCycle = useDataStore((store) => store.deleteCycle);
   const today = todayEpochDay();
 
-  const confirmDelete = (cyc: Cycle) => {
+  const confirmDelete = (cycle: Cycle) => {
     haptics.warn();
     Alert.alert(
       'Delete this period?',
-      `This removes the period starting ${formatDay(cyc.startDay)} from your history. Symptom logs are kept.`,
+      `This removes the period starting ${formatDay(cycle.startDay)} from your history. Symptom logs are kept.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => void (async () => (await deleteCycle(cyc.id)) && haptics.success())(),
+          onPress: () => void (async () => (await deleteCycle(cycle.id)) && haptics.success())(),
         },
       ],
     );
   };
   const preg =
-    settings.cycleMode === 'pregnant' && settings.pregnancyDueDay != null
+    settings.cycleMode === CYCLE_MODE.Pregnant && settings.pregnancyDueDay != null
       ? pregnancyProgress(settings.pregnancyDueDay, today)
       : null;
 
   const lengths = useMemo(() => {
-    const out: number[] = [];
-    for (let i = 1; i < cycles.length; i++) out.push(cycles[i]!.startDay - cycles[i - 1]!.startDay);
-    return out.slice(-8);
+    const result: number[] = [];
+    for (let index = 1; index < cycles.length; index++)
+      result.push(cycles[index]!.startDay - cycles[index - 1]!.startDay);
+    return result.slice(-8);
   }, [cycles]);
 
   const maxLen = Math.max(35, ...lengths);
@@ -81,22 +82,22 @@ export default function Insights() {
           </View>
         ) : (
           <View className="gap-3">
-            {lengths.map((len, i) => (
-              <View key={i} className="flex-row items-center gap-3">
+            {lengths.map((length, index) => (
+              <View key={index} className="flex-row items-center gap-3">
                 <Txt variant="faint" className="w-5 text-right text-2xs">
-                  {i + 1}
+                  {index + 1}
                 </Txt>
                 <View className="h-4 flex-1 overflow-hidden rounded-full bg-surfaceMuted">
                   <View
                     className="h-4 rounded-full bg-period"
                     style={{
-                      width: `${Math.min(100, (len / maxLen) * 100)}%`,
-                      opacity: 0.7 + 0.3 * (i / Math.max(1, lengths.length - 1)),
+                      width: `${Math.min(100, (length / maxLen) * 100)}%`,
+                      opacity: 0.7 + 0.3 * (index / Math.max(1, lengths.length - 1)),
                     }}
                   />
                 </View>
                 <Txt variant="muted" className="w-12 text-right">
-                  {len}d
+                  {length}d
                 </Txt>
               </View>
             ))}
@@ -105,7 +106,7 @@ export default function Insights() {
       </Card>
 
       {/* Upcoming or pregnancy */}
-      {settings.cycleMode === 'pregnant' ? (
+      {settings.cycleMode === CYCLE_MODE.Pregnant ? (
         <Card>
           <View className="flex-row items-center gap-2 mb-4">
             <Ionicons name="heart-outline" size={14} color={colors.textFaint} />
@@ -136,7 +137,9 @@ export default function Insights() {
           <View className="flex-row items-center gap-2 mb-4">
             <Ionicons name="calendar-outline" size={14} color={colors.textFaint} />
             <Txt variant="title">
-              {settings.cycleMode === 'contraception' ? 'Upcoming bleeds' : 'Upcoming periods'}
+              {settings.cycleMode === CYCLE_MODE.Contraception
+                ? 'Upcoming bleeds'
+                : 'Upcoming periods'}
             </Txt>
           </View>
           {prediction.upcoming.length === 0 ? (
@@ -148,17 +151,19 @@ export default function Insights() {
           ) : (
             <View className="gap-3">
               {prediction.upcoming
-                .filter((u) => u.periodStart <= today + 183)
-                .map((u, i) => (
+                .filter((upcoming) => upcoming.periodStart <= today + 183)
+                .map((upcoming, index) => (
                   <View
-                    key={i}
+                    key={index}
                     className="flex-row items-center justify-between py-1"
-                    style={i > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}
+                    style={
+                      index > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined
+                    }
                   >
                     <Txt variant="body">
-                      {formatDay(u.periodStart, { month: 'long', day: 'numeric' })}
+                      {formatDay(upcoming.periodStart, { month: 'long', day: 'numeric' })}
                     </Txt>
-                    <Txt variant="faint">{relativeDays(u.periodStart)}</Txt>
+                    <Txt variant="faint">{relativeDays(upcoming.periodStart)}</Txt>
                   </View>
                 ))}
             </View>
@@ -177,8 +182,8 @@ export default function Insights() {
             {[...cycles]
               .reverse()
               .slice(0, 12)
-              .map((cyc) => (
-                <CycleRow key={cyc.id} cycle={cyc} onDelete={() => confirmDelete(cyc)} />
+              .map((cycle) => (
+                <CycleRow key={cycle.id} cycle={cycle} onDelete={() => confirmDelete(cycle)} />
               ))}
           </View>
         </Card>

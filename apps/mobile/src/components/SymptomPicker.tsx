@@ -11,7 +11,7 @@ export function SymptomPicker({
   customSymptoms = [],
 }: {
   symptoms: string[];
-  onToggle: (s: string) => void;
+  onToggle: (symptom: string) => void;
   customSymptoms?: string[];
 }) {
   const allCategories = useMemo(() => {
@@ -37,12 +37,12 @@ export function SymptomPicker({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ gap: 8 }}
       >
-        {allCategories.map((category, i) => {
-          const active = safecat === i;
+        {allCategories.map((category, index) => {
+          const active = safecat === index;
           return (
             <Pressable
               key={category.name}
-              onPress={() => setCat(i)}
+              onPress={() => setCat(index)}
               style={{
                 borderRadius: 99,
                 paddingHorizontal: 12,
@@ -72,12 +72,12 @@ export function SymptomPicker({
       </ScrollView>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-        {items.map((s) => {
-          const active = symptoms.includes(s);
+        {items.map((symptom) => {
+          const active = symptoms.includes(symptom);
           return (
             <Pressable
-              key={s}
-              onPress={() => onToggle(s)}
+              key={symptom}
+              onPress={() => onToggle(symptom)}
               style={{
                 borderRadius: 99,
                 paddingHorizontal: 14,
@@ -92,7 +92,7 @@ export function SymptomPicker({
                   color: active ? colors.ink : colors.textMuted,
                 }}
               >
-                {s}
+                {symptom}
               </Text>
             </Pressable>
           );

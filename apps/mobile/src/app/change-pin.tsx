@@ -21,7 +21,7 @@ const PROMPTS: Record<Phase, string> = {
 
 export default function ChangePin() {
   const router = useRouter();
-  const changePin = useAuthStore((s) => s.changePin);
+  const changePin = useAuthStore((store) => store.changePin);
 
   const [phase, setPhase] = useState<Phase>('current');
   const [currentPin, setCurrentPin] = useState('');

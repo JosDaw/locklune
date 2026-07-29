@@ -9,24 +9,29 @@ export const metadata: Metadata = {
 
 const faqs = [
   {
-    q: 'I forgot my PIN. Can you reset it?',
-    a: 'No, and neither can we. Your PIN is the encryption key to your data, and we never receive or store it. A forgotten PIN means the data cannot be recovered - this is the price of true privacy. If you are locked out, you can choose Reset and start over on the lock screen: this erases everything on the device and lets you set up again with a new PIN.',
+    question: 'I forgot my PIN. Can you reset it?',
+    answer:
+      'No, and neither can we. Your PIN is the encryption key to your data, and we never receive or store it. A forgotten PIN means the data cannot be recovered - this is the price of true privacy. If you are locked out, you can choose Reset and start over on the lock screen: this erases everything on the device and lets you set up again with a new PIN.',
   },
   {
-    q: 'Is my data backed up to the cloud?',
-    a: 'No. Nothing is uploaded anywhere. Your data lives only on your device. If you get a new phone, previous data does not transfer automatically.',
+    question: 'Is my data backed up to the cloud?',
+    answer:
+      'No. Nothing is uploaded anywhere. Your data lives only on your device. If you get a new phone, previous data does not transfer automatically.',
   },
   {
-    q: 'How are predictions calculated?',
-    a: 'Locklune estimates your next period from a recency-weighted average of your recent cycle lengths, with an uncertainty range based on how regular your cycles are. Ovulation is estimated from a roughly constant luteal phase, and the fertile window from typical sperm and egg viability. Everything is computed on your device and adapts as you log more cycles.',
+    question: 'How are predictions calculated?',
+    answer:
+      'Locklune estimates your next period from a recency-weighted average of your recent cycle lengths, with an uncertainty range based on how regular your cycles are. Ovulation is estimated from a roughly constant luteal phase, and the fertile window from typical sperm and egg viability. Everything is computed on your device and adapts as you log more cycles.',
   },
   {
-    q: 'Are predictions medical or contraceptive advice?',
-    a: 'No. They are estimates for your awareness only and should not be relied on for contraception or medical decisions.',
+    question: 'Are predictions medical or contraceptive advice?',
+    answer:
+      'No. They are estimates for your awareness only and should not be relied on for contraception or medical decisions.',
   },
   {
-    q: 'How do I erase everything?',
-    a: 'Open Settings, then Erase all data, or simply delete the app. There is nothing stored elsewhere.',
+    question: 'How do I erase everything?',
+    answer:
+      'Open Settings, then Erase all data, or simply delete the app. There is nothing stored elsewhere.',
   },
 ];
 
@@ -39,10 +44,10 @@ export default function Support() {
       </p>
 
       <div className="mt-10 space-y-4">
-        {faqs.map((f) => (
-          <div key={f.q} className="surface p-6">
-            <h2 className="font-display text-lg font-semibold text-fg">{f.q}</h2>
-            <p className="mt-2 leading-relaxed text-fg-muted">{f.a}</p>
+        {faqs.map((faq) => (
+          <div key={faq.question} className="surface p-6">
+            <h2 className="font-display text-lg font-semibold text-fg">{faq.question}</h2>
+            <p className="mt-2 leading-relaxed text-fg-muted">{faq.answer}</p>
           </div>
         ))}
       </div>

@@ -22,15 +22,15 @@ export interface DayCycleStatus {
  * action to offer for the day being edited.
  */
 export function cycleForDay(cycles: Cycle[], day: EpochDay, today: EpochDay): DayCycleStatus {
-  const sorted = [...cycles].sort((a, b) => a.startDay - b.startDay);
-  for (let i = 0; i < sorted.length; i++) {
-    const c = sorted[i]!;
+  const sorted = [...cycles].sort((first, second) => first.startDay - second.startDay);
+  for (let index = 0; index < sorted.length; index++) {
+    const cycle = sorted[index]!;
     // Sorted ascending: once a start is past `day`, no later cycle can contain it.
-    if (c.startDay > day) break;
-    const nextStart = sorted[i + 1]?.startDay ?? Infinity;
-    const bleedEnd = c.endDay ?? Math.min(nextStart - 1, today);
+    if (cycle.startDay > day) break;
+    const nextStart = sorted[index + 1]?.startDay ?? Infinity;
+    const bleedEnd = cycle.endDay ?? Math.min(nextStart - 1, today);
     if (day <= bleedEnd) {
-      return { cycle: c, isStart: c.startDay === day, isBleedDay: true };
+      return { cycle, isStart: cycle.startDay === day, isBleedDay: true };
     }
   }
   return { cycle: null, isStart: false, isBleedDay: false };

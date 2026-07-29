@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
+  CYCLE_MODE,
   cycleForDay,
   Flow,
   Mood,
@@ -49,17 +50,17 @@ export default function LogModal() {
   const today = todayEpochDay();
   const day: EpochDay = params.day ? Number(params.day) : today;
 
-  const getDayLog = useDataStore((s) => s.getDayLog);
-  const logDay = useDataStore((s) => s.logDay);
-  const cycles = useDataStore((s) => s.cycles);
-  const startPeriod = useDataStore((s) => s.startPeriod);
-  const endCycle = useDataStore((s) => s.endCycle);
-  const deleteCycle = useDataStore((s) => s.deleteCycle);
-  const settings = useDataStore((s) => s.settings);
+  const getDayLog = useDataStore((store) => store.getDayLog);
+  const logDay = useDataStore((store) => store.logDay);
+  const cycles = useDataStore((store) => store.cycles);
+  const startPeriod = useDataStore((store) => store.startPeriod);
+  const endCycle = useDataStore((store) => store.endCycle);
+  const deleteCycle = useDataStore((store) => store.deleteCycle);
+  const settings = useDataStore((store) => store.settings);
 
-  const pregnant = settings.cycleMode === 'pregnant';
+  const pregnant = settings.cycleMode === CYCLE_MODE.Pregnant;
   const fertilityTracking =
-    settings.cycleMode !== 'pregnant' && settings.cycleMode !== 'period_only';
+    settings.cycleMode !== CYCLE_MODE.Pregnant && settings.cycleMode !== CYCLE_MODE.PeriodOnly;
   const preg =
     pregnant && settings.pregnancyDueDay != null
       ? pregnancyProgress(settings.pregnancyDueDay, day)
@@ -135,11 +136,13 @@ export default function LogModal() {
     );
   }, [loaded, origLog, flow, mood, note, ovulation, symptoms, temp]);
 
-  const toggleSymptom = (s: string) =>
-    setSymptoms((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+  const toggleSymptom = (symptom: string) =>
+    setSymptoms((prev) =>
+      prev.includes(symptom) ? prev.filter((existing) => existing !== symptom) : [...prev, symptom],
+    );
 
-  const handleMoodSelect = (m: Mood) => {
-    setMood((prev) => (prev === m ? null : m));
+  const handleMoodSelect = (selectedMood: Mood) => {
+    setMood((prev) => (prev === selectedMood ? null : selectedMood));
     if (!expanded) {
       LayoutAnimation.configureNext({
         duration: 380,
@@ -152,26 +155,29 @@ export default function LogModal() {
 
   // Where this day sits relative to recorded cycles, so we can offer the right action.
   const status = cycleForDay(cycles, day, today);
-  const c = status.cycle;
-  const isOngoing = c != null && c.endDay === null;
-  const isEndDay = c != null && c.endDay === day;
+  const cycle = status.cycle;
+  const isOngoing = cycle != null && cycle.endDay === null;
+  const isEndDay = cycle != null && cycle.endDay === day;
   const canSetEnd =
-    c != null && day >= c.startDay && day !== c.endDay && (c.endDay === null || day <= c.endDay);
+    cycle != null &&
+    day >= cycle.startDay &&
+    day !== cycle.endDay &&
+    (cycle.endDay === null || day <= cycle.endDay);
 
   const markStart = async () => {
     if (await startPeriod(day)) haptics.success();
   };
 
   const setEnd = async () => {
-    if (c && (await endCycle(c.id, day))) haptics.success();
+    if (cycle && (await endCycle(cycle.id, day))) haptics.success();
   };
 
   const clearEnd = async () => {
-    if (c && (await endCycle(c.id, null))) haptics.success();
+    if (cycle && (await endCycle(cycle.id, null))) haptics.success();
   };
 
   const removeStart = () => {
-    if (!c) return;
+    if (!cycle) return;
     haptics.warn();
     Alert.alert(
       'Remove period start?',
@@ -181,7 +187,7 @@ export default function LogModal() {
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => void (async () => (await deleteCycle(c.id)) && haptics.success())(),
+          onPress: () => void (async () => (await deleteCycle(cycle.id)) && haptics.success())(),
         },
       ],
     );
@@ -282,13 +288,13 @@ export default function LogModal() {
           </Text>
         )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          {MOOD_OPTIONS.map((o) => (
+          {MOOD_OPTIONS.map((option) => (
             <MoodButton
-              key={o.value}
-              option={o}
-              selected={mood === o.value}
+              key={option.value}
+              option={option}
+              selected={mood === option.value}
               expanded={expanded}
-              onPress={() => handleMoodSelect(o.value)}
+              onPress={() => handleMoodSelect(option.value)}
             />
           ))}
         </View>
@@ -314,8 +320,8 @@ export default function LogModal() {
                     <Txt variant="body">
                       {status.isStart ? 'Period started this day' : 'Period day'}
                     </Txt>
-                    {!status.isStart && c && (
-                      <Txt variant="faint">Started {formatDay(c.startDay)}</Txt>
+                    {!status.isStart && cycle && (
+                      <Txt variant="faint">Started {formatDay(cycle.startDay)}</Txt>
                     )}
                     {isEndDay && <Txt variant="faint">Marked as the last day</Txt>}
                     {isOngoing && !status.isStart && <Txt variant="faint">Period ongoing</Txt>}
@@ -356,7 +362,9 @@ export default function LogModal() {
               <Txt variant="label">Flow</Txt>
               <FlowPicker
                 value={flow}
-                onChange={(f) => setFlow((prev) => (prev === f ? null : f))}
+                onChange={(selectedFlow) =>
+                  setFlow((prev) => (prev === selectedFlow ? null : selectedFlow))
+                }
               />
             </View>
           )}

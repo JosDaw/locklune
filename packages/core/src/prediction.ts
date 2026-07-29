@@ -1,5 +1,6 @@
 import { addDays } from './dates.js';
 import {
+  CYCLE_MODE,
   DEFAULT_SETTINGS,
   isHormonalContraception,
   type Confidence,
@@ -42,30 +43,30 @@ const FERTILE_AFTER_OVULATION = 1;
 /** Spread (days) assumed when we don't yet have enough data to measure it. */
 const DEFAULT_VARIABILITY = 4;
 
-function recencyWeights(n: number): number[] {
+function recencyWeights(count: number): number[] {
   // index 0 = most recent, gets the highest weight.
-  return Array.from({ length: n }, (_, i) => 2 ** (-i / RECENCY_HALF_LIFE));
+  return Array.from({ length: count }, (_, index) => 2 ** (-index / RECENCY_HALF_LIFE));
 }
 
 function weightedMean(values: number[], weights: number[]): number {
   let sum = 0;
-  let wsum = 0;
-  for (let i = 0; i < values.length; i++) {
-    sum += values[i]! * weights[i]!;
-    wsum += weights[i]!;
+  let weightSum = 0;
+  for (let index = 0; index < values.length; index++) {
+    sum += values[index]! * weights[index]!;
+    weightSum += weights[index]!;
   }
-  return wsum === 0 ? 0 : sum / wsum;
+  return weightSum === 0 ? 0 : sum / weightSum;
 }
 
 function weightedStdDev(values: number[], weights: number[], mean: number): number {
   if (values.length < 2) return DEFAULT_VARIABILITY;
   let sum = 0;
-  let wsum = 0;
-  for (let i = 0; i < values.length; i++) {
-    sum += weights[i]! * (values[i]! - mean) ** 2;
-    wsum += weights[i]!;
+  let weightSum = 0;
+  for (let index = 0; index < values.length; index++) {
+    sum += weights[index]! * (values[index]! - mean) ** 2;
+    weightSum += weights[index]!;
   }
-  return wsum === 0 ? DEFAULT_VARIABILITY : Math.sqrt(sum / wsum);
+  return weightSum === 0 ? DEFAULT_VARIABILITY : Math.sqrt(sum / weightSum);
 }
 
 function classifyConfidence(cyclesAnalyzed: number, variability: number): Confidence {
@@ -77,9 +78,9 @@ function classifyConfidence(cyclesAnalyzed: number, variability: number): Confid
 /** Completed cycle lengths (start-to-next-start) within the plausible band. */
 function cycleLengths(sortedCycles: Cycle[]): number[] {
   const lengths: number[] = [];
-  for (let i = 1; i < sortedCycles.length; i++) {
-    const len = sortedCycles[i]!.startDay - sortedCycles[i - 1]!.startDay;
-    if (len >= MIN_PLAUSIBLE_CYCLE && len <= MAX_PLAUSIBLE_CYCLE) lengths.push(len);
+  for (let index = 1; index < sortedCycles.length; index++) {
+    const length = sortedCycles[index]!.startDay - sortedCycles[index - 1]!.startDay;
+    if (length >= MIN_PLAUSIBLE_CYCLE && length <= MAX_PLAUSIBLE_CYCLE) lengths.push(length);
   }
   return lengths;
 }
@@ -87,11 +88,11 @@ function cycleLengths(sortedCycles: Cycle[]): number[] {
 /** Mean logged bleed length (inclusive of start and end day), or a default. */
 function periodLength(cycles: Cycle[], fallback: number): number {
   const bleeds = cycles
-    .filter((c) => c.endDay !== null && c.endDay >= c.startDay)
-    .map((c) => c.endDay! - c.startDay + 1)
-    .filter((d) => d >= 1 && d <= 15);
+    .filter((cycle) => cycle.endDay !== null && cycle.endDay >= cycle.startDay)
+    .map((cycle) => cycle.endDay! - cycle.startDay + 1)
+    .filter((bleedLength) => bleedLength >= 1 && bleedLength <= 15);
   if (bleeds.length === 0) return fallback;
-  return bleeds.reduce((a, b) => a + b, 0) / bleeds.length;
+  return bleeds.reduce((sum, bleedLength) => sum + bleedLength, 0) / bleeds.length;
 }
 
 /**
@@ -105,16 +106,16 @@ function empiricalLutealPhase(
   sortedOvulations: number[],
   fallback: number,
 ): number {
-  const starts = sortedCycles.map((c) => c.startDay);
+  const starts = sortedCycles.map((cycle) => cycle.startDay);
   const lengths: number[] = [];
-  for (const o of sortedOvulations) {
-    const nextStart = starts.find((s) => s > o);
+  for (const ovulation of sortedOvulations) {
+    const nextStart = starts.find((start) => start > ovulation);
     if (nextStart === undefined) continue;
-    const len = nextStart - o;
-    if (len >= 7 && len <= 20) lengths.push(len);
+    const length = nextStart - ovulation;
+    if (length >= 7 && length <= 20) lengths.push(length);
   }
   if (lengths.length === 0) return fallback;
-  return Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length);
+  return Math.round(lengths.reduce((sum, length) => sum + length, 0) / lengths.length);
 }
 
 /**
@@ -131,7 +132,7 @@ export function predict(
 ): Prediction {
   const cfg: Settings = { ...DEFAULT_SETTINGS, ...settings };
   const count = Math.max(1, options.count ?? 3);
-  const sorted = [...cycles].sort((a, b) => a.startDay - b.startDay);
+  const sorted = [...cycles].sort((first, second) => first.startDay - second.startDay);
 
   const lengths = cycleLengths(sorted).slice(-MAX_HISTORY);
   // Reverse so index 0 is the most recent (for recency weighting).
@@ -152,12 +153,14 @@ export function predict(
   // Fertility estimates are meaningless while pregnant or on ovulation-suppressing
   // (hormonal) contraception.
   const fertilityApplicable =
-    mode !== 'pregnant' &&
-    mode !== 'period_only' &&
-    !(mode === 'contraception' && isHormonalContraception(cfg.contraceptionMethod));
+    mode !== CYCLE_MODE.Pregnant &&
+    mode !== CYCLE_MODE.PeriodOnly &&
+    !(mode === CYCLE_MODE.Contraception && isHormonalContraception(cfg.contraceptionMethod));
 
   // Confirmed ovulations refine the luteal phase and can anchor the next period.
-  const ovulations = [...(options.confirmedOvulations ?? [])].sort((a, b) => a - b);
+  const ovulations = [...(options.confirmedOvulations ?? [])].sort(
+    (first, second) => first - second,
+  );
   const lutealPhase = empiricalLutealPhase(sorted, ovulations, cfg.lutealPhaseDays);
 
   const upcoming: CyclePrediction[] = [];
@@ -168,23 +171,23 @@ export function predict(
   // the time the user switched out of pregnant mode).
   if (
     cfg.postPregnancyAnchorDay != null &&
-    mode !== 'pregnant' &&
+    mode !== CYCLE_MODE.Pregnant &&
     (anchor === null || anchor < cfg.postPregnancyAnchorDay)
   ) {
     anchor = cfg.postPregnancyAnchorDay - Math.round(averageCycleLength);
   }
   // No period projections while pregnant.
-  if (anchor !== null && mode !== 'pregnant') {
+  if (anchor !== null && mode !== CYCLE_MODE.Pregnant) {
     const cycleLen = Math.round(averageCycleLength);
     const periodLen = Math.max(1, Math.round(averagePeriodLength));
     // A confirmed ovulation in the current cycle (on/after the last period start)
     // anchors the very next period at ovulation + luteal phase.
-    const currentOvulation = ovulations.filter((o) => o >= anchor).slice(-1)[0];
+    const currentOvulation = ovulations.filter((ovulation) => ovulation >= anchor).slice(-1)[0];
     let prevStart = anchor;
-    for (let k = 1; k <= count; k++) {
+    for (let cycleIndex = 1; cycleIndex <= count; cycleIndex++) {
       let periodStart: EpochDay;
       let ovulationDay: EpochDay;
-      if (k === 1 && currentOvulation !== undefined) {
+      if (cycleIndex === 1 && currentOvulation !== undefined) {
         ovulationDay = currentOvulation;
         periodStart = currentOvulation + lutealPhase;
       } else {
@@ -192,7 +195,7 @@ export function predict(
         ovulationDay = addDays(periodStart, -lutealPhase);
       }
       // Uncertainty grows with the square root of cycles projected ahead.
-      const spread = Math.max(1, Math.round(variability * Math.sqrt(k)));
+      const spread = Math.max(1, Math.round(variability * Math.sqrt(cycleIndex)));
       upcoming.push({
         periodStart,
         periodEnd: periodStart + periodLen - 1,

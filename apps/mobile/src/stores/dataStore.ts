@@ -105,7 +105,7 @@ export const useDataStore = create<DataState>((set, get) => {
         // same period (real cycles are never < ~2 weeks apart), so move its start
         // rather than create a second, overlapping open period.
         const RECONCILE_DAYS = 15;
-        const ongoing = [...get().cycles].reverse().find((c) => c.endDay === null);
+        const ongoing = [...get().cycles].reverse().find((cycle) => cycle.endDay === null);
         if (ongoing && Math.abs(ongoing.startDay - day) < RECONCILE_DAYS) {
           if (day !== ongoing.startDay) await db.moveCycleStart(ongoing.id, day);
         } else {
@@ -130,7 +130,7 @@ export const useDataStore = create<DataState>((set, get) => {
 
     deleteCycle: (id) =>
       mutate(async () => {
-        const cycle = get().cycles.find((c) => c.id === id);
+        const cycle = get().cycles.find((candidate) => candidate.id === id);
         if (cycle) {
           const endDay = cycle.endDay ?? cycle.startDay + 14;
           await db.deleteDayLogsInRange(cycle.startDay, endDay);

@@ -30,18 +30,18 @@ export function Background() {
         end={{ x: 0, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      {STARS.map((s, i) => (
+      {STARS.map((star, index) => (
         <View
-          key={i}
+          key={index}
           style={{
             position: 'absolute',
-            top: s.top,
-            left: s.left,
-            width: s.size,
-            height: s.size,
-            borderRadius: s.size / 2,
+            top: star.top,
+            left: star.left,
+            width: star.size,
+            height: star.size,
+            borderRadius: star.size / 2,
             backgroundColor: colors.star,
-            opacity: s.opacity,
+            opacity: star.opacity,
           }}
         />
       ))}

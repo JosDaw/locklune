@@ -53,28 +53,28 @@ export function Backdrop() {
         preserveAspectRatio="none"
         viewBox="0 0 100 70"
       >
-        {CONSTELLATION.map((p, i) =>
-          i === 0 ? null : (
+        {CONSTELLATION.map((point, index) =>
+          index === 0 ? null : (
             <line
-              key={i}
-              x1={CONSTELLATION[i - 1]!.x}
-              y1={CONSTELLATION[i - 1]!.y}
-              x2={p.x}
-              y2={p.y}
+              key={index}
+              x1={CONSTELLATION[index - 1]!.x}
+              y1={CONSTELLATION[index - 1]!.y}
+              x2={point.x}
+              y2={point.y}
               stroke="rgba(255,255,255,0.10)"
               strokeWidth={0.15}
             />
           ),
         )}
-        {STARS.map((s, i) => (
+        {STARS.map((star, index) => (
           <circle
-            key={i}
-            cx={s.x}
-            cy={s.y}
-            r={s.r}
-            fill={s.gold ? '#FFD166' : '#E2E8F0'}
-            className={s.twinkle ? 'animate-twinkle' : ''}
-            opacity={s.twinkle ? undefined : 0.5}
+            key={index}
+            cx={star.x}
+            cy={star.y}
+            r={star.r}
+            fill={star.gold ? '#FFD166' : '#E2E8F0'}
+            className={star.twinkle ? 'animate-twinkle' : ''}
+            opacity={star.twinkle ? undefined : 0.5}
           />
         ))}
       </svg>

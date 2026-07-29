@@ -47,13 +47,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Logo />
               </Link>
               <div className="hidden items-center gap-8 md:flex">
-                {nav.map((n) => (
+                {nav.map((item) => (
                   <Link
-                    key={n.href}
-                    href={n.href}
+                    key={item.href}
+                    href={item.href}
                     className="text-sm text-fg-soft transition-colors hover:text-fg"
                   >
-                    {n.label}
+                    {item.label}
                   </Link>
                 ))}
               </div>

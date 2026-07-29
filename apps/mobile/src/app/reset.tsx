@@ -21,7 +21,7 @@ const PIN_LENGTH = 6;
  */
 export default function Reset() {
   const router = useRouter();
-  const wipe = useAuthStore((s) => s.wipe);
+  const wipe = useAuthStore((store) => store.wipe);
 
   const [phase, setPhase] = useState<'enter' | 'confirm'>('enter');
   const [firstCode, setFirstCode] = useState<string>('');

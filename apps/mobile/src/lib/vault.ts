@@ -76,8 +76,8 @@ export type UnlockResult =
 
 /** How long (seconds) the user must currently wait before trying a PIN. */
 export async function currentLockSeconds(): Promise<number> {
-  const s = await loadAttempts();
-  return remainingLockSeconds(s.count, s.lastFailedAt, Date.now());
+  const attempts = await loadAttempts();
+  return remainingLockSeconds(attempts.count, attempts.lastFailedAt, Date.now());
 }
 
 /** Attempt to unlock with a PIN, applying brute-force throttling. */

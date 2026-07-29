@@ -32,18 +32,18 @@ export function phaseForLog(
   avgPeriodLen: number,
 ): string | null {
   let cycleStart: number | null = null;
-  for (let i = cycles.length - 1; i >= 0; i--) {
-    if (day >= cycles[i].startDay) {
-      cycleStart = cycles[i].startDay;
+  for (let index = cycles.length - 1; index >= 0; index--) {
+    if (day >= cycles[index].startDay) {
+      cycleStart = cycles[index].startDay;
       break;
     }
   }
   if (cycleStart === null) return null;
-  const cd = day - cycleStart + 1;
+  const cycleDay = day - cycleStart + 1;
   const fertStart = avgLen - 19; // ovulation - 5
   const ovDay = avgLen - 14;
-  if (cd <= avgPeriodLen) return 'Menstrual';
-  if (cd < fertStart) return 'Follicular';
-  if (cd <= ovDay + 1) return 'Ovulatory';
+  if (cycleDay <= avgPeriodLen) return 'Menstrual';
+  if (cycleDay < fertStart) return 'Follicular';
+  if (cycleDay <= ovDay + 1) return 'Ovulatory';
   return 'Luteal';
 }

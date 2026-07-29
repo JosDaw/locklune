@@ -14,14 +14,15 @@ export function ContactForm() {
   const [error, setError] = useState<string | null>(null);
 
   const clientValidate = (): string | null => {
-    const e = email.trim();
-    if (e && !EMAIL_RE.test(e)) return "That email address doesn't look right.";
+    const trimmedEmail = email.trim();
+    if (trimmedEmail && !EMAIL_RE.test(trimmedEmail))
+      return "That email address doesn't look right.";
     if (message.trim().length < 10) return 'Please enter a message of at least 10 characters.';
     return null;
   };
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
     if (status === 'sending') return;
     const invalid = clientValidate();
     if (invalid) {
@@ -78,7 +79,7 @@ export function ContactForm() {
             tabIndex={-1}
             autoComplete="off"
             value={company}
-            onChange={(e) => setCompany(e.target.value)}
+            onChange={(event) => setCompany(event.target.value)}
           />
         </label>
       </div>
@@ -97,7 +98,7 @@ export function ContactForm() {
           type="email"
           value={email}
           autoComplete="email"
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(event) => setEmail(event.target.value)}
           className="w-full rounded-2xl border border-line bg-night2 px-4 py-3 text-fg outline-none placeholder:text-fg-muted focus:border-lock"
         />
         <p className="mt-1.5 text-xs text-fg-muted">
@@ -113,7 +114,7 @@ export function ContactForm() {
           id="cf-message"
           rows={5}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(event) => setMessage(event.target.value)}
           className="w-full rounded-2xl border border-line bg-night2 px-4 py-3 text-fg outline-none placeholder:text-fg-muted focus:border-lock"
         />
       </div>

@@ -3,8 +3,8 @@ import { addDays, daysBetween, formatISO, fromEpochDay, parseISO, toEpochDay } f
 
 describe('dates', () => {
   it('round-trips a date through epoch-day', () => {
-    const d = new Date(2026, 6, 27); // 27 Jul 2026, local
-    const day = toEpochDay(d);
+    const date = new Date(2026, 6, 27); // 27 Jul 2026, local
+    const day = toEpochDay(date);
     const back = fromEpochDay(day);
     expect(back.getFullYear()).toBe(2026);
     expect(back.getMonth()).toBe(6);

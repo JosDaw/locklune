@@ -51,19 +51,21 @@ function TomorrowCardBody({
 
   // Is tomorrow a predicted future period?
   const predictedUpcoming = prediction.upcoming.find(
-    (u) => tomorrow >= u.periodStart && tomorrow <= u.periodEnd,
+    (upcoming) => tomorrow >= upcoming.periodStart && tomorrow <= upcoming.periodEnd,
   );
   const isLastPredictedDay = predictedUpcoming != null && tomorrow === predictedUpcoming.periodEnd;
 
   const isPeriod = ongoingPeriodTomorrow || predictedUpcoming != null;
   const isPeriodEnding = isPeriod && (isLastOngoingDay || isLastPredictedDay);
 
-  const isOvulation = fertility && prediction.upcoming.some((u) => u.ovulationDay === tomorrow);
+  const isOvulation =
+    fertility && prediction.upcoming.some((upcoming) => upcoming.ovulationDay === tomorrow);
   const isFertile =
     fertility &&
     !isOvulation &&
     prediction.upcoming.some(
-      (u) => tomorrow >= u.fertileWindow.start && tomorrow <= u.fertileWindow.end,
+      (upcoming) =>
+        tomorrow >= upcoming.fertileWindow.start && tomorrow <= upcoming.fertileWindow.end,
     );
 
   const next = prediction.upcoming[0];
@@ -74,9 +76,9 @@ function TomorrowCardBody({
     const flowValues: number[] = [];
     const moodCounts: Record<number, number> = {};
     recentLogs.forEach((log) => {
-      for (let i = cycles.length - 1; i >= 0; i--) {
-        if (log.day >= cycles[i]!.startDay) {
-          if (log.day - cycles[i]!.startDay + 1 === tomorrowCycleDay) {
+      for (let index = cycles.length - 1; index >= 0; index--) {
+        if (log.day >= cycles[index]!.startDay) {
+          if (log.day - cycles[index]!.startDay + 1 === tomorrowCycleDay) {
             if (log.flow != null) flowValues.push(log.flow);
             if (log.mood != null) moodCounts[log.mood] = (moodCounts[log.mood] ?? 0) + 1;
           }
@@ -86,11 +88,13 @@ function TomorrowCardBody({
     });
     const flow =
       flowValues.length > 0 && isPeriod
-        ? Math.round(flowValues.reduce((a, b) => a + b, 0) / flowValues.length)
+        ? Math.round(flowValues.reduce((sum, flowValue) => sum + flowValue, 0) / flowValues.length)
         : null;
     const moodEntries = Object.entries(moodCounts);
     const mood =
-      moodEntries.length > 0 ? Number(moodEntries.sort((a, b) => b[1] - a[1])[0]![0]) : null;
+      moodEntries.length > 0
+        ? Number(moodEntries.sort((first, second) => second[1] - first[1])[0]![0])
+        : null;
     return { expectedFlow: flow, expectedMood: mood };
   }, [isPeriod, recentLogs, cycles, tomorrowCycleDay]);
 
@@ -99,15 +103,15 @@ function TomorrowCardBody({
     const counts: Record<string, number> = {};
     recentLogs.forEach((log) => {
       if (phaseForLog(log.day, cycles, avgLen, avgPeriodLen) === tomorrowPhase.label) {
-        log.symptoms.forEach((s) => {
-          counts[s] = (counts[s] ?? 0) + 1;
+        log.symptoms.forEach((symptom) => {
+          counts[symptom] = (counts[symptom] ?? 0) + 1;
         });
       }
     });
     return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
+      .sort((first, second) => second[1] - first[1])
       .slice(0, 3)
-      .map(([s]) => s.charAt(0).toUpperCase() + s.slice(1));
+      .map(([symptom]) => symptom.charAt(0).toUpperCase() + symptom.slice(1));
   }, [recentLogs, cycles, tomorrowPhase, avgLen, avgPeriodLen]);
 
   let statusIcon: keyof typeof Ionicons.glyphMap = 'ellipse-outline';
@@ -204,9 +208,9 @@ function TomorrowCardBody({
             Often logged on days like this
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
-            {phaseSymptoms.map((s) => (
+            {phaseSymptoms.map((symptom) => (
               <View
-                key={s}
+                key={symptom}
                 style={{
                   borderRadius: 99,
                   backgroundColor: colors.surfaceMuted,
@@ -215,7 +219,7 @@ function TomorrowCardBody({
                 }}
               >
                 <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}>
-                  {s}
+                  {symptom}
                 </Text>
               </View>
             ))}

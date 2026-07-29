@@ -9,23 +9,23 @@ export function Segmented({
 }: {
   options: { label: string; value: number }[];
   value: number;
-  onChange: (v: number) => void;
+  onChange: (selectedValue: number) => void;
 }) {
   return (
     <View className="flex-row gap-2">
-      {options.map((o) => {
-        const active = o.value === value;
+      {options.map((option) => {
+        const active = option.value === value;
         return (
           <PressScale
-            key={o.value}
+            key={option.value}
             containerStyle={{ flex: 1 }}
-            onPress={() => onChange(o.value)}
+            onPress={() => onChange(option.value)}
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
-            accessibilityLabel={o.label}
+            accessibilityLabel={option.label}
             className={`items-center rounded-xl py-2 ${active ? 'bg-primary' : 'bg-surfaceMuted'}`}
           >
-            <Txt className={active ? 'text-ink' : 'text-text-muted'}>{o.label}</Txt>
+            <Txt className={active ? 'text-ink' : 'text-text-muted'}>{option.label}</Txt>
           </PressScale>
         );
       })}

@@ -4,13 +4,13 @@ import { MoonMark } from './logo';
 const PERIOD = new Set([6, 7, 8, 9, 10]);
 const PREDICTED = new Set([2, 3, 4]); // early-next-cycle window shown faintly
 const TODAY = 17;
-const DAYS = Array.from({ length: 35 }, (_, i) => i - 2); // leading blanks < 1
+const DAYS = Array.from({ length: 35 }, (_, index) => index - 2); // leading blanks < 1
 
-function Cell({ n }: { n: number }) {
-  if (n < 1) return <div className="aspect-square" />;
-  const isPeriod = PERIOD.has(n);
-  const isPredicted = PREDICTED.has(n);
-  const isToday = n === TODAY;
+function Cell({ dayNumber }: { dayNumber: number }) {
+  if (dayNumber < 1) return <div className="aspect-square" />;
+  const isPeriod = PERIOD.has(dayNumber);
+  const isPredicted = PREDICTED.has(dayNumber);
+  const isToday = dayNumber === TODAY;
   return (
     <div className="flex aspect-square items-center justify-center">
       <div
@@ -22,7 +22,7 @@ function Cell({ n }: { n: number }) {
           !isPeriod && !isPredicted && !isToday ? 'text-fg-muted' : '',
         ].join(' ')}
       >
-        {n}
+        {dayNumber}
       </div>
     </div>
   );
@@ -72,13 +72,13 @@ export function PhoneMockup() {
             {/* calendar */}
             <div className="rounded-2xl border border-line bg-card/50 p-3">
               <div className="mb-1.5 grid grid-cols-7 text-center text-[9px] text-fg-muted">
-                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
-                  <span key={i}>{d}</span>
+                {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((label, index) => (
+                  <span key={index}>{label}</span>
                 ))}
               </div>
               <div className="grid grid-cols-7">
-                {DAYS.map((n, i) => (
-                  <Cell key={i} n={n} />
+                {DAYS.map((dayNumber, index) => (
+                  <Cell key={index} dayNumber={dayNumber} />
                 ))}
               </div>
             </div>

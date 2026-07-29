@@ -119,22 +119,22 @@ export default function Home() {
           <TrackCard icon={<MoonIcon className="h-5 w-5" />} title="Mood &amp; symptoms">
             <div className="space-y-3">
               <div className="flex gap-2">
-                {[35, 60, 45, 80, 55, 70, 90].map((h, i) => (
-                  <div key={i} className="flex flex-1 items-end">
+                {[35, 60, 45, 80, 55, 70, 90].map((heightPercent, index) => (
+                  <div key={index} className="flex flex-1 items-end">
                     <div
                       className="w-full rounded-full bg-gradient-to-t from-lock/30 to-highlight"
-                      style={{ height: `${h}%`, minHeight: 8 }}
+                      style={{ height: `${heightPercent}%`, minHeight: 8 }}
                     />
                   </div>
                 ))}
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {['cramps', 'calm', 'tired', 'focused'].map((t) => (
+                {['cramps', 'calm', 'tired', 'focused'].map((tag) => (
                   <span
-                    key={t}
+                    key={tag}
                     className="rounded-full border border-line px-2.5 py-1 text-[11px] text-fg-soft"
                   >
-                    {t}
+                    {tag}
                   </span>
                 ))}
               </div>
@@ -153,11 +153,11 @@ export default function Home() {
             </div>
             <div className="px-5 py-4 font-medium text-fg-muted">Others</div>
           </div>
-          {comparison.map((row, i) => (
+          {comparison.map((row, index) => (
             <div
               key={row.label}
               className={`grid grid-cols-[1.4fr_1fr_1fr] items-center text-sm ${
-                i % 2 ? 'bg-white/[0.015]' : ''
+                index % 2 ? 'bg-white/[0.015]' : ''
               }`}
             >
               <div className="px-5 py-4 text-fg-soft">{row.label}</div>
@@ -188,19 +188,19 @@ export default function Home() {
             <MoonMark className="relative h-56 w-56 drop-shadow-[0_20px_60px_rgba(138,162,255,0.35)]" />
           </div>
           <ul className="space-y-3">
-            {security.map((s, i) => {
-              const Icon = securityIcons[i % securityIcons.length]!;
+            {security.map((feature, index) => {
+              const Icon = securityIcons[index % securityIcons.length]!;
               return (
                 <li
-                  key={s.title}
+                  key={feature.title}
                   className="flex gap-4 rounded-2xl border border-line bg-card/40 p-4"
                 >
                   <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-line bg-lock/10 text-lock">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="font-medium text-fg">{s.title}</p>
-                    <p className="mt-0.5 text-sm leading-relaxed text-fg-muted">{s.body}</p>
+                    <p className="font-medium text-fg">{feature.title}</p>
+                    <p className="mt-0.5 text-sm leading-relaxed text-fg-muted">{feature.body}</p>
                   </div>
                 </li>
               );
@@ -310,20 +310,20 @@ function TrackCard({
 function MiniCalendar() {
   const period = new Set([7, 8, 9, 10]);
   const today = 16;
-  const days = Array.from({ length: 28 }, (_, i) => i + 1);
+  const days = Array.from({ length: 28 }, (_, index) => index + 1);
   return (
     <div className="grid grid-cols-7 gap-1">
-      {days.map((n) => (
-        <div key={n} className="flex aspect-square items-center justify-center">
+      {days.map((dayNumber) => (
+        <div key={dayNumber} className="flex aspect-square items-center justify-center">
           <span
             className={[
               'flex h-6 w-6 items-center justify-center rounded-full text-[10px]',
-              period.has(n) ? 'bg-lock font-semibold text-night' : '',
-              !period.has(n) && n === today ? 'ring-1 ring-moon text-fg' : '',
-              !period.has(n) && n !== today ? 'text-fg-muted' : '',
+              period.has(dayNumber) ? 'bg-lock font-semibold text-night' : '',
+              !period.has(dayNumber) && dayNumber === today ? 'ring-1 ring-moon text-fg' : '',
+              !period.has(dayNumber) && dayNumber !== today ? 'text-fg-muted' : '',
             ].join(' ')}
           >
-            {n}
+            {dayNumber}
           </span>
         </div>
       ))}

@@ -13,7 +13,15 @@ import {
 } from '../lib/vault';
 import { useDataStore } from './dataStore';
 
-type Status = 'loading' | 'onboarding' | 'locked' | 'unlocked';
+/** The vault's lifecycle status, driving which screen the router shows. */
+export const AUTH_STATUS = {
+  Loading: 'loading',
+  Onboarding: 'onboarding',
+  Locked: 'locked',
+  Unlocked: 'unlocked',
+} as const;
+
+type Status = (typeof AUTH_STATUS)[keyof typeof AUTH_STATUS];
 
 interface AuthState {
   status: Status;
@@ -37,7 +45,7 @@ async function afterUnlock(dekHex: string): Promise<void> {
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
-  status: 'loading',
+  status: AUTH_STATUS.Loading,
   dekHex: null,
   lockedForSeconds: 0,
   attemptsRemaining: MAX_PIN_ATTEMPTS,
@@ -47,12 +55,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     void clearLegacyDestructPin().catch(() => undefined);
     try {
       const exists = await hasVault();
-      set({ status: exists ? 'locked' : 'onboarding' });
+      set({ status: exists ? AUTH_STATUS.Locked : AUTH_STATUS.Onboarding });
     } catch {
       // Keystore read failed - safest is to present the lock screen rather than
       // wrongly offering onboarding (which could overwrite an existing vault).
       toast.error('Could not read secure storage.');
-      set({ status: 'locked' });
+      set({ status: AUTH_STATUS.Locked });
     }
   },
 
@@ -66,7 +74,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     await afterUnlock(dekHex).catch((err: unknown) => {
       throw new Error(`db:${err instanceof Error ? err.message : String(err)}`);
     });
-    set({ status: 'unlocked', dekHex, attemptsRemaining: MAX_PIN_ATTEMPTS, lockedForSeconds: 0 });
+    set({
+      status: AUTH_STATUS.Unlocked,
+      dekHex,
+      attemptsRemaining: MAX_PIN_ATTEMPTS,
+      lockedForSeconds: 0,
+    });
   },
 
   unlockPin: async (pin) => {
@@ -81,7 +94,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         await get().wipe();
         return false;
       }
-      set({ status: 'unlocked', dekHex: res.dekHex, lockedForSeconds: 0 });
+      set({ status: AUTH_STATUS.Unlocked, dekHex: res.dekHex, lockedForSeconds: 0 });
       return true;
     }
     if (res.wiped) {
@@ -96,7 +109,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   lock: async () => {
     await closeDb();
     useDataStore.getState().reset();
-    set({ status: 'locked', dekHex: null });
+    set({ status: AUTH_STATUS.Locked, dekHex: null });
   },
 
   changePin: (oldPin, newPin) => changeVaultPin(oldPin, newPin),
@@ -115,7 +128,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (failed) toast.error('Some data could not be fully erased.');
     useDataStore.getState().reset();
     set({
-      status: 'onboarding',
+      status: AUTH_STATUS.Onboarding,
       dekHex: null,
       attemptsRemaining: MAX_PIN_ATTEMPTS,
       lockedForSeconds: 0,

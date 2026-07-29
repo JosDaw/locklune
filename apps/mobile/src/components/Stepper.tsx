@@ -13,7 +13,7 @@ export function Stepper({
   value: number;
   min: number;
   max: number;
-  onChange: (v: number) => void;
+  onChange: (value: number) => void;
 }) {
   return (
     <View className="flex-row items-center gap-3">

@@ -28,25 +28,25 @@ export function addDays(day: EpochDay, delta: number): EpochDay {
   return day + delta;
 }
 
-/** Whole days from `a` to `b` (b − a). */
-export function daysBetween(a: EpochDay, b: EpochDay): number {
-  return b - a;
+/** Whole days from `from` to `to` (to − from). */
+export function daysBetween(from: EpochDay, to: EpochDay): number {
+  return to - from;
 }
 
 /** Format an epoch-day as an ISO `YYYY-MM-DD` string (for display/export). */
 export function formatISO(day: EpochDay): string {
-  const d = fromEpochDay(day);
-  const y = d.getFullYear().toString().padStart(4, '0');
-  const m = (d.getMonth() + 1).toString().padStart(2, '0');
-  const dd = d.getDate().toString().padStart(2, '0');
-  return `${y}-${m}-${dd}`;
+  const date = fromEpochDay(day);
+  const year = date.getFullYear().toString().padStart(4, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const dayOfMonth = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${dayOfMonth}`;
 }
 
 /** Parse an ISO `YYYY-MM-DD` string into an epoch-day. */
 export function parseISO(iso: string): EpochDay {
-  const [y, m, d] = iso.split('-').map(Number);
-  if (y === undefined || m === undefined || d === undefined) {
+  const [year, month, day] = iso.split('-').map(Number);
+  if (year === undefined || month === undefined || day === undefined) {
     throw new Error(`Invalid ISO date: ${iso}`);
   }
-  return Math.floor(Date.UTC(y, m - 1, d) / MS_PER_DAY);
+  return Math.floor(Date.UTC(year, month - 1, day) / MS_PER_DAY);
 }

@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
+  CYCLE_MODE,
   fromEpochDay,
   predict,
   toEpochDay,
@@ -29,8 +30,9 @@ function useMonthGrid(anchor: Date) {
     const first = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const cells: (EpochDay | null)[] = [];
-    for (let i = 0; i < first.getDay(); i++) cells.push(null);
-    for (let d = 1; d <= daysInMonth; d++) cells.push(toEpochDay(new Date(year, month, d)));
+    for (let leadingBlank = 0; leadingBlank < first.getDay(); leadingBlank++) cells.push(null);
+    for (let dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++)
+      cells.push(toEpochDay(new Date(year, month, dayOfMonth)));
     while (cells.length % 7 !== 0) cells.push(null);
     return cells;
   }, [anchor]);
@@ -41,14 +43,14 @@ const LOG_PAGE_SIZE = 6;
 export default function Calendar() {
   const router = useRouter();
   const today = todayEpochDay();
-  const cycles = useDataStore((s) => s.cycles);
-  const prediction = useDataStore((s) => s.prediction);
-  const ovulationDays = useDataStore((s) => s.ovulationDays);
-  const settings = useDataStore((s) => s.settings);
-  const getDayLogsInRange = useDataStore((s) => s.getDayLogsInRange);
-  const deleteLog = useDataStore((s) => s.deleteLog);
+  const cycles = useDataStore((store) => store.cycles);
+  const prediction = useDataStore((store) => store.prediction);
+  const ovulationDays = useDataStore((store) => store.ovulationDays);
+  const settings = useDataStore((store) => store.settings);
+  const getDayLogsInRange = useDataStore((store) => store.getDayLogsInRange);
+  const deleteLog = useDataStore((store) => store.deleteLog);
 
-  const pregnant = settings.cycleMode === 'pregnant';
+  const pregnant = settings.cycleMode === CYCLE_MODE.Pregnant;
   const pregnantDueDay = pregnant ? settings.pregnancyDueDay : null;
 
   const todayDate = fromEpochDay(today);
@@ -84,7 +86,7 @@ export default function Calendar() {
   };
 
   const fetchMonthLogs = useCallback(() => {
-    const validDays = cells.filter((c): c is EpochDay => c !== null);
+    const validDays = cells.filter((cell): cell is EpochDay => cell !== null);
     if (validDays.length === 0) return;
     const from = validDays[0]!;
     const to = validDays[validDays.length - 1]!;
@@ -100,30 +102,31 @@ export default function Calendar() {
   useEffect(fetchMonthLogs, [fetchMonthLogs]);
   useFocusEffect(useCallback(() => fetchMonthLogs(), [fetchMonthLogs]));
 
-  const loggedDays = useMemo(() => new Set(monthLogs.map((l) => l.day)), [monthLogs]);
+  const loggedDays = useMemo(() => new Set(monthLogs.map((log) => log.day)), [monthLogs]);
 
   const { periodSet, predictedSet, fertileSet, ovulationSet } = useMemo(() => {
     const period = new Set<EpochDay>();
-    cycles.forEach((c, i) => {
-      const isLast = i === cycles.length - 1;
-      const end = c.endDay ?? (isLast ? today : c.startDay);
-      for (let d = c.startDay; d <= end; d++) period.add(d);
+    cycles.forEach((cycle, index) => {
+      const isLast = index === cycles.length - 1;
+      const end = cycle.endDay ?? (isLast ? today : cycle.startDay);
+      for (let day = cycle.startDay; day <= end; day++) period.add(day);
     });
     const predicted = new Set<EpochDay>();
     const fertile = new Set<EpochDay>();
     const ovulation = new Set<EpochDay>();
-    for (const u of activePrediction.upcoming) {
-      for (let d = u.periodStart; d <= u.periodEnd; d++) predicted.add(d);
+    for (const upcoming of activePrediction.upcoming) {
+      for (let day = upcoming.periodStart; day <= upcoming.periodEnd; day++) predicted.add(day);
       if (activePrediction.fertilityApplicable) {
-        for (let d = u.fertileWindow.start; d <= u.fertileWindow.end; d++) fertile.add(d);
-        ovulation.add(u.ovulationDay);
+        for (let day = upcoming.fertileWindow.start; day <= upcoming.fertileWindow.end; day++)
+          fertile.add(day);
+        ovulation.add(upcoming.ovulationDay);
       }
     }
     const current = cycles[cycles.length - 1];
     if (current && current.endDay === null) {
       const expectedEnd =
         current.startDay + Math.max(1, Math.round(activePrediction.averagePeriodLength)) - 1;
-      for (let d = today + 1; d <= expectedEnd; d++) predicted.add(d);
+      for (let day = today + 1; day <= expectedEnd; day++) predicted.add(day);
     }
     return {
       periodSet: period,
@@ -134,12 +137,13 @@ export default function Calendar() {
   }, [cycles, activePrediction, today]);
 
   const weeks: (EpochDay | null)[][] = [];
-  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+  for (let cellIndex = 0; cellIndex < cells.length; cellIndex += 7)
+    weeks.push(cells.slice(cellIndex, cellIndex + 7));
 
   const monthLabel = anchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   const shiftMonth = (delta: number) => {
     setLogsExpanded(false);
-    setAnchor((a) => new Date(a.getFullYear(), a.getMonth() + delta, 1));
+    setAnchor((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
   };
 
   return (
@@ -171,20 +175,20 @@ export default function Calendar() {
       {/* Calendar grid */}
       <Card className="px-3 py-5">
         <View className="mb-1 flex-row">
-          {WEEKDAYS.map((w, i) => (
-            <View key={i} className="flex-1 items-center pb-3">
+          {WEEKDAYS.map((weekday, index) => (
+            <View key={index} className="flex-1 items-center pb-3">
               <Txt variant="faint" className="text-2xs uppercase tracking-widest">
-                {w}
+                {weekday}
               </Txt>
             </View>
           ))}
         </View>
 
-        {weeks.map((week, wi) => (
-          <View key={wi} style={{ flexDirection: 'row' }}>
-            {week.map((day, di) => (
+        {weeks.map((week, weekIndex) => (
+          <View key={weekIndex} style={{ flexDirection: 'row' }}>
+            {week.map((day, dayIndex) => (
               <DayCell
-                key={day !== null ? `d${day}` : `e${wi}-${di}`}
+                key={day !== null ? `d${day}` : `e${weekIndex}-${dayIndex}`}
                 day={day}
                 isToday={day === today}
                 isPeriod={day !== null && periodSet.has(day)}
@@ -256,7 +260,8 @@ export default function Calendar() {
                         style: 'destructive',
                         onPress: () =>
                           void deleteLog(log.day).then((ok) => {
-                            if (ok) setMonthLogs((prev) => prev.filter((l) => l.day !== log.day));
+                            if (ok)
+                              setMonthLogs((prev) => prev.filter((entry) => entry.day !== log.day));
                           }),
                       },
                     ],

@@ -11,7 +11,7 @@ export function NotifRow({
   label: string;
   hint: string;
   value: boolean;
-  onValueChange: (v: boolean) => void;
+  onValueChange: (enabled: boolean) => void;
 }) {
   return (
     <View className="flex-row items-center justify-between gap-4 rounded-2xl border border-border bg-surface px-4 py-3">

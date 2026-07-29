@@ -40,9 +40,9 @@ export default function Onboarding() {
   const [notifyFertileTomorrow, setNotifyFertileTomorrow] = useState(false);
   const [notifyFertileStart, setNotifyFertileStart] = useState(false);
 
-  const createPin = useAuthStore((s) => s.createPin);
-  const wipe = useAuthStore((s) => s.wipe);
-  const updateSettings = useDataStore((s) => s.updateSettings);
+  const createPin = useAuthStore((store) => store.createPin);
+  const wipe = useAuthStore((store) => store.wipe);
+  const updateSettings = useDataStore((store) => store.updateSettings);
 
   const handlePinEntry = async (pin: string) => {
     if (busy) return;
@@ -92,7 +92,7 @@ export default function Onboarding() {
     }
   };
 
-  const toggleNotify = async (setter: (v: boolean) => void, value: boolean) => {
+  const toggleNotify = async (setter: (enabled: boolean) => void, value: boolean) => {
     if (value) {
       const granted = await requestNotificationPermission();
       if (!granted) return;
@@ -114,7 +114,7 @@ export default function Onboarding() {
 
         <View className="gap-5">
           <Txt variant="muted">Before you begin</Txt>
-          <CheckboxRow checked={agreedLegal} onToggle={() => setAgreedLegal((v) => !v)}>
+          <CheckboxRow checked={agreedLegal} onToggle={() => setAgreedLegal((prev) => !prev)}>
             <RNText className="text-base leading-6 text-text">
               I agree to the{' '}
               <RNText
@@ -134,7 +134,7 @@ export default function Onboarding() {
             </RNText>
           </CheckboxRow>
 
-          <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((v) => !v)}>
+          <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((prev) => !prev)}>
             <RNText className="text-base leading-6 text-text">
               I understand that {BRAND.name} is for record keeping purposes only and is not intended
               to be used for medical or health advice.
@@ -143,7 +143,7 @@ export default function Onboarding() {
 
           <CheckboxRow
             checked={agreedResponsibility}
-            onToggle={() => setAgreedResponsibility((v) => !v)}
+            onToggle={() => setAgreedResponsibility((prev) => !prev)}
           >
             <RNText className="text-base leading-6 text-text">
               I acknowledge that I am solely responsible for my PIN and the encrypted data it
@@ -205,12 +205,12 @@ export default function Onboarding() {
         </View>
 
         <View className="gap-2">
-          {CYCLE_MODES.map((m) => {
-            const selected = selectedMode === m.value;
+          {CYCLE_MODES.map((mode) => {
+            const selected = selectedMode === mode.value;
             return (
               <Pressable
-                key={m.value}
-                onPress={() => setSelectedMode(m.value)}
+                key={mode.value}
+                onPress={() => setSelectedMode(mode.value)}
                 className={`flex-row items-center gap-4 rounded-2xl border p-4 ${
                   selected ? 'border-primary bg-primary/10' : 'border-border bg-surface'
                 }`}
@@ -223,8 +223,8 @@ export default function Onboarding() {
                   {selected && <Ionicons name="checkmark" size={16} color={colors.ink} />}
                 </View>
                 <View className="flex-1">
-                  <Txt variant="body">{m.label}</Txt>
-                  <Txt variant="faint">{m.hint}</Txt>
+                  <Txt variant="body">{mode.label}</Txt>
+                  <Txt variant="faint">{mode.hint}</Txt>
                 </View>
               </Pressable>
             );
@@ -278,13 +278,13 @@ export default function Onboarding() {
             label="Period starting tomorrow"
             hint="Morning before your predicted period start"
             value={notifyPeriodTomorrow}
-            onValueChange={(v) => void toggleNotify(setNotifyPeriodTomorrow, v)}
+            onValueChange={(enabled) => void toggleNotify(setNotifyPeriodTomorrow, enabled)}
           />
           <NotifRow
             label="Period starting today"
             hint="Morning of your predicted period start"
             value={notifyPeriodToday}
-            onValueChange={(v) => void toggleNotify(setNotifyPeriodToday, v)}
+            onValueChange={(enabled) => void toggleNotify(setNotifyPeriodToday, enabled)}
           />
           {fertilityApplicable && (
             <>
@@ -292,13 +292,13 @@ export default function Onboarding() {
                 label="Fertile window tomorrow"
                 hint="Morning before your fertile window opens"
                 value={notifyFertileTomorrow}
-                onValueChange={(v) => void toggleNotify(setNotifyFertileTomorrow, v)}
+                onValueChange={(enabled) => void toggleNotify(setNotifyFertileTomorrow, enabled)}
               />
               <NotifRow
                 label="Fertile window opens"
                 hint="Morning your fertile window begins"
                 value={notifyFertileStart}
-                onValueChange={(v) => void toggleNotify(setNotifyFertileStart, v)}
+                onValueChange={(enabled) => void toggleNotify(setNotifyFertileStart, enabled)}
               />
             </>
           )}

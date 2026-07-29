@@ -16,18 +16,18 @@ describe('cycleForDay', () => {
 
   it('flags the start day of a cycle', () => {
     const cycles: Cycle[] = [{ id: 1, startDay: 900, endDay: 904 }];
-    const s = cycleForDay(cycles, 900, TODAY);
-    expect(s.isStart).toBe(true);
-    expect(s.isBleedDay).toBe(true);
-    expect(s.cycle?.id).toBe(1);
+    const status = cycleForDay(cycles, 900, TODAY);
+    expect(status.isStart).toBe(true);
+    expect(status.isBleedDay).toBe(true);
+    expect(status.cycle?.id).toBe(1);
   });
 
   it('flags an inner bleed day of a completed cycle (not a start)', () => {
     const cycles: Cycle[] = [{ id: 1, startDay: 900, endDay: 904 }];
-    const s = cycleForDay(cycles, 903, TODAY);
-    expect(s.isBleedDay).toBe(true);
-    expect(s.isStart).toBe(false);
-    expect(s.cycle?.id).toBe(1);
+    const status = cycleForDay(cycles, 903, TODAY);
+    expect(status.isBleedDay).toBe(true);
+    expect(status.isStart).toBe(false);
+    expect(status.cycle?.id).toBe(1);
   });
 
   it('returns nothing for a gap day after a completed bleed', () => {

@@ -13,19 +13,19 @@ type Body = {
   company?: string;
 };
 
-function validate(b: Body): string | null {
-  const email = (b.email ?? '').trim();
-  const message = (b.message ?? '').trim();
+function validate(body: Body): string | null {
+  const email = (body.email ?? '').trim();
+  const message = (body.message ?? '').trim();
   if (email && (!EMAIL_RE.test(email) || email.length > 200))
     return "That email address doesn't look right.";
   if (message.length < 10 || message.length > 5000) return 'Please enter a longer message.';
   return null;
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(
+function escapeHtml(text: string): string {
+  return text.replace(
     /[&<>"']/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]!,
   );
 }
 

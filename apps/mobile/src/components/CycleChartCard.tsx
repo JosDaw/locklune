@@ -9,13 +9,13 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
   const { width } = useWindowDimensions();
 
   const lengths: number[] = [];
-  for (let i = 1; i < cycles.length; i++) {
-    lengths.push(cycles[i].startDay - cycles[i - 1].startDay);
+  for (let index = 1; index < cycles.length; index++) {
+    lengths.push(cycles[index].startDay - cycles[index - 1].startDay);
   }
   const recent = lengths.slice(-12);
   if (recent.length < 2) return null;
 
-  const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+  const avg = recent.reduce((sum, length) => sum + length, 0) / recent.length;
   const THRESHOLD = 0.15;
   const minLen = Math.max(14, Math.min(...recent) - 2);
   const maxLen = Math.min(60, Math.max(...recent) + 2);
@@ -32,7 +32,7 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
   const avgBarH = barH(avg);
   const avgY = chartH - avgBarH;
 
-  const hasIrregular = recent.some((l) => Math.abs(l - avg) / avg > THRESHOLD);
+  const hasIrregular = recent.some((length) => Math.abs(length - avg) / avg > THRESHOLD);
 
   return (
     <View
@@ -62,18 +62,18 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
           strokeWidth={1}
           strokeDasharray="4 4"
         />
-        {recent.map((len, i) => {
-          const irregular = Math.abs(len - avg) / avg > THRESHOLD;
-          const bH = barH(len);
-          const x = i * (barW + gap);
-          const y = chartH - bH;
+        {recent.map((length, index) => {
+          const irregular = Math.abs(length - avg) / avg > THRESHOLD;
+          const barHeight = barH(length);
+          const barX = index * (barW + gap);
+          const barY = chartH - barHeight;
           return (
             <Rect
-              key={i}
-              x={x}
-              y={y}
+              key={index}
+              x={barX}
+              y={barY}
               width={barW}
-              height={bH}
+              height={barHeight}
               rx={3}
               fill={irregular ? colors.danger : colors.primary}
               opacity={0.85}

@@ -50,13 +50,13 @@ export function Button({
         size={size}
         disabled={isDisabled}
         className={`rounded-2xl ${CONTAINER[variant]} ${isDisabled ? 'opacity-50' : ''} ${className ?? ''}`}
-        onPressIn={(e) => {
+        onPressIn={(event) => {
           if (!isDisabled) scale.value = withSpring(0.97, SPRING);
-          callerPressIn?.(e);
+          callerPressIn?.(event);
         }}
-        onPressOut={(e) => {
+        onPressOut={(event) => {
           scale.value = withSpring(1, SPRING);
-          callerPressOut?.(e);
+          callerPressOut?.(event);
         }}
         {...rest}
       >

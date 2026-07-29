@@ -18,8 +18,8 @@ type Handler = (message: string, opts: Required<ToastOptions>) => void;
 let handler: Handler | null = null;
 
 /** Registered by <ToastProvider/>; pass null on unmount. */
-export function setToastHandler(h: Handler | null): void {
-  handler = h;
+export function setToastHandler(nextHandler: Handler | null): void {
+  handler = nextHandler;
 }
 
 export function show(message: string, opts: ToastOptions = {}): void {

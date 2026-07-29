@@ -116,7 +116,7 @@ export async function getCycles(): Promise<Cycle[]> {
   const rows = await requireDb().getAllAsync<CycleRow>(
     'SELECT id, start_day AS startDay, end_day AS endDay FROM cycles ORDER BY start_day ASC',
   );
-  return rows.map((r) => ({ id: r.id, startDay: r.startDay, endDay: r.endDay }));
+  return rows.map((row) => ({ id: row.id, startDay: row.startDay, endDay: row.endDay }));
 }
 
 export async function addCycle(startDay: EpochDay, endDay: EpochDay | null = null): Promise<void> {
@@ -160,15 +160,15 @@ interface DayLogRow {
   temperature: number | null;
 }
 
-function rowToDayLog(r: DayLogRow): DayLog {
+function rowToDayLog(row: DayLogRow): DayLog {
   return {
-    day: r.day,
-    flow: (r.flow as Flow | null) ?? null,
-    mood: (r.mood as Mood | null) ?? null,
-    symptoms: r.symptoms ? (JSON.parse(r.symptoms) as string[]) : [],
-    note: r.note,
-    ovulation: r.ovulation === 1,
-    temperature: r.temperature ?? null,
+    day: row.day,
+    flow: (row.flow as Flow | null) ?? null,
+    mood: (row.mood as Mood | null) ?? null,
+    symptoms: row.symptoms ? (JSON.parse(row.symptoms) as string[]) : [],
+    note: row.note,
+    ovulation: row.ovulation === 1,
+    temperature: row.temperature ?? null,
   };
 }
 
@@ -205,7 +205,7 @@ export async function getConfirmedOvulations(): Promise<EpochDay[]> {
   const rows = await requireDb().getAllAsync<{ day: number }>(
     'SELECT day FROM day_logs WHERE ovulation = 1 ORDER BY day',
   );
-  return rows.map((r) => r.day);
+  return rows.map((row) => row.day);
 }
 
 /** Insert/update a day-log; if the log is empty, the row is removed (stays sparse). */

@@ -13,13 +13,13 @@ export function PressScale({ children, containerStyle, onPressIn, onPressOut, ..
   return (
     <Animated.View style={[containerStyle, anim]}>
       <Pressable
-        onPressIn={(e) => {
+        onPressIn={(event) => {
           scale.value = withSpring(0.95, SPRING);
-          onPressIn?.(e);
+          onPressIn?.(event);
         }}
-        onPressOut={(e) => {
+        onPressOut={(event) => {
           scale.value = withSpring(1, SPRING);
-          onPressOut?.(e);
+          onPressOut?.(event);
         }}
         {...rest}
       >

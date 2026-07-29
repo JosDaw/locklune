@@ -19,7 +19,7 @@ export default function Lock() {
   const [busy, setBusy] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const unlockPin = useAuthStore((s) => s.unlockPin);
+  const unlockPin = useAuthStore((store) => store.unlockPin);
 
   // Restore any active lockout (e.g. after the app was killed mid-timeout).
   useEffect(() => {
@@ -29,8 +29,11 @@ export default function Lock() {
   // Countdown timer while locked out.
   useEffect(() => {
     if (remaining <= 0) return;
-    const t = setInterval(() => setRemaining((r) => (r <= 1 ? 0 : r - 1)), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(
+      () => setRemaining((seconds) => (seconds <= 1 ? 0 : seconds - 1)),
+      1000,
+    );
+    return () => clearInterval(timer);
   }, [remaining > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleComplete = async (pin: string) => {
@@ -51,13 +54,13 @@ export default function Lock() {
       return;
     }
     haptics.error();
-    const s = useAuthStore.getState();
-    if (s.lockedForSeconds > 0) {
-      setRemaining(s.lockedForSeconds);
+    const authState = useAuthStore.getState();
+    if (authState.lockedForSeconds > 0) {
+      setRemaining(authState.lockedForSeconds);
       setError('Too many attempts. Please wait before trying again.');
     } else {
       setError(
-        `Incorrect PIN. ${s.attemptsRemaining} attempt${s.attemptsRemaining === 1 ? '' : 's'} left before all data is erased.`,
+        `Incorrect PIN. ${authState.attemptsRemaining} attempt${authState.attemptsRemaining === 1 ? '' : 's'} left before all data is erased.`,
       );
     }
   };

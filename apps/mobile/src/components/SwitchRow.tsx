@@ -12,7 +12,7 @@ export function SwitchRow({
   label: string;
   hint?: string;
   value: boolean;
-  onValueChange: (v: boolean) => void;
+  onValueChange: (enabled: boolean) => void;
 }) {
   return (
     <View className="flex-row items-center justify-between py-2">

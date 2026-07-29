@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
   BRAND,
+  CYCLE_MODE,
   dueDayFromWeeksAlong,
   estimateDueDay,
   isHormonalContraception,
@@ -44,13 +45,13 @@ const AUTO_LOCK_OPTIONS = [
 
 export default function Settings() {
   const router = useRouter();
-  const settings = useDataStore((s) => s.settings);
-  const updateSettings = useDataStore((s) => s.updateSettings);
-  const prediction = useDataStore((s) => s.prediction);
-  const cycles = useDataStore((s) => s.cycles);
+  const settings = useDataStore((store) => store.settings);
+  const updateSettings = useDataStore((store) => store.updateSettings);
+  const prediction = useDataStore((store) => store.prediction);
+  const cycles = useDataStore((store) => store.cycles);
 
-  const lock = useAuthStore((s) => s.lock);
-  const wipe = useAuthStore((s) => s.wipe);
+  const lock = useAuthStore((store) => store.lock);
+  const wipe = useAuthStore((store) => store.wipe);
 
   const [newSymptom, setNewSymptom] = useState('');
 
@@ -64,8 +65,10 @@ export default function Settings() {
     setNewSymptom('');
   };
 
-  const removeSymptom = (sym: string) => {
-    void updateSettings({ customSymptoms: settings.customSymptoms.filter((s) => s !== sym) });
+  const removeSymptom = (symptom: string) => {
+    void updateSettings({
+      customSymptoms: settings.customSymptoms.filter((existing) => existing !== symptom),
+    });
   };
 
   const today = todayEpochDay();
@@ -73,11 +76,11 @@ export default function Settings() {
     settings.pregnancyDueDay != null ? pregnancyProgress(settings.pregnancyDueDay, today).week : 0;
 
   const selectMode = (mode: CycleMode) => {
-    if (mode === 'pregnant' && settings.pregnancyDueDay == null) {
+    if (mode === CYCLE_MODE.Pregnant && settings.pregnancyDueDay == null) {
       const lastStart = cycles[cycles.length - 1]?.startDay;
       const dueDay = lastStart != null ? estimateDueDay(lastStart) : dueDayFromWeeksAlong(6, today);
       void updateSettings({ cycleMode: mode, pregnancyDueDay: dueDay });
-    } else if (mode !== 'pregnant' && settings.cycleMode === 'pregnant') {
+    } else if (mode !== CYCLE_MODE.Pregnant && settings.cycleMode === CYCLE_MODE.Pregnant) {
       const dueDay = settings.pregnancyDueDay;
       if (dueDay != null) {
         const gestationalAge = Math.max(0, today - (dueDay - 280));
@@ -133,27 +136,27 @@ export default function Settings() {
       <Card>
         <SectionLabel icon="moon-outline" label="I am currently" />
         <View>
-          {CYCLE_MODES.map((m) => (
+          {CYCLE_MODES.map((mode) => (
             <ModeRow
-              key={m.value}
-              label={m.label}
-              hint={m.hint}
-              active={settings.cycleMode === m.value}
-              onPress={() => selectMode(m.value)}
+              key={mode.value}
+              label={mode.label}
+              hint={mode.hint}
+              active={settings.cycleMode === mode.value}
+              onPress={() => selectMode(mode.value)}
             />
           ))}
         </View>
 
-        {settings.cycleMode === 'contraception' && (
+        {settings.cycleMode === CYCLE_MODE.Contraception && (
           <View className="mt-4 gap-3 border-t border-border pt-4">
             <Txt variant="faint">Method</Txt>
             <View className="flex-row flex-wrap gap-2">
-              {CONTRACEPTION_METHODS.map((c) => (
+              {CONTRACEPTION_METHODS.map((method) => (
                 <Chip
-                  key={c.value}
-                  label={c.label}
-                  active={settings.contraceptionMethod === c.value}
-                  onPress={() => void updateSettings({ contraceptionMethod: c.value })}
+                  key={method.value}
+                  label={method.label}
+                  active={settings.contraceptionMethod === method.value}
+                  onPress={() => void updateSettings({ contraceptionMethod: method.value })}
                 />
               ))}
             </View>
@@ -165,7 +168,7 @@ export default function Settings() {
           </View>
         )}
 
-        {settings.cycleMode === 'pregnant' && (
+        {settings.cycleMode === CYCLE_MODE.Pregnant && (
           <View className="mt-4 gap-4 border-t border-border pt-4">
             <View className="flex-row items-center justify-between">
               <Txt variant="body">Weeks along</Txt>
@@ -173,8 +176,8 @@ export default function Settings() {
                 value={pregWeeks}
                 min={0}
                 max={42}
-                onChange={(w) =>
-                  void updateSettings({ pregnancyDueDay: dueDayFromWeeksAlong(w, today) })
+                onChange={(weeks) =>
+                  void updateSettings({ pregnancyDueDay: dueDayFromWeeksAlong(weeks, today) })
                 }
               />
             </View>
@@ -220,7 +223,7 @@ export default function Settings() {
       </Card>
 
       {/* Cycle - not relevant when pregnant */}
-      {settings.cycleMode !== 'pregnant' && (
+      {settings.cycleMode !== CYCLE_MODE.Pregnant && (
         <Card>
           <SectionLabel icon="sync-outline" label="Cycle" />
           <View className="flex-row items-center justify-between">
@@ -232,7 +235,7 @@ export default function Settings() {
               value={luteal}
               min={10}
               max={16}
-              onChange={(v) => void updateSettings({ lutealPhaseDays: v })}
+              onChange={(days) => void updateSettings({ lutealPhaseDays: days })}
             />
           </View>
           <Txt variant="faint" className="mt-3">
@@ -251,13 +254,13 @@ export default function Settings() {
           label="Period starting tomorrow"
           hint="Morning of the day before your predicted period"
           value={settings.notifyPeriodTomorrow}
-          onValueChange={(v) => void toggleNotification('notifyPeriodTomorrow', v)}
+          onValueChange={(enabled) => void toggleNotification('notifyPeriodTomorrow', enabled)}
         />
         <SwitchRow
           label="Period starting today"
           hint="Morning of your predicted period start"
           value={settings.notifyPeriodToday}
-          onValueChange={(v) => void toggleNotification('notifyPeriodToday', v)}
+          onValueChange={(enabled) => void toggleNotification('notifyPeriodToday', enabled)}
         />
         {prediction.fertilityApplicable && (
           <>
@@ -265,13 +268,13 @@ export default function Settings() {
               label="Fertile window tomorrow"
               hint="Morning before your fertile window opens"
               value={settings.notifyFertileTomorrow}
-              onValueChange={(v) => void toggleNotification('notifyFertileTomorrow', v)}
+              onValueChange={(enabled) => void toggleNotification('notifyFertileTomorrow', enabled)}
             />
             <SwitchRow
               label="Fertile window opens"
               hint="Morning your fertile window begins"
               value={settings.notifyFertileStart}
-              onValueChange={(v) => void toggleNotification('notifyFertileStart', v)}
+              onValueChange={(enabled) => void toggleNotification('notifyFertileStart', enabled)}
             />
           </>
         )}
@@ -326,12 +329,12 @@ export default function Settings() {
         </View>
         {settings.customSymptoms.length > 0 && (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-            {settings.customSymptoms.map((sym) => (
+            {settings.customSymptoms.map((symptom) => (
               <Pressable
-                key={sym}
-                onPress={() => removeSymptom(sym)}
+                key={symptom}
+                onPress={() => removeSymptom(symptom)}
                 accessibilityRole="button"
-                accessibilityLabel={`Remove ${sym}`}
+                accessibilityLabel={`Remove ${symptom}`}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -349,7 +352,7 @@ export default function Settings() {
                     color: colors.textMuted,
                   }}
                 >
-                  {sym}
+                  {symptom}
                 </RNText>
                 <Ionicons name="close" size={12} color={colors.textFaint} />
               </Pressable>
@@ -375,7 +378,7 @@ export default function Settings() {
         <Segmented
           options={AUTO_LOCK_OPTIONS}
           value={settings.autoLockMinutes}
-          onChange={(v) => void updateSettings({ autoLockMinutes: v })}
+          onChange={(minutes) => void updateSettings({ autoLockMinutes: minutes })}
         />
       </Card>
 
