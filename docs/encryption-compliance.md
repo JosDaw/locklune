@@ -104,9 +104,11 @@ PBKDF2-HMAC-SHA512 (256,000 iterations + random salt)
 
 ## 6. Apple App Store Declaration
 
-`ITSAppUsesNonExemptEncryption` is set to `true` in `apps/mobile/app.json`.
+`ITSAppUsesNonExemptEncryption` is set to `false` in `apps/mobile/app.json`.
 
-The app uses AES-256 encryption (via SQLCipher) beyond Apple's standard exempt encryption. This has been declared to Apple as required under the Export Administration Regulations.
+The app uses AES-256 encryption (via SQLCipher) beyond Apple's standard exempt encryption. This was declared to Apple through the App Store Connect **App Encryption Documentation** questionnaire (App Information → App Encryption Documentation): the app uses standard, non-proprietary algorithms and qualifies for the mass-market exemption, so Apple determined that **no export compliance documentation upload is required** and issued no `ITSEncryptionExportComplianceCode`. Per Apple's guidance, an app that is exempt from providing documentation sets `ITSAppUsesNonExemptEncryption` to `false`.
+
+This exemption from Apple's documentation requirement is independent of the U.S. BIS annual self-classification obligation described in Section 7, which still applies.
 
 ---
 

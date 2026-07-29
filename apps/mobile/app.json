@@ -13,7 +13,7 @@
       "bundleIdentifier": "app.locklune",
       "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": true
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
