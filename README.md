@@ -1,6 +1,6 @@
 # Locklune
 
-**A 100% on-device, encrypted, zero-tracking period tracker** - plus its privacy/marketing site, in one monorepo.
+**A 100% on-device, encrypted, zero-tracking period tracker** - plus a basic webpage, in one monorepo.
 
 _"lock" (privacy/security) + "lune" (moon/cycle)._
 
@@ -14,7 +14,7 @@ Locklune keeps everything on your phone: no account, no cloud, no analytics, no 
 locklune/
 ├─ packages/core   # Pure TS: prediction engine + crypto envelope + types (Vitest-tested)
 ├─ apps/mobile     # Expo (SDK 57) app: expo-router, gluestack-ui/NativeWind, SQLCipher, secure-store
-└─ apps/web        # Next.js static site: landing + privacy policy (no tracking)
+└─ apps/web        # Next.js basic static webpage (no tracking)
 ```
 
 Tooling: npm workspaces + Turborepo, shared `tsconfig.base.json`, Prettier.

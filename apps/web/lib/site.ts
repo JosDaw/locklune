@@ -1,5 +1,5 @@
 /**
- * Brand + content constants for the marketing/privacy site. Kept dependency-free
+ * Brand + content constants for the basic webpage. Kept dependency-free
  * so the site never pulls in app/crypto code.
  */
 export const site = {

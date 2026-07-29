@@ -2,7 +2,7 @@
  * JS mirror of the Tailwind palette (see tailwind.config.js) for places that
  * can't take a className: navigation theme, StatusBar, calendar markers, etc.
  *
- * Slate / moonlight theme (matches the marketing site).
+ * Slate / moonlight theme (matches the webpage).
  */
 export const colors = {
   ink: '#000022', // app background (night)
