@@ -18,8 +18,7 @@
     "lint": "turbo run lint",
     "test": "turbo run test",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,mjs,cjs,md,json,yml,yaml}\" --ignore-path .gitignore",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,md,json,yml,yaml}\" --ignore-path .gitignore",
-    "eas-build-post-install": "npm run build -w packages/core"
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,cjs,md,json,yml,yaml}\" --ignore-path .gitignore"
   },
   "devDependencies": {
     "prettier": "^3.4.2",

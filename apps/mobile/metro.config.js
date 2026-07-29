@@ -15,7 +15,9 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(monorepoRoot, 'node_modules'),
 ];
-// Respect package "exports" (so @locklune/core resolves to its dist build).
-config.resolver.unstable_enablePackageExports = true;
+// Resolve @locklune/core directly from TypeScript source — no dist/ build needed.
+config.resolver.extraNodeModules = {
+  '@locklune/core': path.resolve(monorepoRoot, 'packages/core/src'),
+};
 
 module.exports = withNativeWind(config, { input: './src/global.css' });
