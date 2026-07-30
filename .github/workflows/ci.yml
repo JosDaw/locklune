@@ -45,7 +45,7 @@ jobs:
         run: npm run format
 
       - name: ESLint (--fix, best effort)
-        run: npm run lint -- --fix
+        run: npm run lint:fix
         continue-on-error: true
 
       - name: Commit formatting
