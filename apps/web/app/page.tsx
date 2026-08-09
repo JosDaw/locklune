@@ -55,7 +55,7 @@ export default function Home() {
                 Learn how your privacy is protected
               </Link>
             </div>
-            <p className="mt-4 text-xs text-fg-muted">Now on Android. iOS coming soon.</p>
+            <p className="mt-4 text-xs text-fg-muted">Now on Android and iOS.</p>
           </div>
 
           <div className="relative">
@@ -235,6 +235,16 @@ export default function Home() {
             >
               Get it on Google Play
             </a>
+            {site.appStore && (
+              <a
+                href={site.appStore}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 text-sm font-semibold text-night transition-transform hover:scale-[1.03]"
+              >
+                Download on the App Store
+              </a>
+            )}
             <Link
               href="/privacy"
               className="rounded-full border border-line px-6 py-3 text-sm font-medium text-fg-soft transition-colors hover:text-fg"
@@ -242,7 +252,7 @@ export default function Home() {
               Read the privacy policy
             </Link>
           </div>
-          <p className="mt-4 text-xs text-fg-muted">Free on Android. iOS coming soon.</p>
+          <p className="mt-4 text-xs text-fg-muted">Free on Android and iOS.</p>
         </div>
       </section>
     </>

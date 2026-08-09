@@ -11,9 +11,9 @@ export const site = {
   url: 'https://locklune.com',
   github: 'https://github.com/JosDaw/locklune',
   lastUpdated: 'July 30, 2026',
-  // Store availability. iOS is not published yet; leave `appStore` null until it is.
+  // Store availability. Both platforms are live.
   playStore: 'https://play.google.com/store/apps/details?id=app.locklune',
-  appStore: null as string | null,
+  appStore: 'https://apps.apple.com/us/app/locklune/id6795797605' as string | null,
 };
 
 export const comparison: { label: string; locklune: string; others: string }[] = [
