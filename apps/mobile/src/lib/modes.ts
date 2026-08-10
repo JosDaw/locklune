@@ -5,36 +5,46 @@ import {
   type CycleMode,
 } from '@locklune/core';
 
-export const CYCLE_MODES: { value: CycleMode; label: string; hint: string }[] = [
+// Labels/hints are i18n keys (see i18n catalogues `data.mode` / `data.contraception`);
+// consumers translate with `t()` at render so they follow the active locale.
+export const CYCLE_MODES: { value: CycleMode; labelKey: string; hintKey: string }[] = [
   {
     value: CYCLE_MODE.Tracking,
-    label: 'Tracking my cycle',
-    hint: 'Period and fertility estimates',
+    labelKey: 'data.mode.tracking.label',
+    hintKey: 'data.mode.tracking.hint',
   },
   {
     value: CYCLE_MODE.PeriodOnly,
-    label: 'Period tracking only',
-    hint: 'Periods only - fertility content hidden',
+    labelKey: 'data.mode.periodOnly.label',
+    hintKey: 'data.mode.periodOnly.hint',
   },
-  { value: CYCLE_MODE.Trying, label: 'Trying to conceive', hint: 'Focus on your fertile window' },
+  {
+    value: CYCLE_MODE.Trying,
+    labelKey: 'data.mode.trying.label',
+    hintKey: 'data.mode.trying.hint',
+  },
   {
     value: CYCLE_MODE.Contraception,
-    label: 'On contraception',
-    hint: 'Track bleeds; fertility hidden on hormonal methods',
+    labelKey: 'data.mode.contraception.label',
+    hintKey: 'data.mode.contraception.hint',
   },
-  { value: CYCLE_MODE.Pregnant, label: 'Pregnant', hint: 'Track pregnancy progress instead' },
+  {
+    value: CYCLE_MODE.Pregnant,
+    labelKey: 'data.mode.pregnant.label',
+    hintKey: 'data.mode.pregnant.hint',
+  },
 ];
 
-export const CONTRACEPTION_METHODS: { value: ContraceptionMethod; label: string }[] = [
-  { value: CONTRACEPTION_METHOD.None, label: 'None' },
-  { value: CONTRACEPTION_METHOD.Pill, label: 'Combined pill' },
-  { value: CONTRACEPTION_METHOD.MiniPill, label: 'Mini-pill' },
-  { value: CONTRACEPTION_METHOD.Patch, label: 'Patch' },
-  { value: CONTRACEPTION_METHOD.Ring, label: 'Ring' },
-  { value: CONTRACEPTION_METHOD.Injection, label: 'Injection' },
-  { value: CONTRACEPTION_METHOD.Implant, label: 'Implant' },
-  { value: CONTRACEPTION_METHOD.HormonalIud, label: 'Hormonal IUD' },
-  { value: CONTRACEPTION_METHOD.CopperIud, label: 'Copper IUD' },
-  { value: CONTRACEPTION_METHOD.Condoms, label: 'Condoms' },
-  { value: CONTRACEPTION_METHOD.Other, label: 'Other' },
+export const CONTRACEPTION_METHODS: { value: ContraceptionMethod; labelKey: string }[] = [
+  { value: CONTRACEPTION_METHOD.None, labelKey: 'data.contraception.none' },
+  { value: CONTRACEPTION_METHOD.Pill, labelKey: 'data.contraception.pill' },
+  { value: CONTRACEPTION_METHOD.MiniPill, labelKey: 'data.contraception.miniPill' },
+  { value: CONTRACEPTION_METHOD.Patch, labelKey: 'data.contraception.patch' },
+  { value: CONTRACEPTION_METHOD.Ring, labelKey: 'data.contraception.ring' },
+  { value: CONTRACEPTION_METHOD.Injection, labelKey: 'data.contraception.injection' },
+  { value: CONTRACEPTION_METHOD.Implant, labelKey: 'data.contraception.implant' },
+  { value: CONTRACEPTION_METHOD.HormonalIud, labelKey: 'data.contraception.hormonalIud' },
+  { value: CONTRACEPTION_METHOD.CopperIud, labelKey: 'data.contraception.copperIud' },
+  { value: CONTRACEPTION_METHOD.Condoms, labelKey: 'data.contraception.condoms' },
+  { value: CONTRACEPTION_METHOD.Other, labelKey: 'data.contraception.other' },
 ];

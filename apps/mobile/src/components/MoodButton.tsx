@@ -1,7 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Mood } from '@locklune/core';
 import { Platform, Pressable } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { MOOD_META } from '../lib/logging';
 import { colors } from '../theme/colors';
 
@@ -20,6 +25,7 @@ export function MoodButton({
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const reduceMotion = useReducedMotion();
   const size = expanded ? 52 : 60;
   const color = MOOD_META[option.value]!.color;
 
@@ -28,12 +34,14 @@ export function MoodButton({
       <Pressable
         onPress={onPress}
         onPressIn={() => {
-          scale.value = withSpring(0.9, MOOD_SPRING);
+          if (!reduceMotion) scale.value = withSpring(0.9, MOOD_SPRING);
         }}
         onPressOut={() => {
           scale.value = withSpring(1, MOOD_SPRING);
         }}
         accessibilityRole="button"
+        accessibilityLabel={`Mood: ${option.value}`}
+        accessibilityState={{ selected }}
         style={{
           width: size,
           height: size,

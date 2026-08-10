@@ -4,6 +4,7 @@ import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { ColorValue } from 'react-native';
+import { t, useLocale } from '../../i18n';
 import { colors } from '../../theme/colors';
 
 type IoniconName = keyof typeof Ionicons.glyphMap;
@@ -37,6 +38,7 @@ const icon = (outline: IoniconName, filled: IoniconName) => {
 };
 
 export default function TabsLayout() {
+  useLocale();
   const insets = useSafeAreaInsets();
   // Android draws the pill behind the system nav bar, so clear the full inset.
   // On iOS we only need a small nudge so the rounded border/shadow isn't
@@ -96,19 +98,19 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Today', tabBarIcon: icon('moon-outline', 'moon') }}
+        options={{ title: t('tabs.today'), tabBarIcon: icon('moon-outline', 'moon') }}
       />
       <Tabs.Screen
         name="calendar"
-        options={{ title: 'Calendar', tabBarIcon: icon('calendar-outline', 'calendar') }}
+        options={{ title: t('tabs.calendar'), tabBarIcon: icon('calendar-outline', 'calendar') }}
       />
       <Tabs.Screen
         name="insights"
-        options={{ title: 'Insights', tabBarIcon: icon('stats-chart-outline', 'stats-chart') }}
+        options={{ title: t('tabs.insights'), tabBarIcon: icon('stats-chart-outline', 'stats-chart') }}
       />
       <Tabs.Screen
         name="settings"
-        options={{ title: 'Preferences', tabBarIcon: icon('settings-outline', 'settings') }}
+        options={{ title: t('tabs.preferences'), tabBarIcon: icon('settings-outline', 'settings') }}
       />
     </Tabs>
   );

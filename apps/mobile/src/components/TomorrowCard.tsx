@@ -3,8 +3,9 @@ import type { Cycle, DayLog, EpochDay, Prediction } from '@locklune/core';
 import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import { Txt } from './ui/Text';
+import { t, useLocale } from '../i18n';
 import { formatDay } from '../lib/format';
-import { FLOW_LABELS, MOOD_LABEL, MOOD_META } from '../lib/logging';
+import { FLOW_LABEL_KEY, MOOD_LABEL_KEY, MOOD_META, symptomLabel } from '../lib/logging';
 import { computePhase, phaseForLog } from '../lib/phases';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -43,6 +44,7 @@ function TomorrowCardBody({
   last,
   tomorrowCycleDay,
 }: TomorrowCardProps & { last: Cycle; tomorrowCycleDay: number }) {
+  useLocale();
   // Is tomorrow still within an ongoing period?
   const ongoingPeriodEnd =
     last.endDay === null ? last.startDay + Math.max(1, Math.round(avgPeriodLen)) - 1 : null;
@@ -102,7 +104,7 @@ function TomorrowCardBody({
     if (!tomorrowPhase) return [];
     const counts: Record<string, number> = {};
     recentLogs.forEach((log) => {
-      if (phaseForLog(log.day, cycles, avgLen, avgPeriodLen) === tomorrowPhase.label) {
+      if (phaseForLog(log.day, cycles, avgLen, avgPeriodLen) === tomorrowPhase.id) {
         log.symptoms.forEach((symptom) => {
           counts[symptom] = (counts[symptom] ?? 0) + 1;
         });
@@ -111,29 +113,31 @@ function TomorrowCardBody({
     return Object.entries(counts)
       .sort((first, second) => second[1] - first[1])
       .slice(0, 3)
-      .map(([symptom]) => symptom.charAt(0).toUpperCase() + symptom.slice(1));
+      .map(([symptom]) => symptom);
   }, [recentLogs, cycles, tomorrowPhase, avgLen, avgPeriodLen]);
 
   let statusIcon: keyof typeof Ionicons.glyphMap = 'ellipse-outline';
   let statusColor: string = colors.textMuted;
-  let statusText = `Day ${tomorrowCycleDay} of your cycle`;
+  let statusText = t('tomorrowCard.dayOfCycle', { day: tomorrowCycleDay });
 
   if (isPeriod) {
     statusIcon = isPeriodEnding ? 'checkmark-circle-outline' : 'ellipse';
     statusColor = colors.period;
     if (isPeriodEnding) {
-      statusText = 'Period likely ending';
+      statusText = t('tomorrowCard.periodEnding');
     } else {
-      statusText = ongoingPeriodTomorrow ? 'Period continues' : 'Period expected';
+      statusText = ongoingPeriodTomorrow
+        ? t('tomorrowCard.periodContinues')
+        : t('tomorrowCard.periodExpected');
     }
   } else if (isOvulation) {
     statusIcon = 'leaf-outline';
     statusColor = colors.ovulation;
-    statusText = 'Estimated ovulation';
+    statusText = t('tomorrowCard.ovulation');
   } else if (isFertile) {
     statusIcon = 'star-outline';
     statusColor = colors.fertile;
-    statusText = 'In your fertile window';
+    statusText = t('tomorrowCard.fertile');
   }
 
   return (
@@ -149,7 +153,7 @@ function TomorrowCardBody({
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Txt variant="label">Tomorrow</Txt>
+        <Txt variant="label">{t('tomorrowCard.title')}</Txt>
         <Txt variant="faint">
           {formatDay(tomorrow, { weekday: 'short', month: 'short', day: 'numeric' })}
         </Txt>
@@ -176,7 +180,7 @@ function TomorrowCardBody({
             ))}
           </View>
           <Text style={{ fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted }}>
-            {FLOW_LABELS[expectedFlow]} expected
+            {t('tomorrowCard.flowExpected', { flow: t(FLOW_LABEL_KEY[expectedFlow]) })}
           </Text>
         </View>
       )}
@@ -190,7 +194,7 @@ function TomorrowCardBody({
             color={MOOD_META[expectedMood]!.color}
           />
           <Text style={{ fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted }}>
-            Usually feeling {MOOD_LABEL[expectedMood]} on days like this
+            {t('tomorrowCard.usuallyMood', { mood: t(MOOD_LABEL_KEY[expectedMood]) })}
           </Text>
         </View>
       )}
@@ -205,7 +209,7 @@ function TomorrowCardBody({
               letterSpacing: 0.4,
             }}
           >
-            Often logged on days like this
+            {t('tomorrowCard.oftenLogged')}
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
             {phaseSymptoms.map((symptom) => (
@@ -219,7 +223,7 @@ function TomorrowCardBody({
                 }}
               >
                 <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}>
-                  {symptom}
+                  {symptomLabel(symptom)}
                 </Text>
               </View>
             ))}

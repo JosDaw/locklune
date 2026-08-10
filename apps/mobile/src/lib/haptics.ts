@@ -20,6 +20,11 @@ export function error(): void {
   void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => undefined);
 }
 
+/** Light cue that accompanies an error toast - subtler than the full error buzz. */
+export function errorTick(): void {
+  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => undefined);
+}
+
 /** Caution, e.g. opening a destructive confirmation. */
 export function warn(): void {
   void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => undefined);

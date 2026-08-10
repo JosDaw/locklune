@@ -2,10 +2,12 @@ import type { Cycle } from '@locklune/core';
 import { useWindowDimensions, View } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 import { Txt } from './ui/Text';
+import { t, useLocale } from '../i18n';
 import { colors } from '../theme/colors';
 import { CARD_SHADOW } from '../theme/shadows';
 
 export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
+  useLocale();
   const { width } = useWindowDimensions();
 
   const lengths: number[] = [];
@@ -34,6 +36,10 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
 
   const hasIrregular = recent.some((length) => Math.abs(length - avg) / avg > THRESHOLD);
 
+  const chartSummary =
+    t('insights.chartSummary', { count: recent.length, avg: Math.round(avg) }) +
+    (hasIrregular ? t('insights.chartSummaryIrregular') : '');
+
   return (
     <View
       style={{
@@ -49,10 +55,16 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
       <View
         style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' }}
       >
-        <Txt variant="label">Cycle lengths</Txt>
-        <Txt variant="faint">avg {Math.round(avg)} days</Txt>
+        <Txt variant="label">{t('insights.chartTitle')}</Txt>
+        <Txt variant="faint">{t('insights.chartAvg', { count: Math.round(avg) })}</Txt>
       </View>
-      <Svg width={availW} height={chartH}>
+      <Svg
+        width={availW}
+        height={chartH}
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={chartSummary}
+      >
         <Line
           x1={0}
           y1={avgY}
@@ -84,7 +96,7 @@ export function CycleChartCard({ cycles }: { cycles: Cycle[] }) {
       {hasIrregular && (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger }} />
-          <Txt variant="faint">outside usual range (±15%)</Txt>
+          <Txt variant="faint">{t('insights.chartOutside')}</Txt>
         </View>
       )}
     </View>

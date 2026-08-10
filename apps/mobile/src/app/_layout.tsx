@@ -1,5 +1,10 @@
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { Manrope_600SemiBold, Manrope_700Bold } from '@expo-google-fonts/manrope';
+import {
+  NanumGothic_400Regular,
+  NanumGothic_700Bold,
+  NanumGothic_800ExtraBold,
+} from '@expo-google-fonts/nanum-gothic';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
@@ -83,6 +88,10 @@ export default function RootLayout() {
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
+    // Korean (Nanum Gothic) - Inter/Manrope have no Hangul glyphs.
+    NanumGothic_400Regular,
+    NanumGothic_700Bold,
+    NanumGothic_800ExtraBold,
     // Preload the icon glyph fonts too, so the very first screens (loading /
     // "Unlocking…") render their Ionicons moon instead of a blank glyph before the
     // icon font has finished loading on its own.

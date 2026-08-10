@@ -1,4 +1,9 @@
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Button as GSButton, ButtonSpinner, ButtonText } from '../gs/button';
 
@@ -42,6 +47,7 @@ export function Button({
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const reduceMotion = useReducedMotion();
   const isDisabled = disabled || loading;
 
   return (
@@ -49,9 +55,12 @@ export function Button({
       <GSButton
         size={size}
         disabled={isDisabled}
+        accessibilityRole="button"
+        accessibilityLabel={title}
+        accessibilityState={{ disabled: !!isDisabled, busy: loading }}
         className={`rounded-2xl ${CONTAINER[variant]} ${isDisabled ? 'opacity-50' : ''} ${className ?? ''}`}
         onPressIn={(event) => {
-          if (!isDisabled) scale.value = withSpring(0.97, SPRING);
+          if (!isDisabled && !reduceMotion) scale.value = withSpring(0.97, SPRING);
           callerPressIn?.(event);
         }}
         onPressOut={(event) => {

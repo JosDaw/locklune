@@ -17,9 +17,10 @@ import { TryingCard } from '../../components/TryingCard';
 import { MoonLoader } from '../../components/ui/MoonLoader';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
+import { t, useLocale } from '../../i18n';
 import { formatDay, formatRange } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
-import { computePhase } from '../../lib/phases';
+import { computePhase, phaseLabelKey } from '../../lib/phases';
 import { ROUTES } from '../../lib/routes';
 import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
@@ -27,6 +28,7 @@ import { fonts } from '../../theme/fonts';
 import { CARD_SHADOW } from '../../theme/shadows';
 
 export default function Today() {
+  useLocale();
   const router = useRouter();
   const today = todayEpochDay();
   const cycles = useDataStore((store) => store.cycles);
@@ -150,7 +152,7 @@ export default function Today() {
                   letterSpacing: 0.6,
                 }}
               >
-                {currentPhase.label} phase
+                {t('home.phaseLabel', { phase: t(phaseLabelKey(currentPhase.id)) })}
               </Text>
             </View>
           )}
@@ -178,17 +180,15 @@ export default function Today() {
                 <MoonLoader size={34} />
                 <View style={{ alignItems: 'center', gap: 8 }}>
                   <Txt variant="heading" className="text-center">
-                    Welcome to {BRAND.name}
+                    {t('home.welcomeTitle', { brand: BRAND.name })}
                   </Txt>
                   <Txt variant="muted" className="text-center">
-                    Log your first period and {BRAND.name} will learn your cycle - all on-device,
-                    always private.
+                    {t('home.welcomeSubtitle', { brand: BRAND.name })}
                   </Txt>
                 </View>
-                <PillButton label="Log period started today" large onPress={onStart} />
+                <PillButton label={t('home.logStartedToday')} large onPress={onStart} />
                 <Txt variant="faint" className="text-center">
-                  To add entries for previous days, go to the calendar and select the date you want
-                  to update.
+                  {t('home.previousDaysHint')}
                 </Txt>
               </View>
             ) : onPeriod ? (
@@ -196,22 +196,22 @@ export default function Today() {
               <View style={{ flexDirection: 'row', gap: 16, alignItems: 'flex-start' }}>
                 <View style={{ flex: 1, gap: 6 }}>
                   <Txt variant="label" className="text-period">
-                    On your period
+                    {t('home.onPeriod')}
                   </Txt>
                   <Text style={{ fontFamily: fonts.display, fontSize: 56, color: colors.moon }}>
-                    Day {periodDay}
+                    {t('home.dayNumber', { count: periodDay })}
                   </Text>
                   <View style={{ gap: 2 }}>
-                    <Txt variant="faint">Started {formatDay(last!.startDay)}</Txt>
+                    <Txt variant="faint">{t('log.startedOn', { date: formatDay(last!.startDay) })}</Txt>
                     {periodDaysLeft > 0 && (
                       <Txt variant="faint">
-                        About {periodDaysLeft} more day{periodDaysLeft === 1 ? '' : 's'} expected
+                        {t('home.moreDaysExpected', { count: periodDaysLeft })}
                       </Txt>
                     )}
                   </View>
                   <View style={{ flexDirection: 'row', marginTop: 8 }}>
                     <View style={{ flex: 1 }} />
-                    <PillButton label="End period" icon="checkmark" onPress={onEnd} />
+                    <PillButton label={t('home.endPeriod')} icon="checkmark" onPress={onEnd} />
                   </View>
                 </View>
                 <CycleRing day={periodDay} total={totalPeriod} size={84} />
@@ -232,8 +232,8 @@ export default function Today() {
                 <View style={{ flex: 1, gap: 4 }}>
                   <Txt variant="label">
                     {settings.cycleMode === CYCLE_MODE.Contraception
-                      ? 'Next expected bleed'
-                      : 'Next period'}
+                      ? t('home.nextExpectedBleed')
+                      : t('home.nextPeriod')}
                   </Txt>
                   <Text
                     style={{
@@ -245,7 +245,7 @@ export default function Today() {
                   >
                     {Math.max(0, daysAway)}
                   </Text>
-                  <Txt variant="muted">{daysAway === 1 ? 'day away' : 'days away'}</Txt>
+                  <Txt variant="muted">{t('home.dayAway', { count: daysAway })}</Txt>
                   <Text
                     style={{
                       fontFamily: fonts.displaySemibold,
@@ -257,13 +257,17 @@ export default function Today() {
                     {formatDay(next!.periodStart)}
                   </Text>
                   <Txt variant="faint">
-                    Expected {formatRange(next!.periodStartRange.start, next!.periodStartRange.end)}
+                    {t('home.expectedRange', {
+                      range: formatRange(next!.periodStartRange.start, next!.periodStartRange.end),
+                    })}
                   </Txt>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
                     <Txt variant="faint" className="flex-1">
-                      {cycleDay > 0 ? `Day ${cycleProgressDay} of ${totalCycle}` : ' '}
+                      {cycleDay > 0
+                        ? t('home.dayXofY', { current: cycleProgressDay, total: totalCycle })
+                        : ' '}
                     </Txt>
-                    <PillButton label="Start period" icon="add" onPress={onStart} />
+                    <PillButton label={t('home.startPeriod')} icon="add" onPress={onStart} />
                   </View>
                 </View>
                 <CycleRing day={cycleProgressDay} total={totalCycle} size={84} />
@@ -296,7 +300,7 @@ export default function Today() {
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Ionicons name="star-outline" size={14} color={colors.fertile} />
-                      <Txt variant="label">Fertile window</Txt>
+                      <Txt variant="label">{t('home.fertileWindow')}</Txt>
                     </View>
                     <Text
                       style={{
@@ -306,7 +310,7 @@ export default function Today() {
                         lineHeight: 36,
                       }}
                     >
-                      {daysToFertile === 1 ? '1 day' : `${daysToFertile} days`}
+                      {t('home.daysCount', { count: daysToFertile })}
                     </Text>
                     <Txt variant="faint">
                       {formatRange(next.fertileWindow.start, next.fertileWindow.end)}
@@ -326,7 +330,7 @@ export default function Today() {
                   >
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                       <Ionicons name="leaf-outline" size={14} color={colors.ovulation} />
-                      <Txt variant="label">Ovulation</Txt>
+                      <Txt variant="label">{t('home.ovulation')}</Txt>
                     </View>
                     <Text
                       style={{
@@ -337,10 +341,8 @@ export default function Today() {
                       }}
                     >
                       {daysToOvulation <= 0
-                        ? 'Today'
-                        : daysToOvulation === 1
-                          ? '1 day'
-                          : `${daysToOvulation} days`}
+                        ? t('home.today')
+                        : t('home.daysCount', { count: daysToOvulation })}
                     </Text>
                     <Txt variant="faint">{formatDay(next.ovulationDay)}</Txt>
                   </View>
@@ -354,13 +356,13 @@ export default function Today() {
               <OutlookChip
                 icon="leaf-outline"
                 iconColor={colors.fertile}
-                label="Fertile window"
+                label={t('home.fertileWindow')}
                 value={formatRange(next.fertileWindow.start, next.fertileWindow.end)}
               />
               <OutlookChip
                 icon="ellipse-outline"
                 iconColor={colors.ovulation}
-                label="Ovulation"
+                label={t('home.ovulation')}
                 value={formatDay(next.ovulationDay)}
               />
             </View>

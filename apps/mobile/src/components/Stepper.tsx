@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { View } from 'react-native';
 import { PressScale } from './ui/PressScale';
 import { Txt } from './ui/Text';
+import { t, useLocale } from '../i18n';
 import { colors } from '../theme/colors';
 
 export function Stepper({
@@ -15,12 +16,13 @@ export function Stepper({
   max: number;
   onChange: (value: number) => void;
 }) {
+  useLocale();
   return (
     <View className="flex-row items-center gap-3">
       <PressScale
         onPress={() => onChange(Math.max(min, value - 1))}
         accessibilityRole="button"
-        accessibilityLabel="Decrease"
+        accessibilityLabel={t('misc.decrease')}
         className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
       >
         <Ionicons name="remove" size={20} color={colors.text} />
@@ -31,7 +33,7 @@ export function Stepper({
       <PressScale
         onPress={() => onChange(Math.min(max, value + 1))}
         accessibilityRole="button"
-        accessibilityLabel="Increase"
+        accessibilityLabel={t('misc.increase')}
         className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
       >
         <Ionicons name="add" size={20} color={colors.text} />

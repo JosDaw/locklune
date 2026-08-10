@@ -18,11 +18,10 @@ import { LogEntry } from '../../components/LogEntry';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
+import { getLocale, t, useLocale } from '../../i18n';
 import { ROUTES } from '../../lib/routes';
 import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
-
-const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 function useMonthGrid(anchor: Date) {
   return useMemo(() => {
@@ -42,8 +41,15 @@ function useMonthGrid(anchor: Date) {
 const LOG_PAGE_SIZE = 6;
 
 export default function Calendar() {
+  const locale = useLocale();
   const router = useRouter();
   const today = todayEpochDay();
+
+  // Localised narrow weekday initials, Sunday-first (2023-01-01 was a Sunday).
+  const weekdays = useMemo(() => {
+    const format = new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format;
+    return Array.from({ length: 7 }, (_, index) => format(new Date(2023, 0, 1 + index)));
+  }, [locale]);
   const cycles = useDataStore((store) => store.cycles);
   const prediction = useDataStore((store) => store.prediction);
   const ovulationDays = useDataStore((store) => store.ovulationDays);
@@ -141,7 +147,7 @@ export default function Calendar() {
   for (let cellIndex = 0; cellIndex < cells.length; cellIndex += 7)
     weeks.push(cells.slice(cellIndex, cellIndex + 7));
 
-  const monthLabel = anchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  const monthLabel = anchor.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' });
   const shiftMonth = (delta: number) => {
     setLogsExpanded(false);
     setAnchor((prev) => new Date(prev.getFullYear(), prev.getMonth() + delta, 1));
@@ -151,32 +157,40 @@ export default function Calendar() {
     <Screen>
       {/* Header */}
       <View className="flex-row items-center justify-between pt-2">
-        <ArrowButton icon="chevron-back" label="Previous month" onPress={() => shiftMonth(-1)} />
+        <ArrowButton
+          icon="chevron-back"
+          label={t('calendar.prevMonth')}
+          onPress={() => shiftMonth(-1)}
+        />
         <View className="items-center gap-1.5">
           <View className="flex-row items-center gap-2">
             <Ionicons name="moon" size={15} color={colors.primarySoft} />
             <Txt variant="title">{monthLabel}</Txt>
           </View>
           {isCurrentMonth ? (
-            <Txt variant="faint">Your cycle stays private.</Txt>
+            <Txt variant="faint">{t('calendar.private')}</Txt>
           ) : (
             <Pressable
               onPress={goToToday}
               accessibilityRole="button"
-              accessibilityLabel="Return to today"
+              accessibilityLabel={t('calendar.returnToday')}
               className="rounded-full bg-white px-4 py-1.5"
             >
-              <Txt className="text-ink text-xs font-body-medium">Today</Txt>
+              <Txt className="text-ink text-xs font-body-medium">{t('calendar.today')}</Txt>
             </Pressable>
           )}
         </View>
-        <ArrowButton icon="chevron-forward" label="Next month" onPress={() => shiftMonth(1)} />
+        <ArrowButton
+          icon="chevron-forward"
+          label={t('calendar.nextMonth')}
+          onPress={() => shiftMonth(1)}
+        />
       </View>
 
       {/* Calendar grid */}
       <Card className="px-3 py-5">
         <View className="mb-1 flex-row">
-          {WEEKDAYS.map((weekday, index) => (
+          {weekdays.map((weekday, index) => (
             <View key={index} className="flex-1 items-center pb-3">
               <Txt variant="faint" className="text-2xs uppercase tracking-widest">
                 {weekday}
@@ -212,23 +226,31 @@ export default function Calendar() {
       <View className="flex-row flex-wrap gap-2">
         {pregnantDueDay !== null ? (
           <>
-            <LegendChip dotColor={T1_COLOR} label="Trimester 1" />
-            <LegendChip dotColor={T2_COLOR} label="Trimester 2" />
-            <LegendChip dotColor={T3_COLOR} label="Trimester 3" />
-            <LegendChip dotColor={DUE_COLOR} label="Due date" />
+            <LegendChip dotColor={T1_COLOR} label={t('calendar.trimester1')} />
+            <LegendChip dotColor={T2_COLOR} label={t('calendar.trimester2')} />
+            <LegendChip dotColor={T3_COLOR} label={t('calendar.trimester3')} />
+            <LegendChip dotColor={DUE_COLOR} label={t('calendar.dueDate')} />
             {monthLogs.length > 0 && (
-              <LegendChip icon="moon" iconColor={colors.primarySoft} label="Logged" />
+              <LegendChip icon="moon" iconColor={colors.primarySoft} label={t('calendar.logged')} />
             )}
           </>
         ) : (
           <>
-            <LegendChip icon="ellipse" iconColor={colors.period} label="Period" />
-            <LegendChip icon="ellipse" iconColor={colors.predictedDim} label="Predicted" />
-            <LegendChip icon="moon" iconColor={colors.primarySoft} label="Logged" />
+            <LegendChip icon="ellipse" iconColor={colors.period} label={t('calendar.period')} />
+            <LegendChip
+              icon="ellipse"
+              iconColor={colors.predictedDim}
+              label={t('calendar.predicted')}
+            />
+            <LegendChip icon="moon" iconColor={colors.primarySoft} label={t('calendar.logged')} />
             {activePrediction.fertilityApplicable && (
               <>
-                <LegendChip icon="star-outline" iconColor={colors.fertile} label="Fertile" />
-                <LegendChip icon="leaf" iconColor={colors.ovulation} label="Ovulation" />
+                <LegendChip
+                  icon="star-outline"
+                  iconColor={colors.fertile}
+                  label={t('calendar.fertile')}
+                />
+                <LegendChip icon="leaf" iconColor={colors.ovulation} label={t('calendar.ovulation')} />
               </>
             )}
           </>
@@ -236,13 +258,13 @@ export default function Calendar() {
       </View>
 
       <Txt variant="faint" className="text-center">
-        Tap any day to add, end, or correct an entry.
+        {t('calendar.tapAnyDay')}
       </Txt>
 
       {/* Month log entries - show 6 initially, expand on demand */}
       {monthLogs.length > 0 && (
         <View className="gap-3">
-          <Txt variant="label">This month</Txt>
+          <Txt variant="label">{t('calendar.thisMonth')}</Txt>
           {[...monthLogs]
             .reverse()
             .slice(0, logsExpanded ? undefined : LOG_PAGE_SIZE)
@@ -255,12 +277,12 @@ export default function Calendar() {
                 }
                 onDelete={() => {
                   Alert.alert(
-                    'Delete this log?',
-                    'This removes all entries recorded for this day.',
+                    t('calendar.deleteLogTitle'),
+                    t('calendar.deleteLogBody'),
                     [
-                      { text: 'Cancel', style: 'cancel' },
+                      { text: t('common.cancel'), style: 'cancel' },
                       {
-                        text: 'Delete',
+                        text: t('common.delete'),
                         style: 'destructive',
                         onPress: () =>
                           void deleteLog(log.day).then((ok) => {
@@ -279,7 +301,9 @@ export default function Calendar() {
               accessibilityRole="button"
               className="items-center rounded-3xl border border-border bg-surface py-3"
             >
-              <Txt variant="faint">Show {monthLogs.length - LOG_PAGE_SIZE} more</Txt>
+              <Txt variant="faint">
+                {t('calendar.showMore', { count: monthLogs.length - LOG_PAGE_SIZE })}
+              </Txt>
             </Pressable>
           )}
         </View>

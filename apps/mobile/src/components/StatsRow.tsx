@@ -2,7 +2,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import type { Cycle, DayLog } from '@locklune/core';
 import { useMemo } from 'react';
 import { Text, View } from 'react-native';
-import { MOOD_LABEL, MOOD_META } from '../lib/logging';
+import { t, useLocale } from '../i18n';
+import { MOOD_LABEL_KEY, MOOD_META, symptomLabel } from '../lib/logging';
 import { phaseForLog, type PhaseInfo } from '../lib/phases';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -26,7 +27,7 @@ function computeStats(logs: DayLog[]): { topMood: number | null; topSymptoms: st
   const topSymptoms = Object.entries(symCounts)
     .sort((first, second) => second[1] - first[1])
     .slice(0, 3)
-    .map(([symptom]) => symptom.charAt(0).toUpperCase() + symptom.slice(1));
+    .map(([symptom]) => symptom);
 
   return { topMood, topSymptoms };
 }
@@ -44,6 +45,7 @@ export function StatsRow({
   avgLen: number;
   avgPeriodLen: number;
 }) {
+  useLocale();
   const { topMood, topSymptoms } = computeStats(logs);
 
   // Phase-specific symptom trend
@@ -52,7 +54,7 @@ export function StatsRow({
     const symCounts: Record<string, number> = {};
     logs.forEach((log) => {
       const phase = phaseForLog(log.day, cycles, avgLen, avgPeriodLen);
-      if (phase === currentPhase.label) {
+      if (phase === currentPhase.id) {
         log.symptoms.forEach((symptom) => {
           symCounts[symptom] = (symCounts[symptom] ?? 0) + 1;
         });
@@ -61,7 +63,7 @@ export function StatsRow({
     return Object.entries(symCounts)
       .sort((first, second) => second[1] - first[1])
       .slice(0, 3)
-      .map(([symptom]) => symptom.charAt(0).toUpperCase() + symptom.slice(1));
+      .map(([symptom]) => symptom);
   }, [logs, cycles, currentPhase, avgLen, avgPeriodLen]);
 
   const shownSymptoms = phaseSymptoms.length > 0 && currentPhase ? phaseSymptoms : topSymptoms;
@@ -97,7 +99,7 @@ export function StatsRow({
               textAlign: 'center',
             }}
           >
-            Usually {MOOD_LABEL[topMood]}
+            {t('statsRow.usuallyMood', { mood: t(MOOD_LABEL_KEY[topMood]) })}
           </Text>
         </View>
       )}
@@ -122,7 +124,7 @@ export function StatsRow({
               letterSpacing: 0.4,
             }}
           >
-            Frequent symptoms
+            {t('statsRow.frequentSymptoms')}
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
             {shownSymptoms.map((symptom) => (
@@ -136,7 +138,7 @@ export function StatsRow({
                 }}
               >
                 <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}>
-                  {symptom}
+                  {symptomLabel(symptom)}
                 </Text>
               </View>
             ))}

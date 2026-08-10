@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { t } from '../i18n';
 import { useAuthStore } from '../stores/authStore';
 import { colors } from '../theme/colors';
 
@@ -37,26 +38,23 @@ export class ErrorBoundary extends Component<Props, State> {
 
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Something went wrong</Text>
-        <Text style={styles.body}>
-          Locklune hit an unexpected error. Your data is untouched and stays encrypted on this
-          device. Try again, or lock the app.
-        </Text>
+        <Text style={styles.title}>{t('errorBoundary.title')}</Text>
+        <Text style={styles.body}>{t('errorBoundary.body')}</Text>
         <Pressable
           onPress={this.reset}
           accessibilityRole="button"
-          accessibilityLabel="Try again"
+          accessibilityLabel={t('errorBoundary.tryAgain')}
           style={[styles.button, styles.primary]}
         >
-          <Text style={styles.primaryLabel}>Try again</Text>
+          <Text style={styles.primaryLabel}>{t('errorBoundary.tryAgain')}</Text>
         </Pressable>
         <Pressable
           onPress={this.lock}
           accessibilityRole="button"
-          accessibilityLabel="Lock the app"
+          accessibilityLabel={t('errorBoundary.lockApp')}
           style={[styles.button, styles.secondary]}
         >
-          <Text style={styles.secondaryLabel}>Lock</Text>
+          <Text style={styles.secondaryLabel}>{t('errorBoundary.lock')}</Text>
         </Pressable>
       </View>
     );

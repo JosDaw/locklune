@@ -28,6 +28,7 @@ import { SymptomPicker } from '../components/SymptomPicker';
 import { Button } from '../components/ui/Button';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
+import { t, useLocale } from '../i18n';
 import { formatDay } from '../lib/format';
 import * as haptics from '../lib/haptics';
 import { MOOD_OPTIONS } from '../lib/logging';
@@ -45,6 +46,7 @@ type OrigLog = {
 };
 
 export default function LogModal() {
+  useLocale();
   const router = useRouter();
   const params = useLocalSearchParams<{ day?: string }>();
   const today = todayEpochDay();
@@ -180,12 +182,12 @@ export default function LogModal() {
     if (!cycle) return;
     haptics.warn();
     Alert.alert(
-      'Remove period start?',
-      'This deletes this period and all logs (symptoms, flow, notes) for those days.',
+      t('log.removeStartTitle'),
+      t('log.removeStartBody'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Remove',
+          text: t('log.remove'),
           style: 'destructive',
           onPress: () => void (async () => (await deleteCycle(cycle.id)) && haptics.success())(),
         },
@@ -213,7 +215,7 @@ export default function LogModal() {
     }
   };
 
-  const saveLabel = justSaved ? '✓ Saved' : isDirty ? 'Save changes' : 'Save';
+  const saveLabel = justSaved ? t('log.saved') : isDirty ? t('log.saveChanges') : t('log.save');
 
   return (
     <Screen>
@@ -226,14 +228,16 @@ export default function LogModal() {
             </Text>
             <Txt variant="heading">{formatDay(day, { month: 'long', day: 'numeric' })}</Txt>
             {!pregnant && cycleDay > 0 && cycleDay <= 60 && (
-              <Txt variant="faint">Day {cycleDay} of your cycle</Txt>
+              <Txt variant="faint">{t('log.dayOfCycle', { count: cycleDay })}</Txt>
             )}
-            {pregnant && preg && <Txt variant="faint">Week {preg.week} of pregnancy</Txt>}
+            {pregnant && preg && (
+              <Txt variant="faint">{t('log.weekOfPregnancy', { week: preg.week })}</Txt>
+            )}
           </View>
           <Pressable
             onPress={() => router.back()}
             accessibilityRole="button"
-            accessibilityLabel="Close"
+            accessibilityLabel={t('common.close')}
             className="h-9 w-9 items-center justify-center rounded-full bg-surfaceMuted"
           >
             <Ionicons name="close" size={20} color={colors.text} />
@@ -247,30 +251,34 @@ export default function LogModal() {
           {preg ? (
             <>
               <Txt variant="label" className="text-primary-soft">
-                Pregnancy
+                {t('log.pregnancy')}
               </Txt>
               <Txt variant="display">
-                Week {preg.week}
-                {preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
+                {preg.dayOfWeek > 0
+                  ? t('insights.weekPlusDay', { week: preg.week, days: preg.dayOfWeek })
+                  : t('insights.weekOnly', { week: preg.week })}
               </Txt>
               <Txt variant="muted">
-                Trimester {preg.trimester} ·{' '}
-                {preg.daysRemaining >= 0
-                  ? `${preg.daysRemaining} days to go`
-                  : `${-preg.daysRemaining} days over`}
+                {t('insights.trimesterLine', {
+                  trimester: preg.trimester,
+                  remaining:
+                    preg.daysRemaining >= 0
+                      ? t('insights.daysToGo', { count: preg.daysRemaining })
+                      : t('insights.daysOver', { count: -preg.daysRemaining }),
+                })}
               </Txt>
               <Txt variant="faint">
-                Due {formatDay(preg.dueDay, { weekday: 'short', month: 'long', day: 'numeric' })}
+                {t('log.due', {
+                  date: formatDay(preg.dueDay, { weekday: 'short', month: 'long', day: 'numeric' }),
+                })}
               </Txt>
             </>
           ) : (
             <>
               <Txt variant="label" className="text-primary-soft">
-                Pregnancy
+                {t('log.pregnancy')}
               </Txt>
-              <Txt variant="muted">
-                Set how many weeks along you are in Settings to track your pregnancy.
-              </Txt>
+              <Txt variant="muted">{t('log.setWeeks')}</Txt>
             </>
           )}
         </View>
@@ -279,12 +287,14 @@ export default function LogModal() {
       {/* Mood */}
       <View style={{ gap: 14 }}>
         {expanded ? (
-          <Txt variant="label">Mood</Txt>
+          <Txt variant="label">{t('log.mood')}</Txt>
         ) : (
           <Text style={{ fontFamily: fonts.displaySemibold, fontSize: 22, color: colors.text }}>
             {day === today
-              ? 'How are you feeling today?'
-              : `How did you feel on ${formatDay(day, { weekday: 'long', month: 'long', day: 'numeric' })}?`}
+              ? t('log.feelingToday')
+              : t('log.feelingOn', {
+                  date: formatDay(day, { weekday: 'long', month: 'long', day: 'numeric' }),
+                })}
           </Text>
         )}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -305,12 +315,12 @@ export default function LogModal() {
         <>
           {!pregnant && (
             <View style={{ gap: 12 }}>
-              <Txt variant="label">Period</Txt>
+              <Txt variant="label">{t('log.period')}</Txt>
               {day > today ? (
-                <Txt variant="faint">You can mark a period once the day has arrived.</Txt>
+                <Txt variant="faint">{t('log.markAfterDay')}</Txt>
               ) : !status.isBleedDay ? (
                 <Button
-                  title="Mark period started this day"
+                  title={t('log.markStarted')}
                   variant="secondary"
                   onPress={() => void markStart()}
                 />
@@ -318,18 +328,22 @@ export default function LogModal() {
                 <View className="gap-2">
                   <View className="rounded-2xl border border-period/40 bg-surface p-3">
                     <Txt variant="body">
-                      {status.isStart ? 'Period started this day' : 'Period day'}
+                      {status.isStart ? t('log.periodStartedThisDay') : t('log.periodDay')}
                     </Txt>
                     {!status.isStart && cycle && (
-                      <Txt variant="faint">Started {formatDay(cycle.startDay)}</Txt>
+                      <Txt variant="faint">
+                        {t('log.startedOn', { date: formatDay(cycle.startDay) })}
+                      </Txt>
                     )}
-                    {isEndDay && <Txt variant="faint">Marked as the last day</Txt>}
-                    {isOngoing && !status.isStart && <Txt variant="faint">Period ongoing</Txt>}
+                    {isEndDay && <Txt variant="faint">{t('log.markedLastDay')}</Txt>}
+                    {isOngoing && !status.isStart && (
+                      <Txt variant="faint">{t('log.periodOngoing')}</Txt>
+                    )}
                   </View>
                   <View className="flex-row gap-2">
                     {canSetEnd && (
                       <Button
-                        title="Mark as last day"
+                        title={t('log.markLastDay')}
                         variant="ghost"
                         onPress={() => void setEnd()}
                         containerStyle={{ flex: 1 }}
@@ -337,7 +351,7 @@ export default function LogModal() {
                     )}
                     {isEndDay && (
                       <Button
-                        title="Clear end date"
+                        title={t('log.clearEndDate')}
                         variant="ghost"
                         onPress={() => void clearEnd()}
                         containerStyle={{ flex: 1 }}
@@ -345,7 +359,7 @@ export default function LogModal() {
                     )}
                     {status.isStart && (
                       <Button
-                        title="Remove start"
+                        title={t('log.removeStart')}
                         variant="danger"
                         onPress={removeStart}
                         containerStyle={{ flex: 1 }}
@@ -359,7 +373,7 @@ export default function LogModal() {
 
           {!pregnant && (
             <View style={{ gap: 12 }}>
-              <Txt variant="label">Flow</Txt>
+              <Txt variant="label">{t('log.flow')}</Txt>
               <FlowPicker
                 value={flow}
                 onChange={(selectedFlow) =>
@@ -370,7 +384,7 @@ export default function LogModal() {
           )}
 
           <View style={{ gap: 12 }}>
-            <Txt variant="label">Symptoms</Txt>
+            <Txt variant="label">{t('log.symptoms')}</Txt>
             <SymptomPicker
               symptoms={symptoms}
               onToggle={toggleSymptom}
@@ -379,12 +393,12 @@ export default function LogModal() {
           </View>
 
           <View style={{ gap: 12 }}>
-            <Txt variant="label">Notes</Txt>
+            <Txt variant="label">{t('log.notes')}</Txt>
             <Textarea className="rounded-2xl border-border bg-surface" style={{ minHeight: 100 }}>
               <TextareaInput
                 value={note}
                 onChangeText={setNote}
-                placeholder="Anything you'd like to remember about today?"
+                placeholder={t('log.notesPlaceholder')}
                 placeholderTextColor={colors.textFaint}
                 multiline
                 textAlignVertical="top"
@@ -397,9 +411,9 @@ export default function LogModal() {
           {fertilityTracking && (
             <View className="flex-row items-center justify-between">
               <View className="flex-1 pr-4">
-                <Txt variant="label">Ovulation</Txt>
+                <Txt variant="label">{t('log.ovulation')}</Txt>
                 <Txt variant="faint" className="mt-1">
-                  Confirmed today, e.g. a positive test. Improves your predictions.
+                  {t('log.ovulationHint')}
                 </Txt>
               </View>
               <Switch
@@ -414,8 +428,8 @@ export default function LogModal() {
           {fertilityTracking && (
             <View style={{ gap: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-                <Txt variant="label">Temperature</Txt>
-                <Txt variant="faint">BBT · °C</Txt>
+                <Txt variant="label">{t('log.temperature')}</Txt>
+                <Txt variant="faint">{t('log.bbtUnit')}</Txt>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <TextInput
@@ -436,7 +450,7 @@ export default function LogModal() {
                   }}
                 />
                 {temp.trim() !== '' && (
-                  <Pressable onPress={() => setTemp('')} accessibilityLabel="Clear temperature">
+                  <Pressable onPress={() => setTemp('')} accessibilityLabel={t('log.clearTemp')}>
                     <Ionicons name="close-circle" size={20} color={colors.textFaint} />
                   </Pressable>
                 )}

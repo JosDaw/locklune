@@ -2,12 +2,14 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import type { DayLog } from '@locklune/core';
 import { Pressable, Text, View } from 'react-native';
 import { Txt } from './ui/Text';
-import { FLOW_LABELS, MOOD_META } from '../lib/logging';
+import { t, useLocale } from '../i18n';
+import { FLOW_LABEL_KEY, MOOD_META, symptomLabel } from '../lib/logging';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { CARD_SHADOW } from '../theme/shadows';
 
 export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => void }) {
+  useLocale();
   const moodMeta = log.mood != null ? MOOD_META[log.mood] : null;
   const shownSyms = log.symptoms.slice(0, 4);
   const extra = log.symptoms.length - shownSyms.length;
@@ -25,7 +27,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Txt variant="label">Today’s log</Txt>
+        <Txt variant="label">{t('todayCard.title')}</Txt>
         {moodMeta && (
           <MaterialCommunityIcons name={moodMeta.icon} size={30} color={moodMeta.color} />
         )}
@@ -44,7 +46,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
             ))}
           </View>
           <Text style={{ fontFamily: fonts.regular, fontSize: 13, color: colors.textMuted }}>
-            {FLOW_LABELS[log.flow]}
+            {t(FLOW_LABEL_KEY[log.flow])}
           </Text>
         </View>
       )}
@@ -59,7 +61,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
               letterSpacing: 0.4,
             }}
           >
-            Symptoms
+            {t('todayCard.symptoms')}
           </Text>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
             {shownSyms.map((symptom) => (
@@ -73,7 +75,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
                 }}
               >
                 <Text style={{ fontFamily: fonts.medium, fontSize: 12, color: colors.textMuted }}>
-                  {symptom}
+                  {symptomLabel(symptom)}
                 </Text>
               </View>
             ))}
@@ -87,7 +89,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
                 }}
               >
                 <Text style={{ fontFamily: fonts.medium, fontSize: 12, color: colors.textFaint }}>
-                  +{extra} more
+                  {t('todayCard.moreCount', { count: extra })}
                 </Text>
               </View>
             )}
@@ -105,7 +107,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
               letterSpacing: 0.4,
             }}
           >
-            Notes
+            {t('todayCard.notes')}
           </Text>
           <Text
             numberOfLines={2}
@@ -124,7 +126,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
       <Pressable
         onPress={onEdit}
         accessibilityRole="button"
-        accessibilityLabel="Edit today's log"
+        accessibilityLabel={t('todayCard.edit')}
         style={{
           alignSelf: 'flex-start',
           flexDirection: 'row',
@@ -139,7 +141,7 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
       >
         <Ionicons name="pencil-outline" size={16} color={colors.primarySoft} />
         <Text style={{ fontFamily: fonts.semibold, fontSize: 13, color: colors.primarySoft }}>
-          Edit today’s log
+          {t('todayCard.edit')}
         </Text>
       </Pressable>
     </View>

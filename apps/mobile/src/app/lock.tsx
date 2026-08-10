@@ -6,6 +6,7 @@ import { MoonLoader } from '../components/ui/MoonLoader';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
+import { t, useLocale } from '../i18n';
 import * as haptics from '../lib/haptics';
 import { ROUTES } from '../lib/routes';
 import * as toast from '../lib/toast';
@@ -15,10 +16,10 @@ import { currentLockSeconds } from '../lib/vault';
 const PIN_LENGTH = 6;
 
 export default function Lock() {
+  useLocale();
   const router = useRouter();
   const [remaining, setRemaining] = useState<number>(0);
   const [busy, setBusy] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const unlockPin = useAuthStore((store) => store.unlockPin);
 
@@ -40,13 +41,12 @@ export default function Lock() {
   const handleComplete = async (pin: string) => {
     if (remaining > 0 || busy) return;
     setBusy(true);
-    setError(null);
     let ok = false;
     try {
       ok = await unlockPin(pin);
     } catch {
       setBusy(false);
-      toast.error('Something went wrong unlocking. Please try again.');
+      toast.error(t('lock.unlockError'));
       return;
     }
     setBusy(false);
@@ -54,28 +54,25 @@ export default function Lock() {
       haptics.success();
       return;
     }
-    haptics.error();
     const authState = useAuthStore.getState();
     if (authState.lockedForSeconds > 0) {
       setRemaining(authState.lockedForSeconds);
-      setError('Too many attempts. Please wait before trying again.');
+      toast.error(t('lock.tooManyAttempts'));
     } else {
-      setError(
-        `Incorrect PIN. ${authState.attemptsRemaining} attempt${authState.attemptsRemaining === 1 ? '' : 's'} left before all data is erased.`,
-      );
+      // Security-critical: give the "attempts remaining" warning a longer dwell.
+      toast.show(t('lock.attemptsLeft', { count: authState.attemptsRemaining }), {
+        variant: 'error',
+        duration: 6000,
+      });
     }
   };
 
   const confirmReset = () => {
     haptics.warn();
-    Alert.alert(
-      'Reset & start over?',
-      'This permanently erases your PIN and all data on this device. It can’t be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Continue', style: 'destructive', onPress: () => router.push(ROUTES.reset) },
-      ],
-    );
+    Alert.alert(t('lock.resetTitle'), t('lock.resetBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('common.continue'), style: 'destructive', onPress: () => router.push(ROUTES.reset) },
+    ]);
   };
 
   return (
@@ -87,14 +84,14 @@ export default function Lock() {
       {busy ? (
         <View className="items-center gap-5 py-8">
           <MoonLoader />
-          <Txt variant="muted">Unlocking…</Txt>
+          <Txt variant="muted">{t('lock.unlocking')}</Txt>
         </View>
       ) : (
         <View className="gap-3">
           {remaining > 0 ? (
-            <Txt className="text-center text-danger">Locked. Try again in {remaining}s</Txt>
-          ) : error ? (
-            <Txt className="text-center text-danger">{error}</Txt>
+            <Txt className="text-center text-danger">
+              {t('lock.lockedRetry', { seconds: remaining })}
+            </Txt>
           ) : (
             <View className="h-5" />
           )}
@@ -108,7 +105,7 @@ export default function Lock() {
             onPress={confirmReset}
             hitSlop={12}
             accessibilityRole="button"
-            accessibilityLabel="Reset and start over"
+            accessibilityLabel={t('lock.resetA11y')}
             style={({ pressed }) => ({
               opacity: pressed ? 0.5 : 1,
               paddingHorizontal: 16,
@@ -116,7 +113,7 @@ export default function Lock() {
             })}
           >
             <Txt variant="faint" className="text-center underline">
-              Locked out? Erase &amp; start over
+              {t('lock.resetCta')}
             </Txt>
           </Pressable>
         )}

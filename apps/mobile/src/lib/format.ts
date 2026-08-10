@@ -1,4 +1,5 @@
 import { fromEpochDay, todayEpochDay, type Confidence, type EpochDay } from '@locklune/core';
+import { t } from '../i18n';
 
 export function formatDay(
   day: EpochDay,
@@ -14,15 +15,13 @@ export function formatRange(start: EpochDay, end: EpochDay): string {
 
 export function relativeDays(day: EpochDay, from: EpochDay = todayEpochDay()): string {
   const diff = day - from;
-  if (diff === 0) return 'today';
-  if (diff === 1) return 'tomorrow';
-  if (diff === -1) return 'yesterday';
-  if (diff > 0) return `in ${diff} days`;
-  return `${-diff} days ago`;
+  if (diff === 0) return t('format.today');
+  if (diff === 1) return t('format.tomorrow');
+  if (diff === -1) return t('format.yesterday');
+  if (diff > 0) return t('format.inDays', { count: diff });
+  return t('format.daysAgo', { count: -diff });
 }
 
 export function confidenceLabel(confidence: Confidence): string {
-  return { low: 'Low confidence', medium: 'Building confidence', high: 'High confidence' }[
-    confidence
-  ];
+  return t(`format.confidence.${confidence}`);
 }

@@ -7,11 +7,14 @@ export function CycleRing({
   total,
   size = 84,
   color = colors.primary,
+  accessibilityLabel,
 }: {
   day: number;
   total: number;
   size?: number;
   color?: string;
+  /** Overrides the default "day X of Y" summary read by VoiceOver. */
+  accessibilityLabel?: string;
 }) {
   const strokeWidth = 10;
   const cx = size / 2;
@@ -21,7 +24,12 @@ export function CycleRing({
   const progress = total > 0 ? Math.max(0, Math.min(1, day / total)) : 0;
 
   return (
-    <View style={{ width: size, height: size }}>
+    <View
+      style={{ width: size, height: size }}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={accessibilityLabel ?? `Cycle progress: day ${day} of ${total}`}
+    >
       <Svg width={size} height={size}>
         <Circle
           cx={cx}

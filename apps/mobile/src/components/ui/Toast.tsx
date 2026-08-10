@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as haptics from '../../lib/haptics';
 import { setToastHandler, type ToastVariant } from '../../lib/toast';
 
 interface ToastState {
@@ -41,6 +42,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setToastHandler((message, opts) => {
+      if (opts.variant === 'error') haptics.errorTick();
       if (hideTimer.current) clearTimeout(hideTimer.current);
       setToast({ message, variant: opts.variant });
       opacity.setValue(0);

@@ -9,9 +9,11 @@ import { MoonLoader } from '../components/ui/MoonLoader';
 import { PinPad } from '../components/ui/PinPad';
 import { Screen } from '../components/ui/Screen';
 import { Txt } from '../components/ui/Text';
+import { t, useLocale } from '../i18n';
 import * as haptics from '../lib/haptics';
 import { CYCLE_MODES } from '../lib/modes';
 import { requestNotificationPermission } from '../lib/notifications';
+import * as toast from '../lib/toast';
 import { useAuthStore } from '../stores/authStore';
 import { useDataStore } from '../stores/dataStore';
 import { colors } from '../theme/colors';
@@ -24,10 +26,11 @@ const FERTILITY_MODES: CycleMode[] = ['tracking', 'trying'];
 type Phase = 'consent' | 'create' | 'confirm' | 'mode' | 'notifications';
 
 export default function Onboarding() {
+  useLocale();
+  const brand = BRAND.name;
   const [phase, setPhase] = useState<Phase>('consent');
   const [firstPin, setFirstPin] = useState<string>('');
   const [confirmedPin, setConfirmedPin] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<boolean>(false);
   const [agreedLegal, setAgreedLegal] = useState<boolean>(false);
   const [agreedMedical, setAgreedMedical] = useState<boolean>(false);
@@ -48,19 +51,16 @@ export default function Onboarding() {
     if (busy) return;
     if (phase === 'create') {
       setFirstPin(pin);
-      setError(null);
       setPhase('confirm');
       return;
     }
     if (pin !== firstPin) {
-      haptics.error();
-      setError('Those PINs didn’t match. Let’s try again.');
+      toast.error(t('onboarding.pinMismatch'));
       setFirstPin('');
       setPhase('create');
       return;
     }
     setConfirmedPin(pin);
-    setError(null);
     setPhase('mode');
   };
 
@@ -80,11 +80,10 @@ export default function Onboarding() {
       await updateSettings(patch);
       haptics.success();
     } catch (err) {
-      haptics.error();
       // Wipe any partial vault/DB state so the retry starts clean.
       await wipe().catch(() => undefined);
       const detail = err instanceof Error ? err.message : String(err);
-      setError(`Setup failed (${detail}). Please try again.`);
+      toast.error(t('onboarding.setupFailed', { detail }));
       setConfirmedPin('');
       setFirstPin('');
       setPhase('create');
@@ -110,34 +109,50 @@ export default function Onboarding() {
           source={require('../../assets/images/locklune_logo.png')}
           style={{ width: '100%', height: 500 }}
           resizeMode="contain"
+          accessible
+          accessibilityRole="image"
+          accessibilityLabel={t('onboarding.logoA11y', { brand })}
         />
 
         <View className="gap-5">
-          <Txt variant="muted">Before you begin</Txt>
+          <Txt variant="muted">{t('onboarding.beforeYouBegin')}</Txt>
           <CheckboxRow checked={agreedLegal} onToggle={() => setAgreedLegal((prev) => !prev)}>
             <RNText className="text-base leading-6 text-text">
-              I agree to the{' '}
-              <RNText
-                className="text-primary-soft underline"
-                onPress={() => void Linking.openURL(`${BRAND.websiteUrl}/privacy`)}
-              >
-                Privacy Policy
-              </RNText>{' '}
-              and{' '}
-              <RNText
-                className="text-primary-soft underline"
-                onPress={() => void Linking.openURL(`${BRAND.websiteUrl}/terms`)}
-              >
-                Terms &amp; Conditions
-              </RNText>
-              .
+              {t('onboarding.consentAgree')
+                .split(/(%\{privacy\}|%\{terms\})/)
+                .map((segment, index) => {
+                  if (segment === '%{privacy}') {
+                    return (
+                      <RNText
+                        key="privacy"
+                        className="text-primary-soft underline"
+                        accessibilityRole="link"
+                        onPress={() => void Linking.openURL(`${BRAND.websiteUrl}/privacy`)}
+                      >
+                        {t('onboarding.privacyPolicy')}
+                      </RNText>
+                    );
+                  }
+                  if (segment === '%{terms}') {
+                    return (
+                      <RNText
+                        key="terms"
+                        className="text-primary-soft underline"
+                        accessibilityRole="link"
+                        onPress={() => void Linking.openURL(`${BRAND.websiteUrl}/terms`)}
+                      >
+                        {t('onboarding.terms')}
+                      </RNText>
+                    );
+                  }
+                  return <RNText key={index}>{segment}</RNText>;
+                })}
             </RNText>
           </CheckboxRow>
 
           <CheckboxRow checked={agreedMedical} onToggle={() => setAgreedMedical((prev) => !prev)}>
             <RNText className="text-base leading-6 text-text">
-              I understand that {BRAND.name} is for record keeping purposes only and is not intended
-              to be used for medical or health advice.
+              {t('onboarding.consentMedical', { brand })}
             </RNText>
           </CheckboxRow>
 
@@ -146,15 +161,13 @@ export default function Onboarding() {
             onToggle={() => setAgreedResponsibility((prev) => !prev)}
           >
             <RNText className="text-base leading-6 text-text">
-              I acknowledge that I am solely responsible for my PIN and the encrypted data it
-              protects, and understand that the developers of {BRAND.name} have no access to this
-              data and cannot recover it if my PIN is lost.
+              {t('onboarding.consentResponsibility', { brand })}
             </RNText>
           </CheckboxRow>
         </View>
 
         <Button
-          title="Continue"
+          title={t('common.continue')}
           disabled={!(agreedLegal && agreedMedical && agreedResponsibility)}
           onPress={() => setPhase('create')}
         />
@@ -169,26 +182,18 @@ export default function Onboarding() {
         <View className="items-center gap-2 pt-6">
           <Txt variant="display">{BRAND.name}</Txt>
           <Txt variant="muted" className="text-center">
-            {phase === 'create'
-              ? 'Choose a 6-digit PIN to protect your data'
-              : 'Re-enter your PIN to confirm'}
+            {phase === 'create' ? t('onboarding.pinCreate') : t('onboarding.pinConfirm')}
           </Txt>
         </View>
 
         <View className="gap-3">
-          {error ? (
-            <Txt className="text-center text-danger">{error}</Txt>
-          ) : (
-            <View className="h-5" />
-          )}
+          <View className="h-5" />
           <PinPad length={PIN_LENGTH} disabled={busy} onComplete={handlePinEntry} />
         </View>
 
         <View className="rounded-2xl border border-border bg-surface p-4">
           <Txt variant="faint" className="text-center leading-5">
-            Your PIN encrypts everything on this device and is never stored or sent anywhere. If you
-            forget it, your data can’t be recovered, and after 5 incorrect attempts, all data is
-            erased.
+            {t('onboarding.pinWarning')}
           </Txt>
         </View>
       </Screen>
@@ -200,8 +205,8 @@ export default function Onboarding() {
     return (
       <Screen contentClassName="justify-between">
         <View className="gap-2 pt-6">
-          <Txt variant="display">How you’ll use {BRAND.name}</Txt>
-          <Txt variant="muted">You can change this any time in settings.</Txt>
+          <Txt variant="display">{t('onboarding.modeTitle', { brand })}</Txt>
+          <Txt variant="muted">{t('onboarding.modeSubtitle')}</Txt>
         </View>
 
         <View className="gap-2">
@@ -211,6 +216,9 @@ export default function Onboarding() {
               <Pressable
                 key={mode.value}
                 onPress={() => setSelectedMode(mode.value)}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={`${t(mode.labelKey)}. ${t(mode.hintKey)}`}
                 className={`flex-row items-center gap-4 rounded-2xl border p-4 ${
                   selected ? 'border-primary bg-primary/10' : 'border-border bg-surface'
                 }`}
@@ -223,15 +231,15 @@ export default function Onboarding() {
                   {selected && <Ionicons name="checkmark" size={16} color={colors.ink} />}
                 </View>
                 <View className="flex-1">
-                  <Txt variant="body">{mode.label}</Txt>
-                  <Txt variant="faint">{mode.hint}</Txt>
+                  <Txt variant="body">{t(mode.labelKey)}</Txt>
+                  <Txt variant="faint">{t(mode.hintKey)}</Txt>
                 </View>
               </Pressable>
             );
           })}
         </View>
 
-        <Button title="Continue" onPress={() => setPhase('notifications')} />
+        <Button title={t('common.continue')} onPress={() => setPhase('notifications')} />
       </Screen>
     );
   }
@@ -263,11 +271,10 @@ export default function Onboarding() {
           </View>
           <View className="items-center gap-2">
             <Txt variant="display" className="text-center">
-              Allow reminders
+              {t('onboarding.notifTitle')}
             </Txt>
             <Txt variant="muted" className="text-center">
-              Enable any reminder below and {BRAND.name} will ask for notification permission. All
-              reminders are local to your device - nothing is sent anywhere.
+              {t('onboarding.notifSubtitle', { brand })}
             </Txt>
           </View>
         </View>
@@ -275,28 +282,28 @@ export default function Onboarding() {
         {/* Individual toggles */}
         <View className="gap-3">
           <NotifRow
-            label="Period starting tomorrow"
-            hint="Morning before your predicted period start"
+            label={t('notif.periodTomorrowLabel')}
+            hint={t('notif.periodTomorrowHint')}
             value={notifyPeriodTomorrow}
             onValueChange={(enabled) => void toggleNotify(setNotifyPeriodTomorrow, enabled)}
           />
           <NotifRow
-            label="Period starting today"
-            hint="Morning of your predicted period start"
+            label={t('notif.periodTodayLabel')}
+            hint={t('notif.periodTodayHint')}
             value={notifyPeriodToday}
             onValueChange={(enabled) => void toggleNotify(setNotifyPeriodToday, enabled)}
           />
           {fertilityApplicable && (
             <>
               <NotifRow
-                label="Fertile window tomorrow"
-                hint="Morning before your fertile window opens"
+                label={t('notif.fertileTomorrowLabel')}
+                hint={t('notif.fertileTomorrowHint')}
                 value={notifyFertileTomorrow}
                 onValueChange={(enabled) => void toggleNotify(setNotifyFertileTomorrow, enabled)}
               />
               <NotifRow
-                label="Fertile window opens"
-                hint="Morning your fertile window begins"
+                label={t('notif.fertileStartLabel')}
+                hint={t('notif.fertileStartHint')}
                 value={notifyFertileStart}
                 onValueChange={(enabled) => void toggleNotify(setNotifyFertileStart, enabled)}
               />
@@ -305,7 +312,7 @@ export default function Onboarding() {
         </View>
       </View>
 
-      <Button title="Get started" disabled={busy} onPress={() => void handleFinish()} />
+      <Button title={t('common.getStarted')} disabled={busy} onPress={() => void handleFinish()} />
     </Screen>
   );
 }

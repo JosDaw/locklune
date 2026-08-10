@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Flow } from '@locklune/core';
 import { Pressable, View } from 'react-native';
 import { Txt } from './ui/Text';
+import { t, useLocale } from '../i18n';
 import { FLOW_OPTIONS } from '../lib/logging';
 import { colors } from '../theme/colors';
 
@@ -12,6 +13,7 @@ export function FlowPicker({
   value: Flow | null;
   onChange: (flow: Flow) => void;
 }) {
+  useLocale();
   return (
     <View style={{ flexDirection: 'row', gap: 8 }}>
       {FLOW_OPTIONS.map((option) => {
@@ -21,7 +23,7 @@ export function FlowPicker({
             key={option.value}
             onPress={() => onChange(option.value)}
             accessibilityRole="button"
-            accessibilityLabel={option.label}
+            accessibilityLabel={t(option.labelKey)}
             style={{
               flex: 1,
               borderRadius: 16,
@@ -54,7 +56,7 @@ export function FlowPicker({
               ))}
             </View>
             <Txt className={selected ? 'text-primary-soft' : 'text-text-muted'} variant="faint">
-              {option.label}
+              {t(option.labelKey)}
             </Txt>
           </Pressable>
         );

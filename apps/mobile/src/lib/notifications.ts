@@ -4,6 +4,7 @@
  */
 import * as Notifications from 'expo-notifications';
 import { fromEpochDay, BRAND, type Prediction, type Settings } from '@locklune/core';
+import { t } from '../i18n';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -45,20 +46,20 @@ export async function syncReminders(prediction: Prediction, settings: Settings):
   if (!next) return;
 
   if (settings.notifyPeriodTomorrow) {
-    await scheduleAt(next.periodStart - 1, 'Your period may start tomorrow.');
+    await scheduleAt(next.periodStart - 1, t('notif.periodTomorrowBody'));
   }
   if (settings.notifyPeriodToday) {
-    await scheduleAt(next.periodStart, 'Your period may start today.');
+    await scheduleAt(next.periodStart, t('notif.periodTodayBody'));
   }
 
   if (prediction.fertilityApplicable) {
     if (settings.notifyFertileTomorrow) {
-      await scheduleAt(next.fertileWindow.start - 1, 'Your fertile window may start tomorrow.');
+      await scheduleAt(next.fertileWindow.start - 1, t('notif.fertileTomorrowBody'));
     }
     if (settings.notifyFertileStart) {
       await scheduleAt(
         next.fertileWindow.start,
-        `Your fertile window may be open until ${shortDate(next.fertileWindow.end)}.`,
+        t('notif.fertileOpenBody', { date: shortDate(next.fertileWindow.end) }),
       );
     }
   }

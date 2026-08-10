@@ -7,12 +7,14 @@ import { StatTile } from '../../components/StatTile';
 import { Card } from '../../components/ui/Card';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
+import { t, useLocale } from '../../i18n';
 import { confidenceLabel, formatDay, relativeDays } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
 import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
 
 export default function Insights() {
+  useLocale();
   const cycles = useDataStore((store) => store.cycles);
   const prediction = useDataStore((store) => store.prediction);
   const settings = useDataStore((store) => store.settings);
@@ -22,12 +24,12 @@ export default function Insights() {
   const confirmDelete = (cycle: Cycle) => {
     haptics.warn();
     Alert.alert(
-      'Delete this period?',
-      `This removes the period starting ${formatDay(cycle.startDay)} from your history. Symptom logs are kept.`,
+      t('insights.deletePeriodTitle'),
+      t('insights.deletePeriodBody', { date: formatDay(cycle.startDay) }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => void (async () => (await deleteCycle(cycle.id)) && haptics.success())(),
         },
@@ -52,32 +54,41 @@ export default function Insights() {
     <Screen>
       <View className="flex-row items-center gap-2 pb-1 pt-2">
         <Ionicons name="stats-chart" size={14} color={colors.primarySoft} />
-        <Txt variant="faint">Your cycle, over time</Txt>
+        <Txt variant="faint">{t('insights.headerSubtitle')}</Txt>
       </View>
 
       {/* Illuminated stat tiles */}
       <Card>
         <View className="flex-row gap-3">
-          <StatTile label="Avg cycle" value={`${Math.round(prediction.averageCycleLength)}d`} />
-          <StatTile label="Avg period" value={`${Math.round(prediction.averagePeriodLength)}d`} />
-          <StatTile label="Variation" value={`±${Math.round(prediction.variability)}d`} />
+          <StatTile
+            label={t('insights.avgCycle')}
+            value={t('insights.days', { count: Math.round(prediction.averageCycleLength) })}
+          />
+          <StatTile
+            label={t('insights.avgPeriod')}
+            value={t('insights.days', { count: Math.round(prediction.averagePeriodLength) })}
+          />
+          <StatTile
+            label={t('insights.variation')}
+            value={t('insights.variability', { count: Math.round(prediction.variability) })}
+          />
         </View>
         <Txt variant="faint" className="mt-4 text-center">
-          {confidenceLabel(prediction.confidence)} · {prediction.cyclesAnalyzed} cycle
-          {prediction.cyclesAnalyzed === 1 ? '' : 's'} analyzed
+          {confidenceLabel(prediction.confidence)} ·{' '}
+          {t('insights.analyzed', { count: prediction.cyclesAnalyzed })}
         </Txt>
       </Card>
 
       {/* Cycle length bar chart */}
       <Card>
         <Txt variant="title" className="mb-4">
-          Recent cycle lengths
+          {t('insights.recentLengths')}
         </Txt>
         {lengths.length === 0 ? (
           <View className="items-center gap-3 py-4">
             <Ionicons name="analytics-outline" size={32} color={colors.textFaint} />
             <Txt variant="muted" className="text-center">
-              Log at least two periods to see your cycle lengths.
+              {t('insights.logTwoPeriods')}
             </Txt>
           </View>
         ) : (
@@ -97,7 +108,7 @@ export default function Insights() {
                   />
                 </View>
                 <Txt variant="muted" className="w-12 text-right">
-                  {length}d
+                  {t('insights.days', { count: length })}
                 </Txt>
               </View>
             ))}
@@ -110,26 +121,32 @@ export default function Insights() {
         <Card>
           <View className="flex-row items-center gap-2 mb-4">
             <Ionicons name="heart-outline" size={14} color={colors.textFaint} />
-            <Txt variant="title">Pregnancy</Txt>
+            <Txt variant="title">{t('insights.pregnancy')}</Txt>
           </View>
           {preg ? (
             <View className="gap-2">
               <Txt variant="display">
-                Week {preg.week}
-                {preg.dayOfWeek > 0 ? ` + ${preg.dayOfWeek}d` : ''}
+                {preg.dayOfWeek > 0
+                  ? t('insights.weekPlusDay', { week: preg.week, days: preg.dayOfWeek })
+                  : t('insights.weekOnly', { week: preg.week })}
               </Txt>
               <Txt variant="muted">
-                Trimester {preg.trimester} ·{' '}
-                {preg.daysRemaining >= 0
-                  ? `${preg.daysRemaining} days to go`
-                  : `${-preg.daysRemaining} days over`}
+                {t('insights.trimesterLine', {
+                  trimester: preg.trimester,
+                  remaining:
+                    preg.daysRemaining >= 0
+                      ? t('insights.daysToGo', { count: preg.daysRemaining })
+                      : t('insights.daysOver', { count: -preg.daysRemaining }),
+                })}
               </Txt>
               <Txt variant="faint">
-                Estimated due {formatDay(preg.dueDay, { month: 'long', day: 'numeric' })}
+                {t('insights.estimatedDue', {
+                  date: formatDay(preg.dueDay, { month: 'long', day: 'numeric' }),
+                })}
               </Txt>
             </View>
           ) : (
-            <Txt variant="muted">Set how many weeks along you are in Settings.</Txt>
+            <Txt variant="muted">{t('insights.setWeeks')}</Txt>
           )}
         </Card>
       ) : (
@@ -138,14 +155,14 @@ export default function Insights() {
             <Ionicons name="calendar-outline" size={14} color={colors.textFaint} />
             <Txt variant="title">
               {settings.cycleMode === CYCLE_MODE.Contraception
-                ? 'Upcoming bleeds'
-                : 'Upcoming periods'}
+                ? t('insights.upcomingBleeds')
+                : t('insights.upcomingPeriods')}
             </Txt>
           </View>
           {prediction.upcoming.length === 0 ? (
             <View className="items-center gap-3 py-2">
               <Txt variant="muted" className="text-center">
-                Log your first period to see predictions.
+                {t('insights.logFirstPeriod')}
               </Txt>
             </View>
           ) : (
@@ -176,7 +193,7 @@ export default function Insights() {
         <Card>
           <View className="flex-row items-center gap-2 mb-4">
             <Ionicons name="time-outline" size={14} color={colors.textFaint} />
-            <Txt variant="title">Cycle history</Txt>
+            <Txt variant="title">{t('insights.cycleHistory')}</Txt>
           </View>
           <View className="gap-3">
             {[...cycles]
@@ -190,7 +207,7 @@ export default function Insights() {
       )}
 
       <Txt variant="faint" className="text-center">
-        For record keeping purposes only. Locklune does not provide medical or health advice.
+        {t('insights.disclaimer')}
       </Txt>
     </Screen>
   );

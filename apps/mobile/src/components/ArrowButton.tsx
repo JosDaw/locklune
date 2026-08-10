@@ -1,6 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { colors } from '../theme/colors';
 
 const ARROW_SPRING = { damping: 18, stiffness: 350, mass: 0.5 } as const;
@@ -16,12 +21,13 @@ export function ArrowButton({
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const reduceMotion = useReducedMotion();
   return (
     <Animated.View style={[styles.arrow, anim]}>
       <Pressable
         onPress={onPress}
         onPressIn={() => {
-          scale.value = withSpring(0.9, ARROW_SPRING);
+          if (!reduceMotion) scale.value = withSpring(0.9, ARROW_SPRING);
         }}
         onPressOut={() => {
           scale.value = withSpring(1, ARROW_SPRING);

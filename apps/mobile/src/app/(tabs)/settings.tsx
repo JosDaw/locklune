@@ -25,6 +25,7 @@ import { Card } from '../../components/ui/Card';
 import { PressScale } from '../../components/ui/PressScale';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
+import { t, useLocale } from '../../i18n';
 import { formatDay } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
 import { FEEDBACK_URL, KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
@@ -36,15 +37,10 @@ import { useDataStore } from '../../stores/dataStore';
 import { colors } from '../../theme/colors';
 import { fonts } from '../../theme/fonts';
 
-const AUTO_LOCK_OPTIONS = [
-  { label: 'Instant', value: 0 },
-  { label: '1 min', value: 1 },
-  { label: '2 min', value: 2 },
-  { label: '5 min', value: 5 },
-  { label: '15 min', value: 15 },
-];
+const AUTO_LOCK_VALUES = [0, 1, 2, 5, 15];
 
 export default function Settings() {
+  useLocale();
   const router = useRouter();
   const settings = useDataStore((store) => store.settings);
   const updateSettings = useDataStore((store) => store.updateSettings);
@@ -105,7 +101,7 @@ export default function Settings() {
     if (value) {
       const granted = await requestNotificationPermission();
       if (!granted) {
-        Alert.alert('Notifications off', 'Enable notifications for Locklune in system settings.');
+        Alert.alert(t('settings.notifOffTitle'), t('settings.notifOffBody'));
         return;
       }
     }
@@ -114,14 +110,10 @@ export default function Settings() {
 
   const confirmWipe = () => {
     haptics.warn();
-    Alert.alert(
-      'Erase everything?',
-      'This permanently deletes your PIN and all cycle data on this device. It cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Erase', style: 'destructive', onPress: () => void wipe() },
-      ],
-    );
+    Alert.alert(t('settings.eraseTitle'), t('settings.eraseBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('settings.erase'), style: 'destructive', onPress: () => void wipe() },
+    ]);
   };
 
   const luteal = settings.lutealPhaseDays;
@@ -130,18 +122,18 @@ export default function Settings() {
     <Screen>
       <View className="flex-row items-center gap-2 pb-1 pt-2">
         <Ionicons name="settings" size={14} color={colors.primarySoft} />
-        <Txt variant="faint">Preferences</Txt>
+        <Txt variant="faint">{t('tabs.preferences')}</Txt>
       </View>
 
       {/* Cycle mode */}
       <Card>
-        <SectionLabel icon="moon-outline" label="I am currently" />
+        <SectionLabel icon="moon-outline" label={t('settings.iAmCurrently')} />
         <View>
           {CYCLE_MODES.map((mode) => (
             <ModeRow
               key={mode.value}
-              label={mode.label}
-              hint={mode.hint}
+              label={t(mode.labelKey)}
+              hint={t(mode.hintKey)}
               active={settings.cycleMode === mode.value}
               onPress={() => selectMode(mode.value)}
             />
@@ -150,21 +142,19 @@ export default function Settings() {
 
         {settings.cycleMode === CYCLE_MODE.Contraception && (
           <View className="mt-4 gap-3 border-t border-border pt-4">
-            <Txt variant="faint">Method</Txt>
+            <Txt variant="faint">{t('settings.method')}</Txt>
             <View className="flex-row flex-wrap gap-2">
               {CONTRACEPTION_METHODS.map((method) => (
                 <Chip
                   key={method.value}
-                  label={method.label}
+                  label={t(method.labelKey)}
                   active={settings.contraceptionMethod === method.value}
                   onPress={() => void updateSettings({ contraceptionMethod: method.value })}
                 />
               ))}
             </View>
             {isHormonalContraception(settings.contraceptionMethod) && (
-              <Txt variant="faint">
-                Fertility estimates are hidden on hormonal methods, since ovulation is suppressed.
-              </Txt>
+              <Txt variant="faint">{t('settings.hormonalNote')}</Txt>
             )}
           </View>
         )}
@@ -172,7 +162,7 @@ export default function Settings() {
         {settings.cycleMode === CYCLE_MODE.Pregnant && (
           <View className="mt-4 gap-4 border-t border-border pt-4">
             <View className="flex-row items-center justify-between">
-              <Txt variant="body">Weeks along</Txt>
+              <Txt variant="body">{t('settings.weeksAlong')}</Txt>
               <Stepper
                 value={pregWeeks}
                 min={0}
@@ -185,7 +175,7 @@ export default function Settings() {
             {settings.pregnancyDueDay != null && (
               <View className="flex-row items-center justify-between">
                 <View>
-                  <Txt variant="body">Due date</Txt>
+                  <Txt variant="body">{t('settings.dueDate')}</Txt>
                   <Txt variant="faint">
                     {formatDay(settings.pregnancyDueDay, {
                       weekday: 'short',
@@ -201,7 +191,7 @@ export default function Settings() {
                       void updateSettings({ pregnancyDueDay: settings.pregnancyDueDay! - 1 })
                     }
                     accessibilityRole="button"
-                    accessibilityLabel="Move due date earlier by one day"
+                    accessibilityLabel={t('settings.dueEarlier')}
                     className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
                   >
                     <Ionicons name="remove" size={20} color={colors.text} />
@@ -211,7 +201,7 @@ export default function Settings() {
                       void updateSettings({ pregnancyDueDay: settings.pregnancyDueDay! + 1 })
                     }
                     accessibilityRole="button"
-                    accessibilityLabel="Move due date later by one day"
+                    accessibilityLabel={t('settings.dueLater')}
                     className="h-10 w-10 items-center justify-center rounded-full bg-surfaceMuted"
                   >
                     <Ionicons name="add" size={20} color={colors.text} />
@@ -226,11 +216,11 @@ export default function Settings() {
       {/* Cycle - not relevant when pregnant */}
       {settings.cycleMode !== CYCLE_MODE.Pregnant && (
         <Card>
-          <SectionLabel icon="sync-outline" label="Cycle" />
+          <SectionLabel icon="sync-outline" label={t('settings.cycle')} />
           <View className="flex-row items-center justify-between">
             <View className="flex-1 pr-4">
-              <Txt variant="body">Luteal phase length</Txt>
-              <Txt variant="faint">Used to estimate ovulation ({luteal} days)</Txt>
+              <Txt variant="body">{t('settings.lutealLength')}</Txt>
+              <Txt variant="faint">{t('settings.lutealUsed', { count: luteal })}</Txt>
             </View>
             <Stepper
               value={luteal}
@@ -240,40 +230,37 @@ export default function Settings() {
             />
           </View>
           <Txt variant="faint" className="mt-3">
-            The luteal phase is the time from ovulation to your next period - usually 12–14 days and
-            fairly steady between cycles. Locklune uses it to estimate ovulation and your fertile
-            window. If you confirm ovulation when logging a day, your own luteal length is learned
-            and used instead.
+            {t('settings.lutealExplain')}
           </Txt>
         </Card>
       )}
 
       {/* Reminders */}
       <Card>
-        <SectionLabel icon="notifications-outline" label="Reminders" />
+        <SectionLabel icon="notifications-outline" label={t('settings.reminders')} />
         <SwitchRow
-          label="Period starting tomorrow"
-          hint="Morning of the day before your predicted period"
+          label={t('notif.periodTomorrowLabel')}
+          hint={t('notif.periodTomorrowHint')}
           value={settings.notifyPeriodTomorrow}
           onValueChange={(enabled) => void toggleNotification('notifyPeriodTomorrow', enabled)}
         />
         <SwitchRow
-          label="Period starting today"
-          hint="Morning of your predicted period start"
+          label={t('notif.periodTodayLabel')}
+          hint={t('notif.periodTodayHint')}
           value={settings.notifyPeriodToday}
           onValueChange={(enabled) => void toggleNotification('notifyPeriodToday', enabled)}
         />
         {prediction.fertilityApplicable && (
           <>
             <SwitchRow
-              label="Fertile window tomorrow"
-              hint="Morning before your fertile window opens"
+              label={t('notif.fertileTomorrowLabel')}
+              hint={t('notif.fertileTomorrowHint')}
               value={settings.notifyFertileTomorrow}
               onValueChange={(enabled) => void toggleNotification('notifyFertileTomorrow', enabled)}
             />
             <SwitchRow
-              label="Fertile window opens"
-              hint="Morning your fertile window begins"
+              label={t('notif.fertileStartLabel')}
+              hint={t('notif.fertileStartHint')}
               value={settings.notifyFertileStart}
               onValueChange={(enabled) => void toggleNotification('notifyFertileStart', enabled)}
             />
@@ -283,15 +270,15 @@ export default function Settings() {
 
       {/* Custom symptoms */}
       <Card>
-        <SectionLabel icon="pricetag-outline" label="Custom symptoms" />
+        <SectionLabel icon="pricetag-outline" label={t('settings.customSymptoms')} />
         <Txt variant="faint" className="mb-3">
-          Add your own symptom tags - they appear in the log screen under “custom”.
+          {t('settings.customSymptomsHint')}
         </Txt>
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
           <TextInput
             value={newSymptom}
             onChangeText={setNewSymptom}
-            placeholder="e.g. joint pain"
+            placeholder={t('settings.symptomPlaceholder')}
             placeholderTextColor={colors.textFaint}
             autoCapitalize="none"
             autoCorrect={false}
@@ -311,7 +298,7 @@ export default function Settings() {
           <Pressable
             onPress={addSymptom}
             accessibilityRole="button"
-            accessibilityLabel="Add symptom"
+            accessibilityLabel={t('settings.addSymptom')}
             style={{
               width: 44,
               height: 44,
@@ -335,7 +322,7 @@ export default function Settings() {
                 key={symptom}
                 onPress={() => removeSymptom(symptom)}
                 accessibilityRole="button"
-                accessibilityLabel={`Remove ${symptom}`}
+                accessibilityLabel={t('settings.removeSymptom', { symptom })}
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
@@ -364,20 +351,23 @@ export default function Settings() {
 
       {/* Security */}
       <Card>
-        <SectionLabel icon="shield-checkmark-outline" label="Security" />
+        <SectionLabel icon="shield-checkmark-outline" label={t('settings.security')} />
         <PressScale
           onPress={() => router.push(ROUTES.changePin)}
           className="flex-row items-center justify-between py-3"
         >
-          <Txt variant="body">Change PIN</Txt>
+          <Txt variant="body">{t('settings.changePin')}</Txt>
           <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
         </PressScale>
 
         <Txt variant="faint" className="mb-2 mt-4">
-          Auto-lock after inactivity
+          {t('settings.autoLock')}
         </Txt>
         <Segmented
-          options={AUTO_LOCK_OPTIONS}
+          options={AUTO_LOCK_VALUES.map((value) => ({
+            label: value === 0 ? t('settings.instant') : t('settings.minutes', { count: value }),
+            value,
+          }))}
           value={settings.autoLockMinutes}
           onChange={(minutes) => void updateSettings({ autoLockMinutes: minutes })}
         />
@@ -385,25 +375,30 @@ export default function Settings() {
 
       {/* About */}
       <Card>
-        <SectionLabel icon="information-circle-outline" label="About" />
-        <RNText className="text-base leading-5 text-text-muted">
-          Locklune is designed for record keeping purposes only. It is not a replacement for
-          professional medical advice. If you have any health concerns, please consult a qualified
-          healthcare provider.
-        </RNText>
+        <SectionLabel icon="information-circle-outline" label={t('settings.about')} />
+        <RNText className="text-base leading-5 text-text-muted">{t('settings.aboutBody')}</RNText>
         <View className="mt-4">
-          <AboutRow icon="star-outline" label="Rate Locklune" onPress={() => openLink(RATE_URL)} />
+          <AboutRow
+            icon="star-outline"
+            label={t('settings.rate')}
+            onPress={() => openLink(RATE_URL)}
+          />
           <AboutRow
             icon="heart-outline"
-            label="Support the developer"
+            label={t('settings.support')}
             onPress={() => openLink(KOFI_URL)}
           />
           <AboutRow
             icon="bug-outline"
-            label="Report a bug or request a feature"
+            label={t('settings.reportBug')}
             onPress={() => openLink(FEEDBACK_URL)}
           />
-          <AboutRow icon="share-social-outline" label="Tell a friend" onPress={shareApp} last />
+          <AboutRow
+            icon="share-social-outline"
+            label={t('settings.tellFriend')}
+            onPress={shareApp}
+            last
+          />
         </View>
       </Card>
 
@@ -413,10 +408,14 @@ export default function Settings() {
           borderColor: 'rgba(248,113,113,0.3)',
         }}
       >
-        <SectionLabel icon="alert-circle-outline" label="Danger zone" labelClass="text-danger" />
+        <SectionLabel
+          icon="alert-circle-outline"
+          label={t('settings.dangerZone')}
+          labelClass="text-danger"
+        />
         <View className="gap-3">
-          <Button title="Lock now" variant="secondary" onPress={() => void lock()} />
-          <Button title="Erase all data" variant="danger" onPress={confirmWipe} />
+          <Button title={t('settings.lockNow')} variant="secondary" onPress={() => void lock()} />
+          <Button title={t('settings.eraseAll')} variant="danger" onPress={confirmWipe} />
         </View>
       </Card>
 
@@ -425,7 +424,7 @@ export default function Settings() {
           {BRAND.name} v{Constants.expoConfig?.version ?? '0.1.0'}
         </Txt>
         <Txt variant="faint" className="text-center">
-          100% on-device · encrypted · no tracking
+          {t('settings.tagline')}
         </Txt>
       </View>
     </Screen>

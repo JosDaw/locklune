@@ -3,6 +3,7 @@ import { fromEpochDay, type DayLog } from '@locklune/core';
 import { useRef } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import { t, useLocale } from '../i18n';
 import { formatDay } from '../lib/format';
 import { MOOD_META } from '../lib/logging';
 import { colors } from '../theme/colors';
@@ -17,6 +18,7 @@ export function LogEntry({
   onPress: () => void;
   onDelete: () => void;
 }) {
+  useLocale();
   const moodIcon = log.mood != null ? MOOD_META[log.mood] : null;
   const swipeRef = useRef<Swipeable>(null);
 
@@ -27,7 +29,7 @@ export function LogEntry({
         onDelete();
       }}
       accessibilityRole="button"
-      accessibilityLabel="Delete log"
+      accessibilityLabel={t('misc.deleteLog')}
       style={{
         justifyContent: 'center',
         alignItems: 'center',
@@ -46,7 +48,7 @@ export function LogEntry({
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel={`Log for ${fromEpochDay(log.day).toLocaleDateString()}`}
+        accessibilityLabel={t('misc.logFor', { date: fromEpochDay(log.day).toLocaleDateString() })}
         style={{
           flexDirection: 'row',
           alignItems: 'center',

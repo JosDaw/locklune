@@ -1,5 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Flow, Mood } from '@locklune/core';
+import { t } from '../i18n';
 
 type MoodIcon = keyof typeof MaterialCommunityIcons.glyphMap;
 type IonIcon = keyof typeof Ionicons.glyphMap;
@@ -13,13 +14,13 @@ export const MOOD_META: Record<number, { icon: MoodIcon; color: string }> = {
   [Mood.Great]: { icon: 'emoticon-excited-outline', color: '#FCA5A5' },
 };
 
-/** Short human label for each mood level. */
-export const MOOD_LABEL: Record<number, string> = {
-  [Mood.Awful]: 'Awful',
-  [Mood.Low]: 'Low',
-  [Mood.Okay]: 'Okay',
-  [Mood.Good]: 'Good',
-  [Mood.Great]: 'Great',
+/** i18n key for each mood level's short label (translate with `t()` at render). */
+export const MOOD_LABEL_KEY: Record<number, string> = {
+  [Mood.Awful]: 'data.mood.awful',
+  [Mood.Low]: 'data.mood.low',
+  [Mood.Okay]: 'data.mood.okay',
+  [Mood.Good]: 'data.mood.good',
+  [Mood.Great]: 'data.mood.great',
 };
 
 /** Ordered mood options for the mood picker. */
@@ -31,48 +32,66 @@ export const MOOD_OPTIONS: { icon: MoodIcon; value: Mood }[] = [
   { icon: MOOD_META[Mood.Great]!.icon, value: Mood.Great },
 ];
 
-/** Descriptive label for each flow level. */
-export const FLOW_LABELS: Record<number, string> = {
-  [Flow.Spotting]: 'Spotting',
-  [Flow.Light]: 'Light flow',
-  [Flow.Medium]: 'Medium flow',
-  [Flow.Heavy]: 'Heavy flow',
+/** i18n key for each flow level's descriptive ("… flow") label. */
+export const FLOW_LABEL_KEY: Record<number, string> = {
+  [Flow.Spotting]: 'data.flow.spottingLong',
+  [Flow.Light]: 'data.flow.lightLong',
+  [Flow.Medium]: 'data.flow.mediumLong',
+  [Flow.Heavy]: 'data.flow.heavyLong',
 };
 
-/** Ordered flow options for the flow picker (short label + drop count). */
-export const FLOW_OPTIONS: { label: string; value: Flow; drops: number }[] = [
-  { label: 'Spotting', value: Flow.Spotting, drops: 1 },
-  { label: 'Light', value: Flow.Light, drops: 2 },
-  { label: 'Medium', value: Flow.Medium, drops: 3 },
-  { label: 'Heavy', value: Flow.Heavy, drops: 4 },
+/** Ordered flow options for the flow picker (short label key + drop count). */
+export const FLOW_OPTIONS: { labelKey: string; value: Flow; drops: number }[] = [
+  { labelKey: 'data.flow.spotting', value: Flow.Spotting, drops: 1 },
+  { labelKey: 'data.flow.light', value: Flow.Light, drops: 2 },
+  { labelKey: 'data.flow.medium', value: Flow.Medium, drops: 3 },
+  { labelKey: 'data.flow.heavy', value: Flow.Heavy, drops: 4 },
 ];
 
-/** Built-in symptom groups shown in the log screen's symptom picker. */
-export const SYMPTOM_CATEGORIES: { name: string; icon: IonIcon; items: string[] }[] = [
+/**
+ * Built-in symptom groups shown in the log screen's symptom picker. `items` are
+ * canonical (English) ids stored verbatim in the DB; `nameKey` is an i18n key.
+ */
+export const SYMPTOM_CATEGORIES: { nameKey: string; icon: IonIcon; items: string[] }[] = [
   {
-    name: 'Common',
+    nameKey: 'data.symptomCategory.common',
     icon: 'star-outline',
     items: ['cramps', 'headache', 'fatigue', 'bloating', 'nausea'],
   },
   {
-    name: 'Pain',
+    nameKey: 'data.symptomCategory.pain',
     icon: 'bandage-outline',
     items: ['back pain', 'tender breasts', 'hot flashes', 'dizziness', 'swelling'],
   },
-  { name: 'Sleep', icon: 'moon-outline', items: ['insomnia', 'night sweats', 'low energy'] },
   {
-    name: 'Mind',
+    nameKey: 'data.symptomCategory.sleep',
+    icon: 'moon-outline',
+    items: ['insomnia', 'night sweats', 'low energy'],
+  },
+  {
+    nameKey: 'data.symptomCategory.mind',
     icon: 'bulb-outline',
     items: ['mood swings', 'anxiety', 'irritability', 'brain fog'],
   },
   {
-    name: 'Gut',
+    nameKey: 'data.symptomCategory.gut',
     icon: 'nutrition-outline',
     items: ['heartburn', 'constipation', 'diarrhea', 'nausea', 'bloating'],
   },
   {
-    name: 'Skin',
+    nameKey: 'data.symptomCategory.skin',
     icon: 'sparkles-outline',
     items: ['acne', 'spotting', 'discharge', 'skin changes', 'hair changes'],
   },
 ];
+
+const BUILTIN_SYMPTOM_IDS = new Set(SYMPTOM_CATEGORIES.flatMap((category) => category.items));
+
+/**
+ * Display label for a stored symptom id. Built-in ids are translated; custom
+ * user symptoms (no catalogue entry) fall back to a capitalised form of the id.
+ */
+export function symptomLabel(id: string): string {
+  if (BUILTIN_SYMPTOM_IDS.has(id)) return t(`data.symptom.${id}`);
+  return id.charAt(0).toUpperCase() + id.slice(1);
+}

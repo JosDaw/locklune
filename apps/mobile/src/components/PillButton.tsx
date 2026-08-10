@@ -1,6 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, Text } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 
@@ -19,12 +24,13 @@ export function PillButton({
 }) {
   const scale = useSharedValue(1);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const reduceMotion = useReducedMotion();
   return (
     <Animated.View style={[anim, { alignSelf: large ? 'center' : 'flex-start', borderRadius: 99 }]}>
       <Pressable
         onPress={onPress}
         onPressIn={() => {
-          scale.value = withSpring(0.94, PILL_SPRING);
+          if (!reduceMotion) scale.value = withSpring(0.94, PILL_SPRING);
         }}
         onPressOut={() => {
           scale.value = withSpring(1, PILL_SPRING);

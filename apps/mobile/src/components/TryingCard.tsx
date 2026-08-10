@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { CycleRing } from './CycleRing';
 import { PillButton } from './PillButton';
 import { Txt } from './ui/Text';
+import { t, useLocale } from '../i18n';
 import { formatDay, formatRange } from '../lib/format';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -22,6 +23,7 @@ export function TryingCard({
   cycleDay: number;
   onStart: () => void;
 }) {
+  useLocale();
   const inWindow = today >= next.fertileWindow.start && today <= next.fertileWindow.end;
   const isOvulationDay = today === next.ovulationDay;
   const afterOvulation = today > next.ovulationDay;
@@ -34,34 +36,36 @@ export function TryingCard({
   let detail2: string | null = null;
 
   if (isOvulationDay) {
-    label = 'Ovulation day';
+    label = t('tryingCard.ovulationDay');
     accentColor = colors.ovulation;
     bigNumber = 0;
-    sublabel = 'Your estimated peak fertility';
-    detail = `Fertile window: ${formatRange(next.fertileWindow.start, next.fertileWindow.end)}`;
+    sublabel = t('tryingCard.peakFertility');
+    detail = t('tryingCard.fertileWindowRange', {
+      range: formatRange(next.fertileWindow.start, next.fertileWindow.end),
+    });
   } else if (inWindow) {
     const daysToOv = next.ovulationDay - today;
-    label = 'In your fertile window';
+    label = t('tryingCard.inFertileWindow');
     accentColor = colors.fertile;
     bigNumber = daysToOv;
-    sublabel = `day${daysToOv === 1 ? '' : 's'} until ovulation`;
-    detail = `Ovulation: ${formatDay(next.ovulationDay)}`;
+    sublabel = t('tryingCard.daysUntilOvulation', { count: daysToOv });
+    detail = t('tryingCard.ovulationOn', { date: formatDay(next.ovulationDay) });
   } else if (!afterOvulation) {
     const daysToWindow = next.fertileWindow.start - today;
-    label = 'Fertile window';
+    label = t('tryingCard.fertileWindow');
     accentColor = colors.fertile;
     bigNumber = daysToWindow;
-    sublabel = `day${daysToWindow === 1 ? '' : 's'} away`;
+    sublabel = t('tryingCard.daysAway', { count: daysToWindow });
     detail = formatRange(next.fertileWindow.start, next.fertileWindow.end);
-    detail2 = `Ovulation: ${formatDay(next.ovulationDay)}`;
+    detail2 = t('tryingCard.ovulationOn', { date: formatDay(next.ovulationDay) });
   } else {
     // Luteal phase - show period countdown so they know the next cycle is coming
     const daysToP = next.periodStart - today;
-    label = 'Next fertile window';
+    label = t('tryingCard.nextFertileWindow');
     accentColor = colors.primarySoft;
     bigNumber = daysToP;
-    sublabel = `day${daysToP === 1 ? '' : 's'} until next period`;
-    detail = `New cycle starts ${formatDay(next.periodStart)}`;
+    sublabel = t('tryingCard.daysUntilNextPeriod', { count: daysToP });
+    detail = t('tryingCard.newCycleStarts', { date: formatDay(next.periodStart) });
   }
 
   return (
@@ -97,9 +101,11 @@ export function TryingCard({
         {detail2 && <Txt variant="faint">{detail2}</Txt>}
         <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
           <Txt variant="faint" className="flex-1">
-            {cycleDay > 0 ? `Day ${cycleProgressDay} of ${totalCycle}` : ' '}
+            {cycleDay > 0
+              ? t('home.dayXofY', { current: cycleProgressDay, total: totalCycle })
+              : ' '}
           </Txt>
-          <PillButton label="Start period" icon="add" onPress={onStart} />
+          <PillButton label={t('home.startPeriod')} icon="add" onPress={onStart} />
         </View>
       </View>
       <CycleRing day={cycleProgressDay} total={totalCycle} size={84} color={accentColor} />
