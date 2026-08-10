@@ -83,7 +83,11 @@ export const en = {
     title: 'A different set of defaults',
     others: 'Others',
     rows: [
-      { label: 'Where your data lives', locklune: 'Local-only, on your device', others: 'Synced to the cloud' },
+      {
+        label: 'Where your data lives',
+        locklune: 'Local-only, on your device',
+        others: 'Synced to the cloud',
+      },
       { label: 'Access', locklune: 'PIN protected', others: 'Login required' },
       { label: 'Analytics', locklune: 'None', others: 'Usage tracking' },
       { label: 'Account', locklune: 'No account', others: 'Email required' },
@@ -93,7 +97,11 @@ export const en = {
         locklune: 'No data exists to seize',
         others: 'Cloud data can be handed over',
       },
-      { label: 'Repeated wrong PINs', locklune: 'Erases all data after 5 tries', others: 'Account lockout' },
+      {
+        label: 'Repeated wrong PINs',
+        locklune: 'Erases all data after 5 tries',
+        others: 'Account lockout',
+      },
     ],
   },
   securitySection: {
@@ -108,8 +116,14 @@ export const en = {
         title: 'PIN lock',
         body: 'A PIN you choose derives the encryption key. It is never stored or transmitted.',
       },
-      { title: 'Offline support', body: 'Everything works with no connection. There is nothing to sync.' },
-      { title: 'No servers', body: 'There is no backend to breach, subpoena, or sell. We hold nothing.' },
+      {
+        title: 'Offline support',
+        body: 'Everything works with no connection. There is nothing to sync.',
+      },
+      {
+        title: 'No servers',
+        body: 'There is no backend to breach, subpoena, or sell. We hold nothing.',
+      },
       {
         title: 'No third-party analytics',
         body: 'No SDKs, no trackers, no identifiers. Not in the app, not on this site.',
@@ -170,10 +184,12 @@ export const en = {
     sentAnon: 'Your message was received anonymously.',
     noPersonalInfoBefore: 'Please do ',
     noPersonalInfoBold: 'not',
-    noPersonalInfoAfter: ' include any personal information about your fertility or menstrual cycle in this form.',
+    noPersonalInfoAfter:
+      ' include any personal information about your fertility or menstrual cycle in this form.',
     emailLabel: 'Email',
     optional: '(optional)',
-    emailHint: "Include your email if you'd like a reply - or leave it blank to contact anonymously.",
+    emailHint:
+      "Include your email if you'd like a reply - or leave it blank to contact anonymously.",
     messageLabel: 'Message',
     sendError: 'Could not send right now. Please try again.',
     sending: 'Sending',

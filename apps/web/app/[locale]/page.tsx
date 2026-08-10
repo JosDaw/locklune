@@ -180,7 +180,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       </Section>
 
       {/* ---------- Security ---------- */}
-      <Section id="security" eyebrow={dict.securitySection.eyebrow} title={dict.securitySection.title}>
+      <Section
+        id="security"
+        eyebrow={dict.securitySection.eyebrow}
+        title={dict.securitySection.title}
+      >
         <div className="grid items-center gap-14 lg:grid-cols-2">
           <div className="relative flex items-center justify-center py-8">
             <div

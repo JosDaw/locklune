@@ -168,9 +168,11 @@ const ko: Catalog = {
   home: {
     phaseLabel: '%{phase}',
     welcomeTitle: '%{brand}에 오신 것을 환영합니다',
-    welcomeSubtitle: '첫 생리를 기록하면 %{brand}이(가) 주기를 학습합니다. 모두 기기에서, 항상 비공개로.',
+    welcomeSubtitle:
+      '첫 생리를 기록하면 %{brand}이(가) 주기를 학습합니다. 모두 기기에서, 항상 비공개로.',
     logStartedToday: '오늘 생리 시작 기록',
-    previousDaysHint: '이전 날짜의 기록을 추가하려면 달력으로 이동하여 업데이트할 날짜를 선택하세요.',
+    previousDaysHint:
+      '이전 날짜의 기록을 추가하려면 달력으로 이동하여 업데이트할 날짜를 선택하세요.',
     onPeriod: '생리 중',
     dayNumber: '%{count}일차',
     moreDaysExpected: {

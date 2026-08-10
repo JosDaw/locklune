@@ -250,7 +250,11 @@ export default function Calendar() {
                   iconColor={colors.fertile}
                   label={t('calendar.fertile')}
                 />
-                <LegendChip icon="leaf" iconColor={colors.ovulation} label={t('calendar.ovulation')} />
+                <LegendChip
+                  icon="leaf"
+                  iconColor={colors.ovulation}
+                  label={t('calendar.ovulation')}
+                />
               </>
             )}
           </>
@@ -276,22 +280,18 @@ export default function Calendar() {
                   router.push({ pathname: ROUTES.log, params: { day: String(log.day) } })
                 }
                 onDelete={() => {
-                  Alert.alert(
-                    t('calendar.deleteLogTitle'),
-                    t('calendar.deleteLogBody'),
-                    [
-                      { text: t('common.cancel'), style: 'cancel' },
-                      {
-                        text: t('common.delete'),
-                        style: 'destructive',
-                        onPress: () =>
-                          void deleteLog(log.day).then((ok) => {
-                            if (ok)
-                              setMonthLogs((prev) => prev.filter((entry) => entry.day !== log.day));
-                          }),
-                      },
-                    ],
-                  );
+                  Alert.alert(t('calendar.deleteLogTitle'), t('calendar.deleteLogBody'), [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    {
+                      text: t('common.delete'),
+                      style: 'destructive',
+                      onPress: () =>
+                        void deleteLog(log.day).then((ok) => {
+                          if (ok)
+                            setMonthLogs((prev) => prev.filter((entry) => entry.day !== log.day));
+                        }),
+                    },
+                  ]);
                 }}
               />
             ))}

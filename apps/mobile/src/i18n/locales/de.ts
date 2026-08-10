@@ -84,7 +84,10 @@ const de: Catalog = {
   },
   data: {
     mode: {
-      tracking: { label: 'Meinen Zyklus verfolgen', hint: 'Perioden- und Fruchtbarkeitsschätzungen' },
+      tracking: {
+        label: 'Meinen Zyklus verfolgen',
+        hint: 'Perioden- und Fruchtbarkeitsschätzungen',
+      },
       periodOnly: {
         label: 'Nur Periode verfolgen',
         hint: 'Nur Perioden – Fruchtbarkeitsinhalte ausgeblendet',
@@ -314,7 +317,8 @@ const de: Catalog = {
     logged: 'Erfasst',
     fertile: 'Fruchtbar',
     ovulation: 'Eisprung',
-    tapAnyDay: 'Tippe auf einen Tag, um einen Eintrag hinzuzufügen, zu beenden oder zu korrigieren.',
+    tapAnyDay:
+      'Tippe auf einen Tag, um einen Eintrag hinzuzufügen, zu beenden oder zu korrigieren.',
     thisMonth: 'Diesen Monat',
     showMore: '%{count} weitere anzeigen',
     deleteLogTitle: 'Diesen Eintrag löschen?',

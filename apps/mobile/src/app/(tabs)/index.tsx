@@ -202,7 +202,9 @@ export default function Today() {
                     {t('home.dayNumber', { count: periodDay })}
                   </Text>
                   <View style={{ gap: 2 }}>
-                    <Txt variant="faint">{t('log.startedOn', { date: formatDay(last!.startDay) })}</Txt>
+                    <Txt variant="faint">
+                      {t('log.startedOn', { date: formatDay(last!.startDay) })}
+                    </Txt>
                     {periodDaysLeft > 0 && (
                       <Txt variant="faint">
                         {t('home.moreDaysExpected', { count: periodDaysLeft })}

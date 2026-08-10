@@ -89,7 +89,10 @@ export const en = {
   data: {
     mode: {
       tracking: { label: 'Tracking my cycle', hint: 'Period and fertility estimates' },
-      periodOnly: { label: 'Period tracking only', hint: 'Periods only - fertility content hidden' },
+      periodOnly: {
+        label: 'Period tracking only',
+        hint: 'Periods only - fertility content hidden',
+      },
       trying: { label: 'Trying to conceive', hint: 'Focus on your fertile window' },
       contraception: {
         label: 'On contraception',
@@ -352,7 +355,8 @@ export const en = {
     bbtUnit: 'BBT · °C',
     clearTemp: 'Clear temperature',
     removeStartTitle: 'Remove period start?',
-    removeStartBody: 'This deletes this period and all logs (symptoms, flow, notes) for those days.',
+    removeStartBody:
+      'This deletes this period and all logs (symptoms, flow, notes) for those days.',
     remove: 'Remove',
     saved: '✓ Saved',
     saveChanges: 'Save changes',
@@ -361,7 +365,8 @@ export const en = {
   settings: {
     iAmCurrently: 'I am currently',
     method: 'Method',
-    hormonalNote: 'Fertility estimates are hidden on hormonal methods, since ovulation is suppressed.',
+    hormonalNote:
+      'Fertility estimates are hidden on hormonal methods, since ovulation is suppressed.',
     weeksAlong: 'Weeks along',
     dueDate: 'Due date',
     dueEarlier: 'Move due date earlier by one day',

@@ -181,18 +181,14 @@ export default function LogModal() {
   const removeStart = () => {
     if (!cycle) return;
     haptics.warn();
-    Alert.alert(
-      t('log.removeStartTitle'),
-      t('log.removeStartBody'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('log.remove'),
-          style: 'destructive',
-          onPress: () => void (async () => (await deleteCycle(cycle.id)) && haptics.success())(),
-        },
-      ],
-    );
+    Alert.alert(t('log.removeStartTitle'), t('log.removeStartBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('log.remove'),
+        style: 'destructive',
+        onPress: () => void (async () => (await deleteCycle(cycle.id)) && haptics.success())(),
+      },
+    ]);
   };
 
   const save = async () => {

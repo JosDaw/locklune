@@ -72,8 +72,6 @@ export function Txt({
       );
     case 'body':
     default:
-      return (
-        <GSText size="md" className={cls('text-text font-body')} style={koStyle} {...rest} />
-      );
+      return <GSText size="md" className={cls('text-text font-body')} style={koStyle} {...rest} />;
   }
 }

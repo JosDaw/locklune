@@ -80,17 +80,29 @@ const de: Dictionary = {
     title: 'Andere Standardeinstellungen',
     others: 'Andere',
     rows: [
-      { label: 'Wo deine Daten liegen', locklune: 'Nur lokal, auf deinem Gerät', others: 'In die Cloud synchronisiert' },
+      {
+        label: 'Wo deine Daten liegen',
+        locklune: 'Nur lokal, auf deinem Gerät',
+        others: 'In die Cloud synchronisiert',
+      },
       { label: 'Zugang', locklune: 'PIN-geschützt', others: 'Anmeldung erforderlich' },
       { label: 'Analysen', locklune: 'Keine', others: 'Nutzungs-Tracking' },
       { label: 'Konto', locklune: 'Kein Konto', others: 'E-Mail erforderlich' },
-      { label: 'Verschlüsselung', locklune: 'AES-256 auf dem Gerät', others: 'Variiert, oft serverseitig' },
+      {
+        label: 'Verschlüsselung',
+        locklune: 'AES-256 auf dem Gerät',
+        others: 'Variiert, oft serverseitig',
+      },
       {
         label: 'Behördliche oder rechtliche Anfragen',
         locklune: 'Es existieren keine Daten zum Beschlagnahmen',
         others: 'Cloud-Daten können herausgegeben werden',
       },
-      { label: 'Wiederholt falsche PINs', locklune: 'Löscht alle Daten nach 5 Versuchen', others: 'Kontosperrung' },
+      {
+        label: 'Wiederholt falsche PINs',
+        locklune: 'Löscht alle Daten nach 5 Versuchen',
+        others: 'Kontosperrung',
+      },
     ],
   },
   securitySection: {
@@ -105,8 +117,14 @@ const de: Dictionary = {
         title: 'PIN-Sperre',
         body: 'Eine PIN, die du wählst, leitet den Verschlüsselungsschlüssel ab. Sie wird niemals gespeichert oder übertragen.',
       },
-      { title: 'Offline-Unterstützung', body: 'Alles funktioniert ohne Verbindung. Es gibt nichts zu synchronisieren.' },
-      { title: 'Keine Server', body: 'Es gibt kein Backend zum Hacken, Vorladen oder Verkaufen. Wir halten nichts.' },
+      {
+        title: 'Offline-Unterstützung',
+        body: 'Alles funktioniert ohne Verbindung. Es gibt nichts zu synchronisieren.',
+      },
+      {
+        title: 'Keine Server',
+        body: 'Es gibt kein Backend zum Hacken, Vorladen oder Verkaufen. Wir halten nichts.',
+      },
       {
         title: 'Keine Analysen von Drittanbietern',
         body: 'Keine SDKs, keine Tracker, keine Identifikatoren. Weder in der App noch auf dieser Website.',
@@ -127,7 +145,8 @@ const de: Dictionary = {
   },
   support: {
     title: 'Hilfe',
-    intro: 'Häufige Fragen unten. Brauchst du noch Hilfe? Schreib uns eine Nachricht und wir antworten per E-Mail.',
+    intro:
+      'Häufige Fragen unten. Brauchst du noch Hilfe? Schreib uns eine Nachricht und wir antworten per E-Mail.',
     contactTitle: 'Kontaktiere uns',
     contactIntro:
       'Das Durchsuchen dieser Website erfasst nichts. Wenn du dieses Formular sendest, werden deine E-Mail (optional) und deine Nachricht an unser Support-Postfach gesendet, damit wir antworten können, und für nichts anderes verwendet.',
@@ -167,10 +186,12 @@ const de: Dictionary = {
     sentAnon: 'Deine Nachricht wurde anonym empfangen.',
     noPersonalInfoBefore: 'Bitte gib in diesem Formular ',
     noPersonalInfoBold: 'keine',
-    noPersonalInfoAfter: ' persönlichen Informationen über deine Fruchtbarkeit oder deinen Menstruationszyklus an.',
+    noPersonalInfoAfter:
+      ' persönlichen Informationen über deine Fruchtbarkeit oder deinen Menstruationszyklus an.',
     emailLabel: 'E-Mail',
     optional: '(optional)',
-    emailHint: 'Gib deine E-Mail an, wenn du eine Antwort möchtest – oder lass sie leer, um anonym zu kontaktieren.',
+    emailHint:
+      'Gib deine E-Mail an, wenn du eine Antwort möchtest – oder lass sie leer, um anonym zu kontaktieren.',
     messageLabel: 'Nachricht',
     sendError: 'Konnte gerade nicht gesendet werden. Bitte versuche es erneut.',
     sending: 'Wird gesendet',

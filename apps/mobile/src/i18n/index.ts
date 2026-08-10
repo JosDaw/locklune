@@ -18,17 +18,12 @@ import ko from './locales/ko';
 export const SUPPORTED_LOCALES = ['en', 'es', 'de', 'ko'] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
-export const i18n = new I18n(
-  { en, es, de, ko },
-  { defaultLocale: 'en', enableFallback: true },
-);
+export const i18n = new I18n({ en, es, de, ko }, { defaultLocale: 'en', enableFallback: true });
 
 /** First supported device language, else English. */
 function detectLocale(): SupportedLocale {
   const code = getLocales()[0]?.languageCode ?? 'en';
-  return (SUPPORTED_LOCALES as readonly string[]).includes(code)
-    ? (code as SupportedLocale)
-    : 'en';
+  return (SUPPORTED_LOCALES as readonly string[]).includes(code) ? (code as SupportedLocale) : 'en';
 }
 
 i18n.locale = detectLocale();

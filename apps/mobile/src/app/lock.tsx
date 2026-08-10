@@ -71,7 +71,11 @@ export default function Lock() {
     haptics.warn();
     Alert.alert(t('lock.resetTitle'), t('lock.resetBody'), [
       { text: t('common.cancel'), style: 'cancel' },
-      { text: t('common.continue'), style: 'destructive', onPress: () => router.push(ROUTES.reset) },
+      {
+        text: t('common.continue'),
+        style: 'destructive',
+        onPress: () => router.push(ROUTES.reset),
+      },
     ]);
   };
 

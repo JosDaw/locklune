@@ -80,17 +80,29 @@ const es: Dictionary = {
     title: 'Otro conjunto de valores por defecto',
     others: 'Otros',
     rows: [
-      { label: 'Dónde viven tus datos', locklune: 'Solo local, en tu dispositivo', others: 'Sincronizados en la nube' },
+      {
+        label: 'Dónde viven tus datos',
+        locklune: 'Solo local, en tu dispositivo',
+        others: 'Sincronizados en la nube',
+      },
       { label: 'Acceso', locklune: 'Protegido con PIN', others: 'Requiere inicio de sesión' },
       { label: 'Analíticas', locklune: 'Ninguna', others: 'Seguimiento de uso' },
       { label: 'Cuenta', locklune: 'Sin cuenta', others: 'Requiere correo' },
-      { label: 'Cifrado', locklune: 'AES-256 en el dispositivo', others: 'Varía, a menudo en el servidor' },
+      {
+        label: 'Cifrado',
+        locklune: 'AES-256 en el dispositivo',
+        others: 'Varía, a menudo en el servidor',
+      },
       {
         label: 'Solicitudes legales o gubernamentales',
         locklune: 'No hay datos que incautar',
         others: 'Los datos en la nube pueden entregarse',
       },
-      { label: 'PIN incorrecto repetido', locklune: 'Borra todo tras 5 intentos', others: 'Bloqueo de cuenta' },
+      {
+        label: 'PIN incorrecto repetido',
+        locklune: 'Borra todo tras 5 intentos',
+        others: 'Bloqueo de cuenta',
+      },
     ],
   },
   securitySection: {
@@ -105,8 +117,14 @@ const es: Dictionary = {
         title: 'Bloqueo con PIN',
         body: 'Un PIN que eliges deriva la clave de cifrado. Nunca se almacena ni se transmite.',
       },
-      { title: 'Compatible sin conexión', body: 'Todo funciona sin conexión. No hay nada que sincronizar.' },
-      { title: 'Sin servidores', body: 'No hay backend que vulnerar, citar judicialmente o vender. No guardamos nada.' },
+      {
+        title: 'Compatible sin conexión',
+        body: 'Todo funciona sin conexión. No hay nada que sincronizar.',
+      },
+      {
+        title: 'Sin servidores',
+        body: 'No hay backend que vulnerar, citar judicialmente o vender. No guardamos nada.',
+      },
       {
         title: 'Sin analíticas de terceros',
         body: 'Sin SDK, sin rastreadores, sin identificadores. Ni en la app, ni en este sitio.',
@@ -127,7 +145,8 @@ const es: Dictionary = {
   },
   support: {
     title: 'Soporte',
-    intro: 'Preguntas comunes abajo. ¿Aún necesitas ayuda? Envíanos un mensaje y responderemos por correo.',
+    intro:
+      'Preguntas comunes abajo. ¿Aún necesitas ayuda? Envíanos un mensaje y responderemos por correo.',
     contactTitle: 'Contáctanos',
     contactIntro:
       'Navegar por este sitio no recopila nada. Cuando envías este formulario, tu correo (opcional) y mensaje se envían a nuestra bandeja de soporte para poder responder, y no se usan para nada más.',
@@ -167,10 +186,12 @@ const es: Dictionary = {
     sentAnon: 'Tu mensaje se recibió de forma anónima.',
     noPersonalInfoBefore: 'Por favor, ',
     noPersonalInfoBold: 'no',
-    noPersonalInfoAfter: ' incluyas información personal sobre tu fertilidad o ciclo menstrual en este formulario.',
+    noPersonalInfoAfter:
+      ' incluyas información personal sobre tu fertilidad o ciclo menstrual en este formulario.',
     emailLabel: 'Correo',
     optional: '(opcional)',
-    emailHint: 'Incluye tu correo si quieres una respuesta, o déjalo en blanco para contactar de forma anónima.',
+    emailHint:
+      'Incluye tu correo si quieres una respuesta, o déjalo en blanco para contactar de forma anónima.',
     messageLabel: 'Mensaje',
     sendError: 'No se pudo enviar ahora. Inténtalo de nuevo.',
     sending: 'Enviando',

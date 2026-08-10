@@ -106,7 +106,10 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="insights"
-        options={{ title: t('tabs.insights'), tabBarIcon: icon('stats-chart-outline', 'stats-chart') }}
+        options={{
+          title: t('tabs.insights'),
+          tabBarIcon: icon('stats-chart-outline', 'stats-chart'),
+        }}
       />
       <Tabs.Screen
         name="settings"

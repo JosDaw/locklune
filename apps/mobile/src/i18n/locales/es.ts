@@ -294,8 +294,7 @@ const es: Catalog = {
     chartTitle: 'Duración de ciclos',
     chartAvg: 'media %{count} días',
     chartOutside: 'fuera del rango habitual (±15%)',
-    chartSummary:
-      'Gráfico de duración de ciclos: %{count} ciclos recientes, media de %{avg} días.',
+    chartSummary: 'Gráfico de duración de ciclos: %{count} ciclos recientes, media de %{avg} días.',
     chartSummaryIrregular: ' Algunos ciclos están fuera del rango habitual.',
   },
   calendar: {
