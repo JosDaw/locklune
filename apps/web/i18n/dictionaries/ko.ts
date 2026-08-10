@@ -30,7 +30,7 @@ const ko: Dictionary = {
     elsewhere: '다른 곳',
     disclaimer: 'Locklune은 기록 목적으로만 사용되며 의료 또는 건강 조언을 제공하지 않습니다.',
     noTracking: '쿠키 없음. 추적 없음. 서버 없음.',
-    madeWith: '만든 정성',
+    madeWith: '정성을 담아',
     supportCreator: '제작자 후원하기',
   },
   hero: {

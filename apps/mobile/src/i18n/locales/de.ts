@@ -92,7 +92,7 @@ const de: Catalog = {
         label: 'Nur Periode verfolgen',
         hint: 'Nur Perioden – Fruchtbarkeitsinhalte ausgeblendet',
       },
-      trying: { label: 'Versuche zu empfangen', hint: 'Fokus auf dein fruchtbares Fenster' },
+      trying: { label: 'Versuche, schwanger zu werden', hint: 'Fokus auf dein fruchtbares Fenster' },
       contraception: {
         label: 'Verhütung',
         hint: 'Blutungen erfassen; Fruchtbarkeit bei hormonellen Methoden ausgeblendet',

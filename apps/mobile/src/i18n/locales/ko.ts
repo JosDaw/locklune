@@ -213,7 +213,7 @@ const ko: Catalog = {
     ovulation: '예상 배란',
     fertile: '가임기 중',
     flowExpected: '%{flow} 예상',
-    usuallyMood: '이런 날에는 보통 %{mood} 기분입니다',
+    usuallyMood: '이런 날에는 대체로 %{mood}',
     oftenLogged: '이런 날에 자주 기록됨',
   },
   statsRow: {
@@ -333,7 +333,7 @@ const ko: Catalog = {
     markLastDay: '마지막 날로 표시',
     clearEndDate: '종료일 지우기',
     removeStart: '시작 제거',
-    flow: '양',
+    flow: '생리량',
     symptoms: '증상',
     notes: '메모',
     notesPlaceholder: '오늘에 대해 기억하고 싶은 것이 있나요?',

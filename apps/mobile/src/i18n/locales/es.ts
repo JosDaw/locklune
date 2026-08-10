@@ -21,7 +21,7 @@ const es: Catalog = {
     resetTitle: '¿Restablecer y empezar de nuevo?',
     resetBody:
       'Esto borra permanentemente tu PIN y todos los datos de este dispositivo. No se puede deshacer.',
-    resetCta: '¿Bloqueado? Borra y empieza de nuevo',
+    resetCta: '¿Bloqueada? Borra y empieza de nuevo',
     resetA11y: 'Restablecer y empezar de nuevo',
   },
   changePin: {
@@ -40,7 +40,7 @@ const es: Catalog = {
     promptEnter: 'Elige un código de 6 dígitos para confirmar',
     promptConfirm: 'Vuelve a introducir el código para confirmar',
     warning:
-      'Esto borra permanentemente tu PIN y todos los datos de este dispositivo para que puedas empezar de cero. No se puede deshacer. Úsalo solo si estás bloqueado o si tus datos no se cargan.',
+      'Esto borra permanentemente tu PIN y todos los datos de este dispositivo para que puedas empezar de cero. No se puede deshacer. Úsalo solo si estás bloqueada o si tus datos no se cargan.',
     erasing: 'Borrando…',
     mismatch: 'Los códigos no coinciden. Empieza de nuevo.',
     success: 'Todo se ha restablecido. Configura un nuevo PIN para empezar de nuevo.',
@@ -54,7 +54,7 @@ const es: Catalog = {
     consentMedical:
       'Entiendo que %{brand} es solo para fines de registro y no está destinado a proporcionar consejo médico o de salud.',
     consentResponsibility:
-      'Reconozco que soy el único responsable de mi PIN y de los datos cifrados que protege, y entiendo que los desarrolladores de %{brand} no tienen acceso a estos datos y no pueden recuperarlos si pierdo mi PIN.',
+      'Reconozco que soy la única responsable de mi PIN y de los datos cifrados que protege, y entiendo que los desarrolladores de %{brand} no tienen acceso a estos datos y no pueden recuperarlos si pierdo mi PIN.',
     pinCreate: 'Elige un PIN de 6 dígitos para proteger tus datos',
     pinConfirm: 'Vuelve a introducir tu PIN para confirmar',
     pinWarning:
