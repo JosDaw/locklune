@@ -1,7 +1,8 @@
 import { Backdrop } from '@/components/backdrop';
 import { MoonMark } from '@/components/logo';
 import { PhoneMockup } from '@/components/phone';
-import { comparison, security, site } from '@/lib/site';
+import { getDictionary } from '@/i18n/dictionaries';
+import { site } from '@/lib/site';
 import {
   CalendarDays as CalendarIcon,
   Check as CheckIcon,
@@ -18,9 +19,14 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+const featureIcons = [LockIcon, MoonIcon, CloudOffIcon];
 const securityIcons = [ShieldIcon, LockIcon, WifiOffIcon, ServerIcon, EyeOffIcon, TrashIcon];
 
-export default function Home() {
+export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const dict = await getDictionary(locale);
+  const base = `/${locale}`;
+
   return (
     <>
       {/* ---------- Hero ---------- */}
@@ -29,33 +35,31 @@ export default function Home() {
         <div className="mx-auto grid max-w-container items-center gap-16 px-6 pb-10 pt-20 lg:grid-cols-[1.05fr_0.95fr] lg:pt-28">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-fg-soft">
-              <MoonMark className="h-4 w-4" /> Device-only · encrypted · no tracking
+              <MoonMark className="h-4 w-4" /> {dict.hero.badge}
             </span>
             <h1 className="mt-6 font-display text-4xl font-semibold leading-[1.08] tracking-tight text-fg sm:text-5xl lg:text-6xl">
-              <span className="text-gradient-moon">{site.tagline}</span>
+              <span className="text-gradient-moon">{dict.hero.tagline}</span>
             </h1>
             <div className="mt-6 max-w-md space-y-1.5 text-lg leading-relaxed text-fg-soft">
-              <p>Your cycle data never leaves your device.</p>
-              <p className="text-fg-muted">
-                Protected with your PIN. No cloud. No account. No digital record.
-              </p>
+              <p>{dict.hero.sub1}</p>
+              <p className="text-fg-muted">{dict.hero.sub2}</p>
             </div>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
               <Link
-                href="#download"
+                href={`${base}#download`}
                 className="inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 text-sm font-semibold text-night transition-transform hover:scale-[1.03]"
               >
-                Download Free
+                {dict.hero.downloadFree}
               </Link>
               <Link
-                href="#security"
+                href={`${base}#security`}
                 className="inline-flex items-center text-sm font-medium text-fg-soft underline underline-offset-4 transition-colors hover:text-fg"
               >
-                Learn how your privacy is protected
+                {dict.hero.learnPrivacy}
               </Link>
             </div>
-            <p className="mt-4 text-xs text-fg-muted">Now on Android and iOS.</p>
+            <p className="mt-4 text-xs text-fg-muted">{dict.hero.availability}</p>
           </div>
 
           <div className="relative">
@@ -65,58 +69,59 @@ export default function Home() {
       </section>
 
       {/* ---------- Privacy first ---------- */}
-      <Section id="privacy" eyebrow="Privacy first" title="Built to reveal nothing">
+      <Section id="privacy" eyebrow={dict.privacySection.eyebrow} title={dict.privacySection.title}>
         <div className="grid gap-5 md:grid-cols-3">
-          <FeatureCard
-            icon={<LockIcon className="h-6 w-6" />}
-            title="Protected by PIN"
-            body="A PIN you choose derives the key that encrypts everything. It is never stored or sent anywhere."
-          />
-          <FeatureCard
-            icon={<MoonIcon className="h-6 w-6" />}
-            title="Everything stays on your device"
-            body="Your cycle, symptoms and notes live in an encrypted database on your phone, and only there."
-          />
-          <FeatureCard
-            icon={<CloudOffIcon className="h-6 w-6" />}
-            title="No cloud. No account. No data collection."
-            body="There is no sign-up and no server. Nothing to breach, nothing to sell, nothing to share."
-          />
+          {dict.privacySection.cards.map((card, index) => {
+            const Icon = featureIcons[index % featureIcons.length]!;
+            return (
+              <FeatureCard
+                key={card.title}
+                icon={<Icon className="h-6 w-6" />}
+                title={card.title}
+                body={card.body}
+              />
+            );
+          })}
         </div>
       </Section>
 
       {/* ---------- Beautiful tracking ---------- */}
       <Section
         id="tracking"
-        eyebrow="Beautiful tracking"
-        title="Calm, minimal, and quietly powerful"
+        eyebrow={dict.trackingSection.eyebrow}
+        title={dict.trackingSection.title}
       >
-        <p className="-mt-6 mb-10 max-w-xl text-fg-soft">
-          A timeline, an elegant calendar, mood tracking, and adaptive predictions, all in a
-          peaceful dark interface designed to disappear into the background. Whether you are
-          tracking your cycle, trying to conceive, on contraception, or pregnant, Locklune adapts to
-          you.
-        </p>
+        <p className="-mt-6 mb-10 max-w-xl text-fg-soft">{dict.trackingSection.intro}</p>
         <div className="grid gap-5 md:grid-cols-3">
-          <TrackCard icon={<CalendarIcon className="h-5 w-5" />} title="Elegant calendar">
+          <TrackCard
+            icon={<CalendarIcon className="h-5 w-5" />}
+            title={dict.trackingSection.calendarTitle}
+          >
             <MiniCalendar />
           </TrackCard>
-          <TrackCard icon={<SparkIcon className="h-5 w-5" />} title="Cycle predictions">
+          <TrackCard
+            icon={<SparkIcon className="h-5 w-5" />}
+            title={dict.trackingSection.predictionsTitle}
+          >
             <div className="space-y-3">
               <div className="rounded-xl border border-line bg-night2 p-3">
-                <p className="text-[11px] uppercase tracking-widest text-lock">Next period</p>
-                <p className="font-display text-lg font-semibold text-fg">in 6 days</p>
+                <p className="text-[11px] uppercase tracking-widest text-lock">
+                  {dict.trackingSection.nextPeriod}
+                </p>
+                <p className="font-display text-lg font-semibold text-fg">
+                  {dict.trackingSection.inDays}
+                </p>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
                   <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-lock to-highlight" />
                 </div>
               </div>
               <div className="flex items-center justify-between text-sm text-fg-soft">
-                <span>Fertile window</span>
-                <span className="text-fg">Jul 9–14</span>
+                <span>{dict.trackingSection.fertileWindow}</span>
+                <span className="text-fg">{dict.trackingSection.fertileDates}</span>
               </div>
             </div>
           </TrackCard>
-          <TrackCard icon={<MoonIcon className="h-5 w-5" />} title="Mood &amp; symptoms">
+          <TrackCard icon={<MoonIcon className="h-5 w-5" />} title={dict.trackingSection.moodTitle}>
             <div className="space-y-3">
               <div className="flex gap-2">
                 {[35, 60, 45, 80, 55, 70, 90].map((heightPercent, index) => (
@@ -129,7 +134,7 @@ export default function Home() {
                 ))}
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {['cramps', 'calm', 'tired', 'focused'].map((tag) => (
+                {dict.trackingSection.tags.map((tag) => (
                   <span
                     key={tag}
                     className="rounded-full border border-line px-2.5 py-1 text-[11px] text-fg-soft"
@@ -144,16 +149,16 @@ export default function Home() {
       </Section>
 
       {/* ---------- Why Locklune (comparison) ---------- */}
-      <Section id="why" eyebrow="Why Locklune" title="A different set of defaults">
+      <Section id="why" eyebrow={dict.whySection.eyebrow} title={dict.whySection.title}>
         <div className="surface overflow-hidden">
           <div className="grid grid-cols-[1.4fr_1fr_1fr] border-b border-line text-sm">
             <div className="px-5 py-4 text-fg-muted" />
             <div className="flex items-center gap-2 px-5 py-4 font-display font-semibold text-fg">
-              <MoonMark className="h-5 w-5" /> Locklune
+              <MoonMark className="h-5 w-5" /> {site.name}
             </div>
-            <div className="px-5 py-4 font-medium text-fg-muted">Others</div>
+            <div className="px-5 py-4 font-medium text-fg-muted">{dict.whySection.others}</div>
           </div>
-          {comparison.map((row, index) => (
+          {dict.whySection.rows.map((row, index) => (
             <div
               key={row.label}
               className={`grid grid-cols-[1.4fr_1fr_1fr] items-center text-sm ${
@@ -175,7 +180,7 @@ export default function Home() {
       </Section>
 
       {/* ---------- Security ---------- */}
-      <Section id="security" eyebrow="Security" title="Peace of mind, by design">
+      <Section id="security" eyebrow={dict.securitySection.eyebrow} title={dict.securitySection.title}>
         <div className="grid items-center gap-14 lg:grid-cols-2">
           <div className="relative flex items-center justify-center py-8">
             <div
@@ -188,7 +193,7 @@ export default function Home() {
             <MoonMark className="relative h-56 w-56 drop-shadow-[0_20px_60px_rgba(138,162,255,0.35)]" />
           </div>
           <ul className="space-y-3">
-            {security.map((feature, index) => {
+            {dict.securitySection.items.map((feature, index) => {
               const Icon = securityIcons[index % securityIcons.length]!;
               return (
                 <li
@@ -221,11 +226,9 @@ export default function Home() {
           />
           <MoonMark className="mx-auto h-12 w-12" />
           <h2 className="mx-auto mt-6 max-w-2xl font-display text-3xl font-semibold tracking-tight text-fg sm:text-4xl">
-            Your cycle. Locked to your device.
+            {dict.download.title}
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-fg-soft">
-            No account, no cloud, no tracking. Just a calm, private place to understand your body.
-          </p>
+          <p className="mx-auto mt-4 max-w-md text-fg-soft">{dict.download.body}</p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href={site.playStore}
@@ -233,7 +236,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 text-sm font-semibold text-night transition-transform hover:scale-[1.03]"
             >
-              Get it on Google Play
+              {dict.download.googlePlay}
             </a>
             {site.appStore && (
               <a
@@ -242,17 +245,17 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-fg px-6 py-3 text-sm font-semibold text-night transition-transform hover:scale-[1.03]"
               >
-                Download on the App Store
+                {dict.download.appStore}
               </a>
             )}
             <Link
-              href="/privacy"
+              href={`${base}/privacy`}
               className="rounded-full border border-line px-6 py-3 text-sm font-medium text-fg-soft transition-colors hover:text-fg"
             >
-              Read the privacy policy
+              {dict.download.readPrivacy}
             </Link>
           </div>
-          <p className="mt-4 text-xs text-fg-muted">Free on Android and iOS.</p>
+          <p className="mt-4 text-xs text-fg-muted">{dict.download.availability}</p>
         </div>
       </section>
     </>

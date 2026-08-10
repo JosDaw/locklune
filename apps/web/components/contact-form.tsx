@@ -1,12 +1,13 @@
 'use client';
 
+import type { Dictionary } from '@/i18n/dictionaries/en';
 import { type FormEvent, useState } from 'react';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
-export function ContactForm() {
+export function ContactForm({ t }: { t: Dictionary['contact'] }) {
   const [email, setEmail] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   const [company, setCompany] = useState<string>(''); // honeypot
@@ -15,9 +16,8 @@ export function ContactForm() {
 
   const clientValidate = (): string | null => {
     const trimmedEmail = email.trim();
-    if (trimmedEmail && !EMAIL_RE.test(trimmedEmail))
-      return "That email address doesn't look right.";
-    if (message.trim().length < 10) return 'Please enter a message of at least 10 characters.';
+    if (trimmedEmail && !EMAIL_RE.test(trimmedEmail)) return t.emailInvalid;
+    if (message.trim().length < 10) return t.messageMin;
     return null;
   };
 
@@ -44,11 +44,11 @@ export function ContactForm() {
         setEmail('');
         setMessage('');
       } else {
-        setError(data.error ?? 'Could not send right now. Please try again.');
+        setError(data.error ?? t.sendError);
         setStatus('error');
       }
     } catch {
-      setError('Could not send right now. Please try again.');
+      setError(t.sendError);
       setStatus('error');
     }
   };
@@ -56,12 +56,8 @@ export function ContactForm() {
   if (status === 'sent') {
     return (
       <div className="surface p-6 text-center">
-        <p className="font-display text-lg font-semibold text-fg">Thanks, your message was sent.</p>
-        <p className="mt-2 text-fg-muted">
-          {email.trim()
-            ? 'We will get back to you by email.'
-            : 'Your message was received anonymously.'}
-        </p>
+        <p className="font-display text-lg font-semibold text-fg">{t.sentTitle}</p>
+        <p className="mt-2 text-fg-muted">{email.trim() ? t.sentReplyEmail : t.sentAnon}</p>
       </div>
     );
   }
@@ -74,7 +70,7 @@ export function ContactForm() {
         className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden"
       >
         <label>
-          Company
+          {t.company}
           <input
             tabIndex={-1}
             autoComplete="off"
@@ -85,13 +81,14 @@ export function ContactForm() {
       </div>
 
       <div className="rounded-2xl border border-star/30 bg-star/[0.06] p-4 text-sm text-fg-soft">
-        Please do <strong className="text-fg">not</strong> include any personal information about
-        your fertility or menstrual cycle in this form.
+        {t.noPersonalInfoBefore}
+        <strong className="text-fg">{t.noPersonalInfoBold}</strong>
+        {t.noPersonalInfoAfter}
       </div>
 
       <div>
         <label htmlFor="cf-email" className="mb-1.5 block text-sm text-fg-soft">
-          Email <span className="text-fg-muted">(optional)</span>
+          {t.emailLabel} <span className="text-fg-muted">{t.optional}</span>
         </label>
         <input
           id="cf-email"
@@ -101,14 +98,12 @@ export function ContactForm() {
           onChange={(event) => setEmail(event.target.value)}
           className="w-full rounded-2xl border border-line bg-night2 px-4 py-3 text-fg outline-none placeholder:text-fg-muted focus:border-lock"
         />
-        <p className="mt-1.5 text-xs text-fg-muted">
-          Include your email if you'd like a reply - or leave it blank to contact anonymously.
-        </p>
+        <p className="mt-1.5 text-xs text-fg-muted">{t.emailHint}</p>
       </div>
 
       <div>
         <label htmlFor="cf-message" className="mb-1.5 block text-sm text-fg-soft">
-          Message
+          {t.messageLabel}
         </label>
         <textarea
           id="cf-message"
@@ -130,7 +125,7 @@ export function ContactForm() {
         disabled={status === 'sending'}
         className="rounded-full bg-fg px-6 py-3 text-sm font-semibold text-night transition-transform hover:scale-[1.02] disabled:opacity-60"
       >
-        {status === 'sending' ? 'Sending' : 'Send message'}
+        {status === 'sending' ? t.sending : t.sendMessage}
       </button>
     </form>
   );

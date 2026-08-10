@@ -1,3 +1,4 @@
+import { getDictionary } from '@/i18n/dictionaries';
 import { site } from '@/lib/site';
 import type { Metadata } from 'next';
 
@@ -14,11 +15,18 @@ function P({ children }: { children: React.ReactNode }) {
   return <p className="mt-4 leading-relaxed text-fg-soft">{children}</p>;
 }
 
-export default function Terms() {
+export default async function Terms({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const dict = await getDictionary(locale);
   return (
     <article className="mx-auto max-w-3xl px-6 py-20">
       <h1 className="font-display text-4xl font-semibold tracking-tight text-fg">Terms of Use</h1>
       <p className="mt-3 text-sm text-fg-muted">Last updated: {site.lastUpdated}</p>
+      {locale !== 'en' && (
+        <p className="mt-4 rounded-2xl border border-line bg-white/[0.03] px-4 py-3 text-sm text-fg-muted">
+          {dict.legalNote}
+        </p>
+      )}
 
       <H2>Acceptance</H2>
       <P>
@@ -132,7 +140,7 @@ export default function Terms() {
       <H2>Contact</H2>
       <P>
         Questions about these terms? Use the{' '}
-        <a href="/support" className="text-lock underline underline-offset-4">
+        <a href={`/${locale}/support`} className="text-lock underline underline-offset-4">
           contact form
         </a>{' '}
         on our support page.
