@@ -112,10 +112,17 @@ export default function Calendar() {
   const loggedDays = useMemo(() => new Set(monthLogs.map((log) => log.day)), [monthLogs]);
 
   const { periodSet, predictedSet, fertileSet, ovulationSet } = useMemo(() => {
+    const avgBleed = Math.max(1, Math.round(activePrediction.averagePeriodLength));
     const period = new Set<EpochDay>();
     cycles.forEach((cycle, index) => {
       const isLast = index === cycles.length - 1;
-      const end = cycle.endDay ?? (isLast ? today : cycle.startDay);
+      // Confirmed bleed range. For a period left open (no end recorded), assume the
+      // average bleed length rather than painting red indefinitely: cap the active
+      // (last) cycle at today so future days aren't shown as confirmed, and cap an
+      // older open cycle before the next period so ranges never run together.
+      const nextStart = isLast ? Number.POSITIVE_INFINITY : cycles[index + 1]!.startDay;
+      const end =
+        cycle.endDay ?? Math.min(cycle.startDay + avgBleed - 1, isLast ? today : nextStart - 1);
       for (let day = cycle.startDay; day <= end; day++) period.add(day);
     });
     const predicted = new Set<EpochDay>();
@@ -125,14 +132,18 @@ export default function Calendar() {
       for (let day = upcoming.periodStart; day <= upcoming.periodEnd; day++) predicted.add(day);
       if (activePrediction.fertilityApplicable) {
         for (let day = upcoming.fertileWindow.start; day <= upcoming.fertileWindow.end; day++)
-          fertile.add(day);
-        ovulation.add(upcoming.ovulationDay);
+          // A recorded bleed day is a known fact; never also mark it fertile/ovulation
+          // (they would otherwise collide on short cycles, or when an ongoing period is
+          // left open and its red range extends up to today past the fertile window).
+          if (!period.has(day)) fertile.add(day);
+        if (!period.has(upcoming.ovulationDay)) ovulation.add(upcoming.ovulationDay);
       }
     }
     const current = cycles[cycles.length - 1];
     if (current && current.endDay === null) {
-      const expectedEnd =
-        current.startDay + Math.max(1, Math.round(activePrediction.averagePeriodLength)) - 1;
+      // Rest of the expected bleed (beyond today) shows as predicted, dovetailing
+      // with the confirmed range above so the two never overlap.
+      const expectedEnd = current.startDay + avgBleed - 1;
       for (let day = today + 1; day <= expectedEnd; day++) predicted.add(day);
     }
     return {

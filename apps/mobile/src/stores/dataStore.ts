@@ -109,8 +109,20 @@ export const useDataStore = create<DataState>((set, get) => {
         if (ongoing && Math.abs(ongoing.startDay - day) < RECONCILE_DAYS) {
           if (day !== ongoing.startDay) await db.moveCycleStart(ongoing.id, day);
         } else {
+          // A genuinely new cycle begins. If the previous period was never given an
+          // end, finalise it now so it stops counting as "ongoing" - otherwise it
+          // keeps painting up to today (colliding with the new cycle's fertile
+          // window) and collapses to a single day once it is no longer the latest
+          // cycle. Bound the bleed to the learned average, never past the new start.
+          if (ongoing && ongoing.startDay < day) {
+            const bleed = Math.max(1, Math.round(get().prediction.averagePeriodLength));
+            await db.setCycleEnd(ongoing.id, Math.min(day - 1, ongoing.startDay + bleed - 1));
+          }
           await db.addCycle(day);
         }
+        // refreshAll re-derives cycles + confirmed ovulations and recomputes the
+        // prediction, so the next period, ovulation and fertile window all re-anchor
+        // to this new start.
         await refreshAll();
       }, 'Could not save the period.'),
 
