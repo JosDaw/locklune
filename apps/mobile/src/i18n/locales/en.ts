@@ -191,6 +191,8 @@ export const en = {
     },
     endPeriod: 'End period',
     startPeriod: 'Start period',
+    logSymptoms: 'Log symptoms',
+    editSymptoms: 'Edit symptoms',
     nextExpectedBleed: 'Next expected bleed',
     nextPeriod: 'Next period',
     dayAway: {

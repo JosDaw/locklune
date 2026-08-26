@@ -185,6 +185,8 @@ const es: Catalog = {
     },
     endPeriod: 'Finalizar período',
     startPeriod: 'Iniciar período',
+    logSymptoms: 'Registrar síntomas',
+    editSymptoms: 'Editar síntomas',
     nextExpectedBleed: 'Próximo sangrado previsto',
     nextPeriod: 'Próximo período',
     dayAway: {

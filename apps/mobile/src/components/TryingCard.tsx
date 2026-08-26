@@ -1,7 +1,6 @@
 import type { CyclePrediction, EpochDay } from '@locklune/core';
 import { Text, View } from 'react-native';
 import { CycleRing } from './CycleRing';
-import { PillButton } from './PillButton';
 import { Txt } from './ui/Text';
 import { t, useLocale } from '../i18n';
 import { formatDay, formatRange } from '../lib/format';
@@ -14,14 +13,12 @@ export function TryingCard({
   cycleProgressDay,
   totalCycle,
   cycleDay,
-  onStart,
 }: {
   next: CyclePrediction;
   today: EpochDay;
   cycleProgressDay: number;
   totalCycle: number;
   cycleDay: number;
-  onStart: () => void;
 }) {
   useLocale();
   const inWindow = today >= next.fertileWindow.start && today <= next.fertileWindow.end;
@@ -99,14 +96,11 @@ export function TryingCard({
           {detail}
         </Text>
         {detail2 && <Txt variant="faint">{detail2}</Txt>}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
-          <Txt variant="faint" className="flex-1">
-            {cycleDay > 0
-              ? t('home.dayXofY', { current: cycleProgressDay, total: totalCycle })
-              : ' '}
+        {cycleDay > 0 && (
+          <Txt variant="faint" className="mt-2.5">
+            {t('home.dayXofY', { current: cycleProgressDay, total: totalCycle })}
           </Txt>
-          <PillButton label={t('home.startPeriod')} icon="add" onPress={onStart} />
-        </View>
+        )}
       </View>
       <CycleRing day={cycleProgressDay} total={totalCycle} size={84} color={accentColor} />
     </View>

@@ -8,6 +8,7 @@ import { CycleRing } from '../../components/CycleRing';
 import { InsightCard } from '../../components/InsightCard';
 import { LogTodayButton } from '../../components/LogTodayButton';
 import { OutlookChip } from '../../components/OutlookChip';
+import { PeriodActionsCard } from '../../components/PeriodActionsCard';
 import { PillButton } from '../../components/PillButton';
 import { PregnancyCard } from '../../components/PregnancyCard';
 import { StatsRow } from '../../components/StatsRow';
@@ -91,6 +92,9 @@ export default function Today() {
 
   const totalCycle = Math.round(prediction.averageCycleLength);
   const daysAway = next ? next.periodStart - today : 0;
+  // The period/log actions live in their own card at the very top, except in the
+  // brand-new "welcome" state (no cycle yet) which keeps its own start CTA.
+  const showActions = !pregnant && (onPeriod || next !== undefined);
   // Where in the cycle we are, for the hero subtitle + ring progress.
   const cycleDay = last !== undefined && today >= last.startDay ? today - last.startDay + 1 : 0;
   const cycleProgressDay = Math.min(cycleDay, totalCycle);
@@ -163,6 +167,18 @@ export default function Today() {
         <PregnancyCard preg={preg} />
       ) : (
         <>
+          {/* Quick actions - first card at the top */}
+          {showActions && (
+            <PeriodActionsCard
+              onPeriod={onPeriod}
+              hasSymptoms={logLoaded && todayLog !== null && todayLog.symptoms.length > 0}
+              onPeriodAction={onPeriod ? onEnd : onStart}
+              onLogSymptoms={() =>
+                router.push({ pathname: ROUTES.log, params: { day: String(today) } })
+              }
+            />
+          )}
+
           {/* Primary status card */}
           <View
             style={{
@@ -211,10 +227,6 @@ export default function Today() {
                       </Txt>
                     )}
                   </View>
-                  <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                    <View style={{ flex: 1 }} />
-                    <PillButton label={t('home.endPeriod')} icon="checkmark" onPress={onEnd} />
-                  </View>
                 </View>
                 <CycleRing day={periodDay} total={totalPeriod} size={84} />
               </View>
@@ -226,7 +238,6 @@ export default function Today() {
                 cycleProgressDay={cycleProgressDay}
                 totalCycle={totalCycle}
                 cycleDay={cycleDay}
-                onStart={onStart}
               />
             ) : (
               // NEXT PERIOD countdown
@@ -263,14 +274,11 @@ export default function Today() {
                       range: formatRange(next!.periodStartRange.start, next!.periodStartRange.end),
                     })}
                   </Txt>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}>
-                    <Txt variant="faint" className="flex-1">
-                      {cycleDay > 0
-                        ? t('home.dayXofY', { current: cycleProgressDay, total: totalCycle })
-                        : ' '}
+                  {cycleDay > 0 && (
+                    <Txt variant="faint" className="mt-2.5">
+                      {t('home.dayXofY', { current: cycleProgressDay, total: totalCycle })}
                     </Txt>
-                    <PillButton label={t('home.startPeriod')} icon="add" onPress={onStart} />
-                  </View>
+                  )}
                 </View>
                 <CycleRing day={cycleProgressDay} total={totalCycle} size={84} />
               </View>
@@ -390,7 +398,7 @@ export default function Today() {
           onEdit={() => router.push({ pathname: ROUTES.log, params: { day: String(today) } })}
         />
       )}
-      {logLoaded && !todayLog && (
+      {logLoaded && !todayLog && !showActions && (
         <LogTodayButton
           onPress={() => router.push({ pathname: ROUTES.log, params: { day: String(today) } })}
         />

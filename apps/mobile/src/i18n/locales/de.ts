@@ -191,6 +191,8 @@ const de: Catalog = {
     },
     endPeriod: 'Periode beenden',
     startPeriod: 'Periode starten',
+    logSymptoms: 'Symptome erfassen',
+    editSymptoms: 'Symptome bearbeiten',
     nextExpectedBleed: 'Nächste erwartete Blutung',
     nextPeriod: 'Nächste Periode',
     dayAway: {

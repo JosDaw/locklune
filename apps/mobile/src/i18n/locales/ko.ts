@@ -181,6 +181,8 @@ const ko: Catalog = {
     },
     endPeriod: '생리 종료',
     startPeriod: '생리 시작',
+    logSymptoms: '증상 기록',
+    editSymptoms: '증상 편집',
     nextExpectedBleed: '다음 예상 출혈',
     nextPeriod: '다음 생리',
     dayAway: {
