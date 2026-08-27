@@ -1,6 +1,7 @@
 export * from './types.js';
 export * from './dates.js';
 export * from './prediction.js';
+export * from './temperature.js';
 export * from './cycles.js';
 export * from './pregnancy.js';
 export * from './lockout.js';

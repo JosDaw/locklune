@@ -29,6 +29,10 @@ export enum Flow {
   Heavy = 4,
 }
 
+/** Unit for entering/displaying basal body temperature. Stored data is always
+ * canonical Celsius; this only affects input and display. */
+export type TemperatureUnit = 'c' | 'f';
+
 /** Coarse mood scale for a logged day. */
 export enum Mood {
   Awful = 1,
@@ -135,6 +139,8 @@ export interface Settings {
   postPregnancyAnchorDay: EpochDay | null;
   /** User-defined symptom tags added on top of the built-in categories. */
   customSymptoms: string[];
+  /** Preferred unit for basal body temperature entry/display. */
+  temperatureUnit: TemperatureUnit;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -151,6 +157,7 @@ export const DEFAULT_SETTINGS: Settings = {
   pregnancyDueDay: null,
   postPregnancyAnchorDay: null,
   customSymptoms: [],
+  temperatureUnit: 'c',
 };
 
 /** Confidence tier attached to a prediction. */
