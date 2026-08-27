@@ -61,6 +61,8 @@ const de: Catalog = {
       'Deine PIN verschlüsselt alles auf diesem Gerät und wird niemals gespeichert oder irgendwohin gesendet. Wenn du sie vergisst, können deine Daten nicht wiederhergestellt werden, und nach 5 fehlerhaften Versuchen werden alle Daten gelöscht.',
     modeTitle: 'Wie du %{brand} nutzt',
     modeSubtitle: 'Du kannst dies jederzeit in den Einstellungen ändern.',
+    unitsTitle: 'Temperatureinheit',
+    unitsSubtitle: 'Wähle, wie die Basaltemperatur angezeigt wird. Du kannst dies später ändern.',
     notifTitle: 'Erinnerungen erlauben',
     notifSubtitle:
       'Aktiviere unten eine Erinnerung und %{brand} fragt nach der Benachrichtigungserlaubnis. Alle Erinnerungen sind lokal auf deinem Gerät – es wird nichts irgendwohin gesendet.',
@@ -180,7 +182,7 @@ const de: Catalog = {
     welcomeTitle: 'Willkommen bei %{brand}',
     welcomeSubtitle:
       'Erfasse deine erste Periode und %{brand} lernt deinen Zyklus – alles auf dem Gerät, immer privat.',
-    logStartedToday: 'Periodenbeginn für heute erfassen',
+    startLogging: 'Mit dem Erfassen beginnen',
     previousDaysHint:
       'Um Einträge für frühere Tage hinzuzufügen, gehe zum Kalender und wähle das Datum, das du aktualisieren möchtest.',
     onPeriod: 'Während deiner Periode',
@@ -191,8 +193,6 @@ const de: Catalog = {
     },
     endPeriod: 'Periode beenden',
     startPeriod: 'Periode starten',
-    logSymptoms: 'Symptome erfassen',
-    editSymptoms: 'Symptome bearbeiten',
     nextExpectedBleed: 'Nächste erwartete Blutung',
     nextPeriod: 'Nächste Periode',
     dayAway: {
@@ -213,6 +213,7 @@ const de: Catalog = {
     title: 'Heutiger Eintrag',
     symptoms: 'Symptome',
     moreCount: '+%{count} mehr',
+    ovulation: 'Eisprung bestätigt',
     notes: 'Notizen',
     edit: 'Heutigen Eintrag bearbeiten',
   },
@@ -227,6 +228,9 @@ const de: Catalog = {
     flowExpected: '%{flow} erwartet',
     usuallyMood: 'An Tagen wie diesem fühlst du dich normalerweise %{mood}',
     oftenLogged: 'Oft an Tagen wie diesem erfasst',
+    basedOnLogs: 'Basierend auf deinen letzten Einträgen',
+    usuallyFeel: 'Normalerweise fühlst du dich %{mood}',
+    commonlyLogged: 'Häufig erfasst',
   },
   statsRow: {
     usuallyMood: 'Normalerweise %{mood}',
@@ -357,8 +361,10 @@ const de: Catalog = {
     ovulation: 'Eisprung',
     ovulationHint: 'Heute bestätigt, z. B. ein positiver Test. Verbessert deine Vorhersagen.',
     temperature: 'Temperatur',
-    bbtUnit: 'BTT · °C',
+    bbtUnit: 'BTT',
     clearTemp: 'Temperatur löschen',
+    tempRange: 'Typisch %{min}–%{max} %{unit}',
+    tempOutOfRange: 'Gib eine Temperatur zwischen %{min} und %{max} %{unit} ein',
     removeStartTitle: 'Periodenbeginn entfernen?',
     removeStartBody:
       'Dies löscht diese Periode und alle Einträge (Symptome, Blutung, Notizen) für diese Tage.',
@@ -390,6 +396,10 @@ const de: Catalog = {
     symptomPlaceholder: 'z. B. Gelenkschmerzen',
     addSymptom: 'Symptom hinzufügen',
     removeSymptom: '%{symptom} entfernen',
+    language: 'Sprache',
+    temperatureUnit: 'Temperatureinheit',
+    celsius: 'Celsius (°C)',
+    fahrenheit: 'Fahrenheit (°F)',
     security: 'Sicherheit',
     changePin: 'PIN ändern',
     autoLock: 'Automatische Sperre nach Inaktivität',
@@ -425,7 +435,7 @@ const de: Catalog = {
     lock: 'Sperren',
   },
   misc: {
-    logToday: 'Symptome für heute erfassen',
+    logToday: 'Heute erfassen',
     deleteLog: 'Eintrag löschen',
     logFor: 'Eintrag vom %{date}',
     decrease: 'Verringern',

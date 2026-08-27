@@ -200,6 +200,22 @@ export async function getDayLogsInRange(from: EpochDay, to: EpochDay): Promise<D
   return rows.map(rowToDayLog);
 }
 
+/** Whether any day-log exists. Rows are sparse (empty logs are deleted), so a
+ * non-zero count means the user has recorded at least one real entry. */
+export async function hasAnyDayLog(): Promise<boolean> {
+  const row = await requireDb().getFirstAsync<{ n: number }>('SELECT COUNT(*) AS n FROM day_logs');
+  return (row?.n ?? 0) > 0;
+}
+
+/** Every day with a logged flow, so prediction can anchor a spotting-led period
+ * on its first real-flow day. Sparse table, so this stays small. */
+export async function getFlowDays(): Promise<{ day: EpochDay; flow: Flow }[]> {
+  const rows = await requireDb().getAllAsync<{ day: number; flow: number }>(
+    'SELECT day, flow FROM day_logs WHERE flow IS NOT NULL ORDER BY day',
+  );
+  return rows.map((row) => ({ day: row.day, flow: row.flow as Flow }));
+}
+
 /** Days on which the user confirmed ovulation (used to sharpen predictions). */
 export async function getConfirmedOvulations(): Promise<EpochDay[]> {
   const rows = await requireDb().getAllAsync<{ day: number }>(

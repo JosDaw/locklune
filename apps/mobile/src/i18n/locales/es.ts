@@ -61,6 +61,8 @@ const es: Catalog = {
       'Tu PIN cifra todo en este dispositivo y nunca se almacena ni se envía a ningún lugar. Si lo olvidas, tus datos no se podrán recuperar y, tras 5 intentos incorrectos, se borrarán todos los datos.',
     modeTitle: 'Cómo usarás %{brand}',
     modeSubtitle: 'Puedes cambiar esto en cualquier momento en los ajustes.',
+    unitsTitle: 'Unidad de temperatura',
+    unitsSubtitle: 'Elige cómo se muestra la temperatura basal. Puedes cambiarlo más adelante.',
     notifTitle: 'Permitir recordatorios',
     notifSubtitle:
       'Activa cualquier recordatorio a continuación y %{brand} pedirá permiso para notificaciones. Todos los recordatorios son locales en tu dispositivo: no se envía nada a ningún lugar.',
@@ -174,7 +176,7 @@ const es: Catalog = {
     welcomeTitle: 'Bienvenida a %{brand}',
     welcomeSubtitle:
       'Registra tu primer período y %{brand} aprenderá tu ciclo: todo en el dispositivo, siempre privado.',
-    logStartedToday: 'Registrar que el período comenzó hoy',
+    startLogging: 'Empezar a registrar',
     previousDaysHint:
       'Para añadir entradas de días anteriores, ve al calendario y selecciona la fecha que quieras actualizar.',
     onPeriod: 'En tu período',
@@ -185,8 +187,6 @@ const es: Catalog = {
     },
     endPeriod: 'Finalizar período',
     startPeriod: 'Iniciar período',
-    logSymptoms: 'Registrar síntomas',
-    editSymptoms: 'Editar síntomas',
     nextExpectedBleed: 'Próximo sangrado previsto',
     nextPeriod: 'Próximo período',
     dayAway: {
@@ -207,6 +207,7 @@ const es: Catalog = {
     title: 'Registro de hoy',
     symptoms: 'Síntomas',
     moreCount: '+%{count} más',
+    ovulation: 'Ovulación confirmada',
     notes: 'Notas',
     edit: 'Editar el registro de hoy',
   },
@@ -221,6 +222,9 @@ const es: Catalog = {
     flowExpected: '%{flow} previsto',
     usuallyMood: 'Normalmente te sientes %{mood} en días como este',
     oftenLogged: 'A menudo registrado en días como este',
+    basedOnLogs: 'Según tus registros recientes',
+    usuallyFeel: 'Normalmente te sientes %{mood}',
+    commonlyLogged: 'Registrado con frecuencia',
   },
   statsRow: {
     usuallyMood: 'Normalmente %{mood}',
@@ -347,8 +351,10 @@ const es: Catalog = {
     ovulation: 'Ovulación',
     ovulationHint: 'Confirmada hoy, p. ej. un test positivo. Mejora tus predicciones.',
     temperature: 'Temperatura',
-    bbtUnit: 'TBC · °C',
+    bbtUnit: 'TBC',
     clearTemp: 'Borrar temperatura',
+    tempRange: 'Típico %{min}–%{max} %{unit}',
+    tempOutOfRange: 'Introduce una temperatura entre %{min} y %{max} %{unit}',
     removeStartTitle: '¿Eliminar el inicio del período?',
     removeStartBody:
       'Esto elimina este período y todos los registros (síntomas, flujo, notas) de esos días.',
@@ -380,6 +386,10 @@ const es: Catalog = {
     symptomPlaceholder: 'p. ej. dolor articular',
     addSymptom: 'Añadir síntoma',
     removeSymptom: 'Eliminar %{symptom}',
+    language: 'Idioma',
+    temperatureUnit: 'Unidad de temperatura',
+    celsius: 'Celsius (°C)',
+    fahrenheit: 'Fahrenheit (°F)',
     security: 'Seguridad',
     changePin: 'Cambiar PIN',
     autoLock: 'Bloqueo automático tras inactividad',
@@ -415,7 +425,7 @@ const es: Catalog = {
     lock: 'Bloquear',
   },
   misc: {
-    logToday: 'Registrar síntomas de hoy',
+    logToday: 'Registrar hoy',
     deleteLog: 'Eliminar registro',
     logFor: 'Registro del %{date}',
     decrease: 'Disminuir',

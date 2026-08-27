@@ -5,6 +5,7 @@ import {
   type Cycle,
   type DayLog,
   type EpochDay,
+  type Flow,
   type Prediction,
   type Settings,
 } from '@locklune/core';
@@ -15,8 +16,14 @@ import * as toast from '../lib/toast';
 interface DataState {
   loaded: boolean;
   cycles: Cycle[];
+  /** Whether the user has recorded at least one day-log (drives the home screen
+   * away from the first-run welcome state, even without a period on record). */
+  hasLogs: boolean;
   /** Days the user has confirmed ovulation (feeds the prediction). */
   ovulationDays: EpochDay[];
+  /** Logged flow per day, so prediction can anchor a spotting-led period on its
+   * first real-flow day. */
+  flowByDay: ReadonlyMap<EpochDay, Flow>;
   settings: Settings;
   prediction: Prediction;
 
@@ -42,15 +49,19 @@ const emptyPrediction = predict([]);
 export const useDataStore = create<DataState>((set, get) => {
   /** Reload cycles + confirmed ovulations and recompute prediction + reminders. */
   async function refreshAll(): Promise<void> {
-    const [cycles, ovulationDays] = await Promise.all([
+    const [cycles, ovulationDays, hasLogs, flowDays] = await Promise.all([
       db.getCycles(),
       db.getConfirmedOvulations(),
+      db.hasAnyDayLog(),
+      db.getFlowDays(),
     ]);
+    const flowByDay = new Map(flowDays.map((entry) => [entry.day, entry.flow]));
     const prediction = predict(cycles, get().settings, {
       confirmedOvulations: ovulationDays,
+      flowByDay,
       count: 6,
     });
-    set({ cycles, ovulationDays, prediction });
+    set({ cycles, ovulationDays, hasLogs, flowByDay, prediction });
     void syncReminders(prediction, get().settings).catch(() => undefined);
   }
 
@@ -68,22 +79,28 @@ export const useDataStore = create<DataState>((set, get) => {
   return {
     loaded: false,
     cycles: [],
+    hasLogs: false,
     ovulationDays: [],
+    flowByDay: new Map(),
     settings: { ...DEFAULT_SETTINGS },
     prediction: emptyPrediction,
 
     load: async () => {
       try {
-        const [cycles, settings, ovulationDays] = await Promise.all([
+        const [cycles, settings, ovulationDays, hasLogs, flowDays] = await Promise.all([
           db.getCycles(),
           db.getSettings(),
           db.getConfirmedOvulations(),
+          db.hasAnyDayLog(),
+          db.getFlowDays(),
         ]);
+        const flowByDay = new Map(flowDays.map((entry) => [entry.day, entry.flow]));
         const prediction = predict(cycles, settings, {
           confirmedOvulations: ovulationDays,
+          flowByDay,
           count: 6,
         });
-        set({ cycles, settings, ovulationDays, prediction, loaded: true });
+        set({ cycles, settings, ovulationDays, hasLogs, flowByDay, prediction, loaded: true });
         void syncReminders(prediction, settings).catch(() => undefined);
       } catch {
         toast.error('Could not load your data.');
@@ -94,7 +111,9 @@ export const useDataStore = create<DataState>((set, get) => {
       set({
         loaded: false,
         cycles: [],
+        hasLogs: false,
         ovulationDays: [],
+        flowByDay: new Map(),
         settings: { ...DEFAULT_SETTINGS },
         prediction: emptyPrediction,
       }),
@@ -182,6 +201,7 @@ export const useDataStore = create<DataState>((set, get) => {
         let next: Settings = { ...get().settings, ...patch };
         const prediction = predict(get().cycles, next, {
           confirmedOvulations: get().ovulationDays,
+          flowByDay: get().flowByDay,
           count: 6,
         });
         // If fertility no longer applies (e.g. period-only, pregnant, or hormonal

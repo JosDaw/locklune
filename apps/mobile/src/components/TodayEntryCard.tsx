@@ -1,6 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import type { DayLog } from '@locklune/core';
-import { Pressable, Text, View } from 'react-native';
+import { formatBbt, temperatureUnitLabel, type DayLog, type TemperatureUnit } from '@locklune/core';
+import { Text, View } from 'react-native';
 import { Txt } from './ui/Text';
 import { t, useLocale } from '../i18n';
 import { FLOW_LABEL_KEY, MOOD_META, symptomLabel } from '../lib/logging';
@@ -8,7 +8,7 @@ import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
 import { CARD_SHADOW } from '../theme/shadows';
 
-export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => void }) {
+export function TodayEntryCard({ log, unit }: { log: DayLog; unit: TemperatureUnit }) {
   useLocale();
   const moodMeta = log.mood != null ? MOOD_META[log.mood] : null;
   const shownSyms = log.symptoms.slice(0, 4);
@@ -47,6 +47,24 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
           </View>
           <Text style={{ fontFamily: fonts.regular, fontSize: 13, color: colors.textMuted }}>
             {t(FLOW_LABEL_KEY[log.flow])}
+          </Text>
+        </View>
+      )}
+
+      {log.ovulation && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Ionicons name="leaf" size={16} color={colors.ovulation} />
+          <Text style={{ fontFamily: fonts.regular, fontSize: 13, color: colors.textMuted }}>
+            {t('todayCard.ovulation')}
+          </Text>
+        </View>
+      )}
+
+      {log.temperature != null && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Ionicons name="thermometer-outline" size={16} color={colors.primarySoft} />
+          <Text style={{ fontFamily: fonts.regular, fontSize: 13, color: colors.textMuted }}>
+            {formatBbt(log.temperature, unit)} {temperatureUnitLabel(unit)}
           </Text>
         </View>
       )}
@@ -122,28 +140,6 @@ export function TodayEntryCard({ log, onEdit }: { log: DayLog; onEdit: () => voi
           </Text>
         </View>
       )}
-
-      <Pressable
-        onPress={onEdit}
-        accessibilityRole="button"
-        accessibilityLabel={t('todayCard.edit')}
-        style={{
-          alignSelf: 'flex-start',
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 6,
-          marginTop: 2,
-          borderRadius: 99,
-          backgroundColor: colors.surfaceMuted,
-          paddingHorizontal: 14,
-          paddingVertical: 8,
-        }}
-      >
-        <Ionicons name="pencil-outline" size={16} color={colors.primarySoft} />
-        <Text style={{ fontFamily: fonts.semibold, fontSize: 13, color: colors.primarySoft }}>
-          {t('todayCard.edit')}
-        </Text>
-      </Pressable>
     </View>
   );
 }

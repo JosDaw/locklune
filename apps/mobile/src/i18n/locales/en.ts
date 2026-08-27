@@ -65,6 +65,8 @@ export const en = {
       'Your PIN encrypts everything on this device and is never stored or sent anywhere. If you forget it, your data can’t be recovered, and after 5 incorrect attempts, all data is erased.',
     modeTitle: 'How you’ll use %{brand}',
     modeSubtitle: 'You can change this any time in settings.',
+    unitsTitle: 'Temperature unit',
+    unitsSubtitle: 'Choose how basal body temperature is shown. You can change this later.',
     notifTitle: 'Allow reminders',
     notifSubtitle:
       'Enable any reminder below and %{brand} will ask for notification permission. All reminders are local to your device - nothing is sent anywhere.',
@@ -180,7 +182,7 @@ export const en = {
     welcomeTitle: 'Welcome to %{brand}',
     welcomeSubtitle:
       'Log your first period and %{brand} will learn your cycle - all on-device, always private.',
-    logStartedToday: 'Log period started today',
+    startLogging: 'Start logging',
     previousDaysHint:
       'To add entries for previous days, go to the calendar and select the date you want to update.',
     onPeriod: 'On your period',
@@ -191,8 +193,6 @@ export const en = {
     },
     endPeriod: 'End period',
     startPeriod: 'Start period',
-    logSymptoms: 'Log symptoms',
-    editSymptoms: 'Edit symptoms',
     nextExpectedBleed: 'Next expected bleed',
     nextPeriod: 'Next period',
     dayAway: {
@@ -213,6 +213,7 @@ export const en = {
     title: 'Today’s log',
     symptoms: 'Symptoms',
     moreCount: '+%{count} more',
+    ovulation: 'Ovulation confirmed',
     notes: 'Notes',
     edit: 'Edit today’s log',
   },
@@ -227,6 +228,9 @@ export const en = {
     flowExpected: '%{flow} expected',
     usuallyMood: 'Usually feeling %{mood} on days like this',
     oftenLogged: 'Often logged on days like this',
+    basedOnLogs: 'Based on your recent logs',
+    usuallyFeel: 'You usually feel %{mood}',
+    commonlyLogged: 'Commonly logged',
   },
   statsRow: {
     usuallyMood: 'Usually %{mood}',
@@ -354,8 +358,10 @@ export const en = {
     ovulation: 'Ovulation',
     ovulationHint: 'Confirmed today, e.g. a positive test. Improves your predictions.',
     temperature: 'Temperature',
-    bbtUnit: 'BBT · °C',
+    bbtUnit: 'BBT',
     clearTemp: 'Clear temperature',
+    tempRange: 'Typical %{min}–%{max} %{unit}',
+    tempOutOfRange: 'Enter a temperature between %{min} and %{max} %{unit}',
     removeStartTitle: 'Remove period start?',
     removeStartBody:
       'This deletes this period and all logs (symptoms, flow, notes) for those days.',
@@ -386,6 +392,10 @@ export const en = {
     symptomPlaceholder: 'e.g. joint pain',
     addSymptom: 'Add symptom',
     removeSymptom: 'Remove %{symptom}',
+    language: 'Language',
+    temperatureUnit: 'Temperature unit',
+    celsius: 'Celsius (°C)',
+    fahrenheit: 'Fahrenheit (°F)',
     security: 'Security',
     changePin: 'Change PIN',
     autoLock: 'Auto-lock after inactivity',
@@ -421,7 +431,7 @@ export const en = {
     lock: 'Lock',
   },
   misc: {
-    logToday: 'Log symptoms for today',
+    logToday: 'Log today',
     deleteLog: 'Delete log',
     logFor: 'Log for %{date}',
     decrease: 'Decrease',

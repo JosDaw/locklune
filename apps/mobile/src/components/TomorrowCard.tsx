@@ -21,16 +21,127 @@ type TomorrowCardProps = {
   avgPeriodLen: number;
 };
 
-// Thin guard wrapper: bails before any hooks run so TomorrowCardBody always calls
-// its hooks unconditionally (keeps hook order stable across renders).
+// Thin guard wrapper: picks which body to render before any hooks run, so each
+// body calls its hooks unconditionally (keeps hook order stable across renders).
 export function TomorrowCard(props: TomorrowCardProps) {
   const last = props.cycles[props.cycles.length - 1];
-  if (!last) return null;
+  const tomorrowCycleDay = last ? props.tomorrow - last.startDay + 1 : 0;
 
-  const tomorrowCycleDay = props.tomorrow - last.startDay + 1;
-  if (tomorrowCycleDay <= 0) return null;
+  // With a recorded cycle we can predict tomorrow's phase, flow and mood.
+  if (last && tomorrowCycleDay > 0) {
+    return <TomorrowCardBody {...props} last={last} tomorrowCycleDay={tomorrowCycleDay} />;
+  }
 
-  return <TomorrowCardBody {...props} last={last} tomorrowCycleDay={tomorrowCycleDay} />;
+  // No period on record yet: still surface a lightweight forecast built purely
+  // from recently logged mood + symptoms (no cycle phase involved).
+  return <TomorrowCardSimple tomorrow={props.tomorrow} recentLogs={props.recentLogs} />;
+}
+
+// Cycle-less forecast: aggregates mood + symptoms across all recent logs (not by
+// cycle day, since there's no cycle) and shows the most common of each.
+function TomorrowCardSimple({
+  tomorrow,
+  recentLogs,
+}: {
+  tomorrow: EpochDay;
+  recentLogs: DayLog[];
+}) {
+  useLocale();
+  const { expectedMood, topSymptoms } = useMemo(() => {
+    const moodCounts: Record<number, number> = {};
+    const symptomCounts: Record<string, number> = {};
+    recentLogs.forEach((log) => {
+      if (log.mood != null) moodCounts[log.mood] = (moodCounts[log.mood] ?? 0) + 1;
+      log.symptoms.forEach((symptom) => {
+        symptomCounts[symptom] = (symptomCounts[symptom] ?? 0) + 1;
+      });
+    });
+    const moodEntries = Object.entries(moodCounts);
+    const mood =
+      moodEntries.length > 0
+        ? Number(moodEntries.sort((first, second) => second[1] - first[1])[0]![0])
+        : null;
+    const symptoms = Object.entries(symptomCounts)
+      .sort((first, second) => second[1] - first[1])
+      .slice(0, 3)
+      .map(([symptom]) => symptom);
+    return { expectedMood: mood, topSymptoms: symptoms };
+  }, [recentLogs]);
+
+  // Nothing logged to forecast from - don't show an empty card.
+  if (expectedMood == null && topSymptoms.length === 0) return null;
+
+  return (
+    <View
+      style={{
+        borderRadius: 20,
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        padding: 16,
+        gap: 10,
+        ...CARD_SHADOW,
+      }}
+    >
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Txt variant="label">{t('tomorrowCard.title')}</Txt>
+        <Txt variant="faint">
+          {formatDay(tomorrow, { weekday: 'short', month: 'short', day: 'numeric' })}
+        </Txt>
+      </View>
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Text style={{ fontFamily: fonts.regular, fontSize: 13, color: colors.textMuted }}>
+          {t('tomorrowCard.basedOnLogs')}
+        </Text>
+      </View>
+
+      {expectedMood != null && MOOD_META[expectedMood] != null && (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <MaterialCommunityIcons
+            name={MOOD_META[expectedMood]!.icon}
+            size={18}
+            color={MOOD_META[expectedMood]!.color}
+          />
+          <Text style={{ fontFamily: fonts.regular, fontSize: 12, color: colors.textMuted }}>
+            {t('tomorrowCard.usuallyFeel', { mood: t(MOOD_LABEL_KEY[expectedMood]) })}
+          </Text>
+        </View>
+      )}
+
+      {topSymptoms.length > 0 && (
+        <View style={{ gap: 6 }}>
+          <Text
+            style={{
+              fontFamily: fonts.medium,
+              fontSize: 11,
+              color: colors.textFaint,
+              letterSpacing: 0.4,
+            }}
+          >
+            {t('tomorrowCard.commonlyLogged')}
+          </Text>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+            {topSymptoms.map((symptom) => (
+              <View
+                key={symptom}
+                style={{
+                  borderRadius: 99,
+                  backgroundColor: colors.surfaceMuted,
+                  paddingHorizontal: 8,
+                  paddingVertical: 3,
+                }}
+              >
+                <Text style={{ fontFamily: fonts.regular, fontSize: 11, color: colors.textMuted }}>
+                  {symptomLabel(symptom)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+    </View>
+  );
 }
 
 function TomorrowCardBody({
