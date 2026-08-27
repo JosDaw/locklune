@@ -25,9 +25,10 @@ import { Card } from '../../components/ui/Card';
 import { PressScale } from '../../components/ui/PressScale';
 import { Screen } from '../../components/ui/Screen';
 import { Txt } from '../../components/ui/Text';
-import { t, useLocale } from '../../i18n';
+import { setLocale, t, useLocale, type SupportedLocale } from '../../i18n';
 import { formatDay } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
+import { setStoredLocale } from '../../lib/localeStore';
 import { FEEDBACK_URL, KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
@@ -39,8 +40,17 @@ import { fonts } from '../../theme/fonts';
 
 const AUTO_LOCK_VALUES = [0, 1, 2, 5, 15];
 
+// Languages are labelled in their own tongue (not translated), the usual
+// convention for a language picker.
+const LANGUAGES: { code: SupportedLocale; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'es', label: 'Español' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'ko', label: '한국어' },
+];
+
 export default function Settings() {
-  useLocale();
+  const locale = useLocale();
   const router = useRouter();
   const settings = useDataStore((store) => store.settings);
   const updateSettings = useDataStore((store) => store.updateSettings);
@@ -347,6 +357,38 @@ export default function Settings() {
             ))}
           </View>
         )}
+      </Card>
+
+      {/* Language */}
+      <Card>
+        <SectionLabel icon="language-outline" label={t('settings.language')} />
+        <View className="flex-row flex-wrap gap-2">
+          {LANGUAGES.map((language) => (
+            <Chip
+              key={language.code}
+              label={language.label}
+              active={locale === language.code}
+              onPress={() => {
+                haptics.tap();
+                setLocale(language.code);
+                void setStoredLocale(language.code);
+              }}
+            />
+          ))}
+        </View>
+      </Card>
+
+      {/* Temperature unit */}
+      <Card>
+        <SectionLabel icon="thermometer-outline" label={t('settings.temperatureUnit')} />
+        <Segmented
+          options={[
+            { label: t('settings.celsius'), value: 'c' as const },
+            { label: t('settings.fahrenheit'), value: 'f' as const },
+          ]}
+          value={settings.temperatureUnit}
+          onChange={(value) => void updateSettings({ temperatureUnit: value })}
+        />
       </Card>
 
       {/* Security */}

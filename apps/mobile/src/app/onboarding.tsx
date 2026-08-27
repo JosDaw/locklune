@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { BRAND, type CycleMode, type Settings } from '@locklune/core';
+import { BRAND, type CycleMode, type Settings, type TemperatureUnit } from '@locklune/core';
 import { useState } from 'react';
 import { Image, Linking, Pressable, Text as RNText, View } from 'react-native';
 import { CheckboxRow } from '../components/CheckboxRow';
@@ -23,7 +23,7 @@ const PIN_LENGTH = 6;
 // Modes for which fertility notifications are relevant.
 const FERTILITY_MODES: CycleMode[] = ['tracking', 'trying'];
 
-type Phase = 'consent' | 'create' | 'confirm' | 'mode' | 'notifications';
+type Phase = 'consent' | 'create' | 'confirm' | 'mode' | 'units' | 'notifications';
 
 export default function Onboarding() {
   useLocale();
@@ -38,6 +38,8 @@ export default function Onboarding() {
 
   // Preferences collected during onboarding - applied after createPin succeeds.
   const [selectedMode, setSelectedMode] = useState<CycleMode>('tracking');
+  // Required choice: no default, so the user must actively pick a unit.
+  const [selectedUnit, setSelectedUnit] = useState<TemperatureUnit | null>(null);
   const [notifyPeriodTomorrow, setNotifyPeriodTomorrow] = useState<boolean>(false);
   const [notifyPeriodToday, setNotifyPeriodToday] = useState<boolean>(false);
   const [notifyFertileTomorrow, setNotifyFertileTomorrow] = useState<boolean>(false);
@@ -72,6 +74,7 @@ export default function Onboarding() {
       // DB is now open - persist the onboarding choices before navigation fires.
       const patch: Partial<Settings> = {
         cycleMode: selectedMode,
+        temperatureUnit: selectedUnit ?? 'c',
         notifyPeriodTomorrow,
         notifyPeriodToday,
         notifyFertileTomorrow,
@@ -239,7 +242,56 @@ export default function Onboarding() {
           })}
         </View>
 
-        <Button title={t('common.continue')} onPress={() => setPhase('notifications')} />
+        <Button title={t('common.continue')} onPress={() => setPhase('units')} />
+      </Screen>
+    );
+  }
+
+  // ── Temperature unit (required) ───────────────────────────────────────────────
+  if (phase === 'units') {
+    const UNITS: { value: TemperatureUnit; labelKey: string }[] = [
+      { value: 'c', labelKey: 'settings.celsius' },
+      { value: 'f', labelKey: 'settings.fahrenheit' },
+    ];
+    return (
+      <Screen contentClassName="justify-between">
+        <View className="gap-2 pt-6">
+          <Txt variant="display">{t('onboarding.unitsTitle')}</Txt>
+          <Txt variant="muted">{t('onboarding.unitsSubtitle')}</Txt>
+        </View>
+
+        <View className="gap-2">
+          {UNITS.map((option) => {
+            const selected = selectedUnit === option.value;
+            return (
+              <Pressable
+                key={option.value}
+                onPress={() => setSelectedUnit(option.value)}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={t(option.labelKey)}
+                className={`flex-row items-center gap-4 rounded-2xl border p-4 ${
+                  selected ? 'border-primary bg-primary/10' : 'border-border bg-surface'
+                }`}
+              >
+                <View
+                  className={`h-6 w-6 items-center justify-center rounded-full border-2 ${
+                    selected ? 'border-primary bg-primary' : 'border-surfaceMuted'
+                  }`}
+                >
+                  {selected && <Ionicons name="checkmark" size={16} color={colors.ink} />}
+                </View>
+                <Txt variant="body">{t(option.labelKey)}</Txt>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <Button
+          title={t('common.continue')}
+          disabled={selectedUnit === null}
+          onPress={() => setPhase('notifications')}
+        />
       </Screen>
     );
   }

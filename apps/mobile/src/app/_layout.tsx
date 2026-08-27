@@ -18,6 +18,8 @@ import { ErrorBoundary } from '../components/ErrorBoundary';
 import { GluestackUIProvider } from '../components/gs/gluestack-ui-provider';
 import { ToastProvider } from '../components/ui/Toast';
 import '../global.css';
+import { setLocale } from '../i18n';
+import { getStoredLocale } from '../lib/localeStore';
 import { ROUTES, SEGMENT } from '../lib/routes';
 import { AUTH_STATUS, useAuthStore } from '../stores/authStore';
 import { useDataStore } from '../stores/dataStore';
@@ -101,6 +103,10 @@ export default function RootLayout() {
 
   useEffect(() => {
     void init();
+    // Apply the user's saved language (if any) over the detected device locale.
+    void getStoredLocale().then((locale) => {
+      if (locale) setLocale(locale);
+    });
   }, [init]);
 
   useAuthRouting();

@@ -1,10 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import {
+  bbtRange,
   CYCLE_MODE,
   cycleForDay,
   Flow,
+  formatBbt,
   Mood,
+  parseBbtToCelsius,
   pregnancyProgress,
+  temperatureUnitLabel,
   todayEpochDay,
   type EpochDay,
 } from '@locklune/core';
@@ -32,6 +36,7 @@ import { t, useLocale } from '../i18n';
 import { formatDay } from '../lib/format';
 import * as haptics from '../lib/haptics';
 import { MOOD_OPTIONS } from '../lib/logging';
+import * as toast from '../lib/toast';
 import { useDataStore } from '../stores/dataStore';
 import { colors } from '../theme/colors';
 import { fonts } from '../theme/fonts';
@@ -59,6 +64,7 @@ export default function LogModal() {
   const endCycle = useDataStore((store) => store.endCycle);
   const deleteCycle = useDataStore((store) => store.deleteCycle);
   const settings = useDataStore((store) => store.settings);
+  const unit = settings.temperatureUnit;
 
   const pregnant = settings.cycleMode === CYCLE_MODE.Pregnant;
   const fertilityTracking =
@@ -98,7 +104,7 @@ export default function LogModal() {
         setSymptoms(log.symptoms);
         setNote(log.note ?? '');
         setOvulation(log.ovulation);
-        const tempStr = log.temperature != null ? String(log.temperature) : '';
+        const tempStr = log.temperature != null ? formatBbt(log.temperature, unit) : '';
         setTemp(tempStr);
         setOrigLog({
           flow: log.flow,
@@ -123,7 +129,7 @@ export default function LogModal() {
     return () => {
       alive = false;
     };
-  }, [day, getDayLog]);
+  }, [day, getDayLog, unit]);
 
   const isDirty = useMemo(() => {
     if (!loaded) return false;
@@ -192,10 +198,37 @@ export default function LogModal() {
   };
 
   const save = async () => {
-    const parsedTemp = temp.trim() ? parseFloat(temp.trim()) : null;
-    const temperature = parsedTemp !== null && isFinite(parsedTemp) ? parsedTemp : null;
+    // Validate BBT against a plausible band (in the active unit) and store the
+    // canonical Celsius value; reject a typo rather than corrupt the record.
+    const trimmedTemp = temp.trim();
+    let temperature: number | null = null;
+    if (trimmedTemp) {
+      temperature = parseBbtToCelsius(parseFloat(trimmedTemp), unit);
+      if (temperature === null) {
+        haptics.warn();
+        const range = bbtRange(unit);
+        toast.error(
+          t('log.tempOutOfRange', {
+            min: range.min,
+            max: range.max,
+            unit: temperatureUnitLabel(unit),
+          }),
+        );
+        return;
+      }
+    }
+    // Ovulation on a bleed day is physiologically impossible - never persist it.
+    const confirmedOvulation = status.isBleedDay ? false : ovulation;
     if (
-      await logDay({ day, flow, mood, symptoms, note: note.trim() || null, ovulation, temperature })
+      await logDay({
+        day,
+        flow,
+        mood,
+        symptoms,
+        note: note.trim() || null,
+        ovulation: confirmedOvulation,
+        temperature,
+      })
     ) {
       haptics.success();
       setOrigLog({
@@ -203,7 +236,7 @@ export default function LogModal() {
         mood,
         syms: symptoms,
         note: note.trim(),
-        ov: ovulation,
+        ov: confirmedOvulation,
         temp: temp.trim(),
       });
       setJustSaved(true);
@@ -404,7 +437,9 @@ export default function LogModal() {
             </Textarea>
           </View>
 
-          {fertilityTracking && (
+          {/* Ovulation can't occur during menstruation, so the toggle is hidden on
+              a bleed day (and coerced off on save) to prevent contradictory data. */}
+          {fertilityTracking && !status.isBleedDay && (
             <View className="flex-row items-center justify-between">
               <View className="flex-1 pr-4">
                 <Txt variant="label">{t('log.ovulation')}</Txt>
@@ -425,14 +460,14 @@ export default function LogModal() {
             <View style={{ gap: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
                 <Txt variant="label">{t('log.temperature')}</Txt>
-                <Txt variant="faint">{t('log.bbtUnit')}</Txt>
+                <Txt variant="faint">{`${t('log.bbtUnit')} · ${temperatureUnitLabel(unit)}`}</Txt>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <TextInput
                   value={temp}
                   onChangeText={setTemp}
                   keyboardType="decimal-pad"
-                  placeholder="36.70"
+                  placeholder={unit === 'f' ? '98.60' : '36.70'}
                   placeholderTextColor={colors.textFaint}
                   style={{
                     flex: 1,
@@ -451,6 +486,13 @@ export default function LogModal() {
                   </Pressable>
                 )}
               </View>
+              <Txt variant="faint">
+                {t('log.tempRange', {
+                  min: bbtRange(unit).min,
+                  max: bbtRange(unit).max,
+                  unit: temperatureUnitLabel(unit),
+                })}
+              </Txt>
             </View>
           )}
         </>
