@@ -130,17 +130,7 @@ export function DayCell({
           ...solidBorder,
         }}
       >
-        <Text
-          style={{
-            fontFamily: fonts.medium,
-            fontSize: 14,
-            color: textColor,
-            // Lift the number when the bottom icon row is present so the two
-            // don't touch. translateY is visual-only, so number alignment on
-            // icon-less days is unchanged.
-            ...(hasIndicators && { transform: [{ translateY: -4 }] }),
-          }}
-        >
+        <Text style={{ fontFamily: fonts.medium, fontSize: 14, color: textColor }}>
           {fromEpochDay(day).getDate()}
         </Text>
         {hasIndicators && (
@@ -184,7 +174,11 @@ export function DayCell({
 const styles = StyleSheet.create({
   indicators: {
     position: 'absolute',
-    bottom: 4,
+    // Anchored just below the cell's centre (where the number sits) rather than
+    // the bottom edge, so the gap under the number is constant across cell sizes
+    // and the number itself never moves.
+    top: '50%',
+    marginTop: 11,
     left: 0,
     right: 0,
     flexDirection: 'row',
