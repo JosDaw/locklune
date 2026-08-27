@@ -87,6 +87,8 @@ export function DayCell({
     solidBorder = { borderWidth: 1.5, borderColor: colors.primarySoft };
   }
 
+  const hasIndicators = hasLog || isOvulation || isFertile;
+
   const states = [
     isToday && 'today',
     isPeriod && 'period',
@@ -128,10 +130,20 @@ export function DayCell({
           ...solidBorder,
         }}
       >
-        <Text style={{ fontFamily: fonts.medium, fontSize: 14, color: textColor }}>
+        <Text
+          style={{
+            fontFamily: fonts.medium,
+            fontSize: 14,
+            color: textColor,
+            // Lift the number when the bottom icon row is present so the two
+            // don't touch. translateY is visual-only, so number alignment on
+            // icon-less days is unchanged.
+            ...(hasIndicators && { transform: [{ translateY: -4 }] }),
+          }}
+        >
           {fromEpochDay(day).getDate()}
         </Text>
-        {(hasLog || isOvulation || isFertile) && (
+        {hasIndicators && (
           <View style={styles.indicators}>
             {isOvulation && <Ionicons name="leaf" size={8} color={colors.ovulation} />}
             {isFertile && !isOvulation && <Ionicons name="star" size={7} color={colors.fertile} />}
