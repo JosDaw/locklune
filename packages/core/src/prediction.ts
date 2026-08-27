@@ -2,6 +2,7 @@ import { addDays } from './dates.js';
 import {
   CYCLE_MODE,
   DEFAULT_SETTINGS,
+  Flow,
   isHormonalContraception,
   type Confidence,
   type Cycle,
@@ -42,6 +43,30 @@ const FERTILE_BEFORE_OVULATION = 5;
 const FERTILE_AFTER_OVULATION = 1;
 /** Spread (days) assumed when we don't yet have enough data to measure it. */
 const DEFAULT_VARIABILITY = 4;
+/**
+ * A period often opens with a day or two of spotting before real flow. Clinically
+ * "day 1" is the first day of full flow, so for prediction we skip up to this many
+ * leading spotting days and anchor the cycle on the first Light+ day instead.
+ */
+const MAX_SPOTTING_LEAD_DAYS = 3;
+
+/**
+ * Effective cycle start for prediction: if the recorded start is logged as
+ * Spotting and real flow (Light+) begins within the next few days, anchor on that
+ * first real-flow day. Leaves the start unchanged when there's no flow log, when
+ * the start already has real flow, or when the lead is all spotting (no Light+
+ * found within the window) - so spotting-only bleeds aren't silently discarded.
+ */
+function effectiveStart(cycle: Cycle, flowByDay: ReadonlyMap<EpochDay, Flow>): EpochDay {
+  if (flowByDay.get(cycle.startDay) !== Flow.Spotting) return cycle.startDay;
+  const lastDay = Math.min(cycle.startDay + MAX_SPOTTING_LEAD_DAYS, cycle.endDay ?? Infinity);
+  for (let day = cycle.startDay + 1; day <= lastDay; day++) {
+    const flow = flowByDay.get(day);
+    if (flow === undefined) break; // gap in logging - don't shift into uncertainty
+    if (flow >= Flow.Light) return day; // first real-flow day becomes day 1
+  }
+  return cycle.startDay;
+}
 
 function recencyWeights(count: number): number[] {
   // index 0 = most recent, gets the highest weight.
@@ -124,15 +149,27 @@ function empiricalLutealPhase(
  * @param cycles   All recorded cycles (any order).
  * @param settings Partial overrides of {@link DEFAULT_SETTINGS}.
  * @param options  `count` = how many future cycles to project (default 3).
+ *                 `flowByDay` = logged flow per day, used to anchor a period that
+ *                 opens with spotting on its first real-flow day.
  */
 export function predict(
   cycles: Cycle[],
   settings: Partial<Settings> = {},
-  options: { count?: number; confirmedOvulations?: EpochDay[] } = {},
+  options: {
+    count?: number;
+    confirmedOvulations?: EpochDay[];
+    flowByDay?: ReadonlyMap<EpochDay, Flow>;
+  } = {},
 ): Prediction {
   const cfg: Settings = { ...DEFAULT_SETTINGS, ...settings };
   const count = Math.max(1, options.count ?? 3);
-  const sorted = [...cycles].sort((first, second) => first.startDay - second.startDay);
+  // Anchor each cycle on its first real-flow day when it opens with spotting, so
+  // leading spotting doesn't skew cycle-length or the next-period projection.
+  const flowByDay = options.flowByDay;
+  const anchored = flowByDay
+    ? cycles.map((cycle) => ({ ...cycle, startDay: effectiveStart(cycle, flowByDay) }))
+    : cycles;
+  const sorted = [...anchored].sort((first, second) => first.startDay - second.startDay);
 
   const lengths = cycleLengths(sorted).slice(-MAX_HISTORY);
   // Reverse so index 0 is the most recent (for recency weighting).
@@ -157,10 +194,20 @@ export function predict(
     mode !== CYCLE_MODE.PeriodOnly &&
     !(mode === CYCLE_MODE.Contraception && isHormonalContraception(cfg.contraceptionMethod));
 
-  // Confirmed ovulations refine the luteal phase and can anchor the next period.
-  const ovulations = [...(options.confirmedOvulations ?? [])].sort(
-    (first, second) => first - second,
-  );
+  // Confirmed ovulations refine the luteal phase and can anchor the next period -
+  // but ovulation is physiologically impossible during menstruation. Drop any that
+  // fall on a recorded bleed day (a mis-log) so they can't anchor the prediction
+  // onto a period day and report "fertile/ovulating" while the user is bleeding.
+  const bleedPeriodLen = Math.max(1, Math.round(averagePeriodLength));
+  const onBleedDay = (day: EpochDay): boolean =>
+    sorted.some((cycle, index) => {
+      const nextStart = sorted[index + 1]?.startDay ?? Number.POSITIVE_INFINITY;
+      const end = cycle.endDay ?? Math.min(nextStart - 1, cycle.startDay + bleedPeriodLen - 1);
+      return day >= cycle.startDay && day <= end;
+    });
+  const ovulations = [...(options.confirmedOvulations ?? [])]
+    .filter((day) => !onBleedDay(day))
+    .sort((first, second) => first - second);
   const lutealPhase = empiricalLutealPhase(sorted, ovulations, cfg.lutealPhaseDays);
 
   const upcoming: CyclePrediction[] = [];

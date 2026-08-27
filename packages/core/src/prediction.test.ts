@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { predict } from './prediction.js';
-import type { Cycle } from './types.js';
+import { Flow, type Cycle } from './types.js';
 
 /** Build cycles from a starting epoch-day and a list of cycle lengths. */
 function cyclesFromLengths(start: number, lengths: number[], bleed = 5): Cycle[] {
@@ -96,6 +96,19 @@ describe('predict', () => {
     expect(prediction.upcoming[0]!.fertileWindow).toEqual({ start: 1015 - 5, end: 1015 + 1 });
   });
 
+  it('ignores a confirmed ovulation logged on a bleed day', () => {
+    // Ovulation "confirmed" on day 1 of the period is physiologically impossible;
+    // it must not anchor the prediction (which would report ovulation = today).
+    const prediction = predict(
+      [{ id: 1, startDay: 1000, endDay: 1004 }],
+      {},
+      { confirmedOvulations: [1002] },
+    );
+    // Falls back to the default projection (start + 28), not the bleed-day ovulation.
+    expect(prediction.upcoming[0]!.periodStart).toBe(1028);
+    expect(prediction.upcoming[0]!.ovulationDay).toBe(1028 - 14);
+  });
+
   it('learns the luteal phase from a past confirmed ovulation', () => {
     const cycles: Cycle[] = [
       { id: 1, startDay: 0, endDay: 4 },
@@ -136,5 +149,36 @@ describe('predict', () => {
     expect(prediction.mode).toBe('pregnant');
     expect(prediction.upcoming).toHaveLength(0);
     expect(prediction.fertilityApplicable).toBe(false);
+  });
+
+  it('anchors a spotting-led period on its first real-flow day', () => {
+    const cycles: Cycle[] = [
+      { id: 1, startDay: 1000, endDay: 1004 },
+      { id: 2, startDay: 1030, endDay: 1035 },
+    ];
+    // The second period is *recorded* on 1030 but that day is only spotting; real
+    // flow starts 1031, which should become day 1 for cycle-length + projection.
+    const flowByDay = new Map<number, Flow>([
+      [1030, Flow.Spotting],
+      [1031, Flow.Light],
+    ]);
+    const withFlow = predict(cycles, {}, { flowByDay });
+    const withoutFlow = predict(cycles, {});
+    expect(withoutFlow.averageCycleLength).toBe(30);
+    expect(withFlow.averageCycleLength).toBe(31);
+    // Projection anchors on the shifted start (1031), not the recorded 1030.
+    expect(withFlow.upcoming[0]!.periodStart).toBe(1031 + 31);
+  });
+
+  it('does not shift a period that already opens with real flow', () => {
+    const cycles: Cycle[] = [
+      { id: 1, startDay: 0, endDay: 4 },
+      { id: 2, startDay: 30, endDay: 34 },
+    ];
+    // 30 is logged as spotting but no Light+ follows within the window, so the
+    // recorded start stands (spotting-only bleeds aren't silently dropped).
+    const flowByDay = new Map<number, Flow>([[30, Flow.Spotting]]);
+    const prediction = predict(cycles, {}, { flowByDay });
+    expect(prediction.averageCycleLength).toBe(30);
   });
 });
