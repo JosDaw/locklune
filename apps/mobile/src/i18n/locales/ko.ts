@@ -160,6 +160,8 @@ const ko: Catalog = {
       heartburn: '속쓰림',
       constipation: '변비',
       diarrhea: '설사',
+      'increased appetite': '식욕 증가',
+      'no appetite': '식욕 없음',
       acne: '여드름',
       spotting: '점상 출혈',
       discharge: '분비물',
@@ -224,7 +226,7 @@ const ko: Catalog = {
   },
   statsRow: {
     usuallyMood: '보통 %{mood}',
-    frequentSymptoms: '자주 나타나는 증상',
+    frequentSymptoms: '흔한 증상',
   },
   tryingCard: {
     ovulationDay: '배란일',
@@ -391,7 +393,6 @@ const ko: Catalog = {
     aboutBody:
       'Locklune은 기록 목적으로만 설계되었습니다. 전문적인 의료 조언을 대체하지 않습니다. 건강에 관한 우려가 있으면 자격을 갖춘 의료 전문가와 상담하세요.',
     rate: 'Locklune 평가하기',
-    support: '개발자 후원하기',
     reportBug: '버그 신고 또는 기능 요청',
     tellFriend: '친구에게 알리기',
     dangerZone: '위험 구역',

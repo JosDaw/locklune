@@ -76,7 +76,15 @@ export const SYMPTOM_CATEGORIES: { nameKey: string; icon: IonIcon; items: string
   {
     nameKey: 'data.symptomCategory.gut',
     icon: 'nutrition-outline',
-    items: ['heartburn', 'constipation', 'diarrhea', 'nausea', 'bloating'],
+    items: [
+      'heartburn',
+      'constipation',
+      'diarrhea',
+      'nausea',
+      'bloating',
+      'increased appetite',
+      'no appetite',
+    ],
   },
   {
     nameKey: 'data.symptomCategory.skin',

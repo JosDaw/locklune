@@ -170,6 +170,8 @@ export const en = {
       heartburn: 'Heartburn',
       constipation: 'Constipation',
       diarrhea: 'Diarrhea',
+      'increased appetite': 'Increased appetite',
+      'no appetite': 'No appetite',
       acne: 'Acne',
       spotting: 'Spotting',
       discharge: 'Discharge',
@@ -234,7 +236,7 @@ export const en = {
   },
   statsRow: {
     usuallyMood: 'Usually %{mood}',
-    frequentSymptoms: 'Frequent symptoms',
+    frequentSymptoms: 'Common symptoms',
   },
   tryingCard: {
     ovulationDay: 'Ovulation day',
@@ -405,7 +407,6 @@ export const en = {
     aboutBody:
       'Locklune is designed for record keeping purposes only. It is not a replacement for professional medical advice. If you have any health concerns, please consult a qualified healthcare provider.',
     rate: 'Rate Locklune',
-    support: 'Support the developer',
     reportBug: 'Report a bug or request a feature',
     tellFriend: 'Tell a friend',
     dangerZone: 'Danger zone',

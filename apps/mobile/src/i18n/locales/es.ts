@@ -164,6 +164,8 @@ const es: Catalog = {
       heartburn: 'Acidez',
       constipation: 'Estreñimiento',
       diarrhea: 'Diarrea',
+      'increased appetite': 'Más apetito',
+      'no appetite': 'Sin apetito',
       acne: 'Acné',
       spotting: 'Manchado',
       discharge: 'Flujo',
@@ -228,7 +230,7 @@ const es: Catalog = {
   },
   statsRow: {
     usuallyMood: 'Normalmente %{mood}',
-    frequentSymptoms: 'Síntomas frecuentes',
+    frequentSymptoms: 'Síntomas comunes',
   },
   tryingCard: {
     ovulationDay: 'Día de ovulación',
@@ -399,7 +401,6 @@ const es: Catalog = {
     aboutBody:
       'Locklune está diseñado solo con fines de registro. No sustituye el consejo médico profesional. Si tienes alguna preocupación de salud, consulta a un profesional sanitario cualificado.',
     rate: 'Valorar Locklune',
-    support: 'Apoyar al desarrollador',
     reportBug: 'Informar de un error o solicitar una función',
     tellFriend: 'Cuéntaselo a un amigo',
     dangerZone: 'Zona de peligro',

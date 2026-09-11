@@ -170,6 +170,8 @@ const de: Catalog = {
       heartburn: 'Sodbrennen',
       constipation: 'Verstopfung',
       diarrhea: 'Durchfall',
+      'increased appetite': 'Gesteigerter Appetit',
+      'no appetite': 'Kein Appetit',
       acne: 'Akne',
       spotting: 'Schmierblutung',
       discharge: 'Ausfluss',
@@ -409,7 +411,6 @@ const de: Catalog = {
     aboutBody:
       'Locklune dient nur zu Aufzeichnungszwecken. Es ersetzt keine professionelle medizinische Beratung. Wenn du gesundheitliche Bedenken hast, wende dich an qualifiziertes medizinisches Fachpersonal.',
     rate: 'Locklune bewerten',
-    support: 'Entwickler unterstützen',
     reportBug: 'Fehler melden oder Funktion vorschlagen',
     tellFriend: 'Weiterempfehlen',
     dangerZone: 'Gefahrenzone',
