@@ -4,7 +4,7 @@ import { Logo, MoonMark } from '@/components/logo';
 import { locales } from '@/i18n/config';
 import { getDictionary } from '@/i18n/dictionaries';
 import { site } from '@/lib/site';
-import { Coffee as CoffeeIcon, Heart as HeartIcon } from 'lucide-react';
+import { Heart as HeartIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { Inter, Manrope } from 'next/font/google';
 import Link from 'next/link';
@@ -164,14 +164,6 @@ export default async function LocaleLayout({
                 <span className="flex items-center gap-1.5">
                   {dict.footer.madeWith} <HeartIcon className="h-4 w-4 text-lock" />
                 </span>
-                <a
-                  href="https://ko-fi.com/constantlearning"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-medium text-fg-soft transition-colors hover:text-fg"
-                >
-                  <CoffeeIcon className="h-4 w-4" /> {dict.footer.supportCreator}
-                </a>
               </div>
             </div>
           </div>

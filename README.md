@@ -44,9 +44,9 @@ taken on trust. A few ways to audit them:
   git grep -nE "fetch\(|XMLHttpRequest|new WebSocket|\baxios\b|Amplitude|Sentry|mixpanel|sendBeacon|firebase|googleapis" -- apps/mobile/src
   ```
 
-  There is no account, sync, or backend for the app. The only outbound URL in the
-  app is a user-tapped "support the developer" link opened in the system browser
-  (`apps/mobile/src/lib/links.ts`) - the app itself never sends your data anywhere. All other links go to <https://locklune.com>, which is static and contains no tracking.
+  There is no account, sync, or backend for the app. The only outbound URLs in the
+  app are user-tapped links to <https://locklune.com>
+  (`apps/mobile/src/lib/links.ts`) - the app itself never sends your data anywhere. That site is static and contains no tracking.
 
   This covers the app's own code. Locklune relies on a small set of audited native
   modules (`expo-secure-store`, `expo-sqlite`/SQLCipher, `expo-notifications`), each

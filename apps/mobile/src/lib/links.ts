@@ -1,9 +1,6 @@
 import { BRAND } from '@locklune/core';
 import { Linking, Share } from 'react-native';
 
-/** Ko-fi page for supporting the maker. */
-export const KOFI_URL = 'https://ko-fi.com/constantlearning';
-
 /** Store listing used for ratings (update once the app is published). */
 export const RATE_URL = BRAND.websiteUrl;
 

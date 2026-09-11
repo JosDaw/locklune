@@ -35,7 +35,6 @@ export const en = {
       'Locklune is for record keeping purposes only and does not provide medical or health advice.',
     noTracking: 'No cookies. No tracking. No servers.',
     madeWith: 'Made with',
-    supportCreator: 'Support the creator',
   },
   hero: {
     badge: 'Device-only · encrypted · no tracking',

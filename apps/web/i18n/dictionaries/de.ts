@@ -32,7 +32,6 @@ const de: Dictionary = {
       'Locklune dient nur zu Aufzeichnungszwecken und bietet keine medizinische oder gesundheitliche Beratung.',
     noTracking: 'Keine Cookies. Kein Tracking. Keine Server.',
     madeWith: 'Gemacht mit',
-    supportCreator: 'Unterstütze die Entwicklerin',
   },
   hero: {
     badge: 'Nur auf dem Gerät · verschlüsselt · kein Tracking',

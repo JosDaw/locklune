@@ -29,7 +29,7 @@ import { setLocale, t, useLocale, type SupportedLocale } from '../../i18n';
 import { formatDay } from '../../lib/format';
 import * as haptics from '../../lib/haptics';
 import { setStoredLocale } from '../../lib/localeStore';
-import { FEEDBACK_URL, KOFI_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
+import { FEEDBACK_URL, openLink, RATE_URL, shareApp } from '../../lib/links';
 import { CONTRACEPTION_METHODS, CYCLE_MODES } from '../../lib/modes';
 import { requestNotificationPermission } from '../../lib/notifications';
 import { ROUTES } from '../../lib/routes';
@@ -424,11 +424,6 @@ export default function Settings() {
             icon="star-outline"
             label={t('settings.rate')}
             onPress={() => openLink(RATE_URL)}
-          />
-          <AboutRow
-            icon="heart-outline"
-            label={t('settings.support')}
-            onPress={() => openLink(KOFI_URL)}
           />
           <AboutRow
             icon="bug-outline"
