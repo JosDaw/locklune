@@ -111,7 +111,7 @@ export default function Today() {
   return (
     <Screen>
       {/* Hero */}
-      <View style={{ alignItems: 'center', paddingVertical: 32, gap: 14 }}>
+      <View style={{ alignItems: 'center', paddingTop: 32, gap: 14 }}>
         <View
           style={{
             width: 96,
@@ -283,7 +283,6 @@ export default function Today() {
                         fontFamily: fonts.displaySemibold,
                         fontSize: 20,
                         color: colors.text,
-                        marginTop: 4,
                       }}
                     >
                       {formatDay(next!.periodStart)}
@@ -297,7 +296,7 @@ export default function Today() {
                       })}
                     </Txt>
                     {cycleDay > 0 && (
-                      <Txt variant="faint" className="mt-2.5">
+                      <Txt variant="faint">
                         {t('home.dayXofY', { current: cycleProgressDay, total: totalCycle })}
                       </Txt>
                     )}

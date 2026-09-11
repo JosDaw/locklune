@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     // the bottom edge, so the gap under the number is constant across cell sizes
     // and the number itself never moves.
     top: '50%',
-    marginTop: 11,
+    marginTop: 9,
     left: 0,
     right: 0,
     flexDirection: 'row',
